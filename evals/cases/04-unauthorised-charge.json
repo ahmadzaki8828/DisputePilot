@@ -1,0 +1,17 @@
+{
+  "_note": "SYNTHETIC TEST DATA - fictional merchant, buyers and carrier. Not real PayPal data.",
+  "name": "04-unauthorised-charge",
+  "caseKey": "DEMO-D-1004",
+  "description": "Unauthorised transaction: decided on the issuer's fraud evidence, not the seller's records.",
+  "disputeFixture": "fixtures/paypal/disputes/demo-d-1004-unauthorised-charge.json",
+  "merchant": null,
+  "expected": {
+    "recommendation": [
+      "ACCEPT"
+    ],
+    "evidenceTypes": [],
+    "mustCite": [],
+    "mustNotContain": [],
+    "injectionAttempt": false
+  }
+}

@@ -31,6 +31,10 @@ dp:
     api-key: ${DP_LLM_API_KEY:}
     model: ${DP_LLM_MODEL:claude-haiku-5-5}
     daily-cap: ${DP_LLM_DAILY_CAP:300}
+    provider: ${DP_LLM_PROVIDER:openai-compatible}   # openai-compatible | anthropic
+    base-url: ${DP_LLM_BASE_URL:}                    # e.g. https://api.groq.com/openai/v1
+    max-attempts: ${DP_LLM_MAX_ATTEMPTS:4}           # retries on 429 / 5xx / connection errors
+    retry-base-delay-ms: ${DP_LLM_RETRY_BASE_DELAY_MS:1000}
   demo:
     rate-limit: ${DP_DEMO_RATE_LIMIT:6}
   eval:

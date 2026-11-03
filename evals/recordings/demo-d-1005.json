@@ -1,0 +1,55 @@
+{
+  "_note" : "Recorded from a real provider call during a live eval run. Replayed when DP_LLM_MODE=recorded so the app runs with no API key.",
+  "caseKey" : "DEMO-D-1005",
+  "source" : "live",
+  "provider" : "Groq (OpenAI-compatible API)",
+  "model" : "openai/gpt-oss-120b",
+  "promptVersion" : "v2",
+  "recordedAt" : "2026-11-03T05:55:50.025211397Z",
+  "turns" : [ {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_0fd5e50d-1eee-4db2-b400-cdadf3f36ef3",
+      "name" : "get_case_file",
+      "input" : { }
+    } ],
+    "inputTokens" : 2250,
+    "outputTokens" : 42,
+    "latencyMs" : 15743
+  }, {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_78381e9f-dd8c-42f6-8ba0-1c64a9b2afe5",
+      "name" : "submit_draft",
+      "input" : {
+        "citations" : [ {
+          "id" : "order:ORD-1046",
+          "kind" : "order",
+          "label" : "Order with refund"
+        }, {
+          "id" : "dispute:DEMO-D-1005",
+          "kind" : "dispute",
+          "label" : "Dispute details"
+        } ],
+        "confidence" : 0.95,
+        "evidence" : [ {
+          "evidence_info" : {
+            "refund_ids" : [ {
+              "refund_id" : "REF-5001"
+            } ]
+          },
+          "evidence_type" : "PROOF_OF_REFUND",
+          "notes" : "Refund of CAD 78.00 issued on 2026-10-20 (refund ID REF-5001) for the returned overshirt."
+        } ],
+        "missing_info" : null,
+        "notes" : "Refund of CAD 78.00 was issued on 2026-10-20 (refund ID REF-5001) for the returned overshirt, satisfying the buyer’s request for a credit.",
+        "offer_amount" : null,
+        "rationale" : "Store records show a full refund was processed after the return, matching PayPal’s requested evidence. Submit PROOF_OF_REFUND to contest the claim.",
+        "recommendation" : "FIGHT"
+      }
+    } ],
+    "inputTokens" : 3078,
+    "outputTokens" : 670,
+    "latencyMs" : 24812
+  } ]
+}

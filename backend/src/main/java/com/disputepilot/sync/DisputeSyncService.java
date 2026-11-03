@@ -1,6 +1,7 @@
 package com.disputepilot.sync;
 
 import com.disputepilot.api.DisputeRepository;
+import com.disputepilot.domain.DisputeChangedEvent;
 import com.disputepilot.paypal.PayPalDispute;
 import com.disputepilot.paypal.PayPalDisputesClient;
 import java.util.HashMap;

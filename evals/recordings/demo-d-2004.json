@@ -1,0 +1,54 @@
+{
+  "_note" : "Recorded from a real provider call during a live eval run. Replayed when DP_LLM_MODE=recorded so the app runs with no API key.",
+  "caseKey" : "DEMO-D-2004",
+  "source" : "live",
+  "provider" : "Groq (OpenAI-compatible API)",
+  "model" : "openai/gpt-oss-120b",
+  "promptVersion" : "v2",
+  "recordedAt" : "2026-11-03T05:55:50.025211397Z",
+  "turns" : [ {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_1c8cd015-3da0-4efd-bcf5-04a7bf841e20",
+      "name" : "get_case_file",
+      "input" : { }
+    } ],
+    "inputTokens" : 2263,
+    "outputTokens" : 40,
+    "latencyMs" : 6864
+  }, {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_835d7c26-bc5f-41bf-81db-da177c498811",
+      "name" : "submit_draft",
+      "input" : {
+        "citations" : [ {
+          "id" : "order:ORD-2004",
+          "kind" : "order",
+          "label" : "Order total CAD 86.00"
+        }, {
+          "id" : "dispute:DEMO-D-2004",
+          "kind" : "dispute",
+          "label" : "Disputed transaction amount CAD 96.00"
+        }, {
+          "id" : "msg:DM-1",
+          "kind" : "msg",
+          "label" : "Buyer claim of overcharge"
+        } ],
+        "confidence" : 0.92,
+        "evidence" : [ {
+          "evidence_type" : "OTHER",
+          "notes" : "Order total was CAD 86.00 (order:ORD-2004). Disputed transaction amount was CAD 96.00 (dispute:DEMO-D-2004). Buyer was overcharged by CAD 10.00."
+        } ],
+        "missing_info" : null,
+        "notes" : "The order total was CAD 86.00, but the buyer was charged CAD 96.00, resulting in an overcharge of CAD 10.00. We are offering a refund of CAD 10.00 to correct the amount.",
+        "offer_amount" : 10,
+        "rationale" : "Buyer was overcharged by $10. Offering a refund resolves the dispute and aligns with the store's policy on accurate billing.",
+        "recommendation" : "OFFER"
+      }
+    } ],
+    "inputTokens" : 2999,
+    "outputTokens" : 746,
+    "latencyMs" : 21186
+  } ]
+}

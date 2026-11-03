@@ -20,11 +20,13 @@ public record Draft(
         List<String> missingInfo,
         ValidationResult validation,
         LlmMode llmMode,
+        String provider,
         String model,
         String promptVersion,
         Integer inputTokens,
         Integer outputTokens,
         Integer latencyMs,
         boolean editedByHuman,
+        boolean repairAttempted,
         Instant createdAt) {
 }

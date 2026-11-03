@@ -13,7 +13,7 @@ import com.disputepilot.paypal.EvidenceSubmission;
 import com.disputepilot.paypal.PayPalDispute;
 import com.disputepilot.paypal.SimulatedPayPalDisputesClient;
 import com.disputepilot.domain.EvidenceItem;
-import com.disputepilot.sync.DisputeChangedEvent;
+import com.disputepilot.domain.DisputeChangedEvent;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;

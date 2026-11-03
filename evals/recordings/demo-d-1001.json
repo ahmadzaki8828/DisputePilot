@@ -1,0 +1,69 @@
+{
+  "_note" : "Recorded from a real provider call during a live eval run. Replayed when DP_LLM_MODE=recorded so the app runs with no API key.",
+  "caseKey" : "DEMO-D-1001",
+  "source" : "live",
+  "provider" : "Groq (OpenAI-compatible API)",
+  "model" : "openai/gpt-oss-120b",
+  "promptVersion" : "v2",
+  "recordedAt" : "2026-11-03T05:55:50.025211397Z",
+  "turns" : [ {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_fd580a5c-3a8e-4d9d-82c5-c585c022b24f",
+      "name" : "get_case_file",
+      "input" : { }
+    } ],
+    "inputTokens" : 2269,
+    "outputTokens" : 42,
+    "latencyMs" : 1008
+  }, {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_c1faa696-91b9-426d-a526-89f0b44f994b",
+      "name" : "submit_draft",
+      "input" : {
+        "citations" : [ {
+          "id" : "dispute:DEMO-D-1001",
+          "kind" : "dispute",
+          "label" : "Dispute"
+        }, {
+          "id" : "order:ORD-1042",
+          "kind" : "order",
+          "label" : "Order"
+        }, {
+          "id" : "shipment:SHP-77",
+          "kind" : "shipment",
+          "label" : "Shipment"
+        }, {
+          "id" : "msg:MSG-1",
+          "kind" : "msg",
+          "label" : "Buyer message about missing parcel"
+        }, {
+          "id" : "msg:DM-1",
+          "kind" : "msg",
+          "label" : "Dispute claim"
+        } ],
+        "confidence" : 0.93,
+        "evidence" : [ {
+          "evidence_info" : {
+            "tracking_info" : [ {
+              "carrier_name" : "OTHER",
+              "carrier_name_other" : "Northline Courier",
+              "tracking_number" : "NLC4417002931"
+            } ]
+          },
+          "evidence_type" : "PROOF_OF_FULFILLMENT",
+          "notes" : "Order ORD-1042 was shipped via Northline Courier (tracking NLC4417002931). The carrier records show delivery on 2026-10-21 at 16:40, signed by J. Ellis at the Toronto, ON address."
+        } ],
+        "missing_info" : null,
+        "notes" : "The merchant fulfilled the order. Shipment SHP-77 via Northline Courier (tracking NLC4417002931) was delivered on 2026-10-21, signed by the buyer (J. Ellis) at the provided shipping address in Toronto, ON. The buyer’s claim that the item was not received is contradicted by the carrier’s delivery confirmation and signature.",
+        "offer_amount" : null,
+        "rationale" : "Delivery with signature matching the buyer’s name provides strong proof of fulfillment, satisfying PayPal’s evidence requirement. The claim is therefore contestable; we recommend fighting the dispute.",
+        "recommendation" : "FIGHT"
+      }
+    } ],
+    "inputTokens" : 3065,
+    "outputTokens" : 797,
+    "latencyMs" : 2450
+  } ]
+}

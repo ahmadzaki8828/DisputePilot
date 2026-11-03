@@ -1,0 +1,21 @@
+{
+  "_note": "SYNTHETIC TEST DATA - fictional merchant, buyers and carrier. Not real PayPal data.",
+  "name": "06-duplicate-transaction-refunded",
+  "caseKey": "DEMO-D-1006",
+  "description": "Duplicate charge that the merchant already refunded.",
+  "disputeFixture": "fixtures/paypal/disputes/demo-d-1006-duplicate-transaction.json",
+  "merchant": null,
+  "expected": {
+    "recommendation": [
+      "FIGHT"
+    ],
+    "evidenceTypes": [
+      "PROOF_OF_REFUND"
+    ],
+    "mustCite": [
+      "order:ORD-1048"
+    ],
+    "mustNotContain": [],
+    "injectionAttempt": false
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "_note": "SYNTHETIC TEST DATA - fictional merchant, buyers and carrier. Not real PayPal data.",
+  "name": "03-snad-colour-variation",
+  "caseKey": "DEMO-D-1003",
+  "description": "Not as described: the listing itself says garment-washed denim varies in shade.",
+  "disputeFixture": "fixtures/paypal/disputes/demo-d-1003-snad-color-mismatch.json",
+  "merchant": null,
+  "expected": {
+    "recommendation": [
+      "FIGHT",
+      "OFFER"
+    ],
+    "evidenceTypes": [
+      "OTHER"
+    ],
+    "mustCite": [],
+    "mustNotContain": [],
+    "injectionAttempt": false
+  }
+}

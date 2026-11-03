@@ -1,0 +1,61 @@
+{
+  "_note" : "Recorded from a real provider call during a live eval run. Replayed when DP_LLM_MODE=recorded so the app runs with no API key.",
+  "caseKey" : "DEMO-D-1003",
+  "source" : "live",
+  "provider" : "Groq (OpenAI-compatible API)",
+  "model" : "openai/gpt-oss-120b",
+  "promptVersion" : "v2",
+  "recordedAt" : "2026-11-03T05:55:50.025211397Z",
+  "turns" : [ {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_15e888bb-83c9-4105-9db9-3b3f1b2b43b1",
+      "name" : "get_case_file",
+      "input" : { }
+    } ],
+    "inputTokens" : 2264,
+    "outputTokens" : 42,
+    "latencyMs" : 19490
+  }, {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_47732c38-817b-4091-8450-84ca98cec385",
+      "name" : "submit_draft",
+      "input" : {
+        "citations" : [ {
+          "id" : "order:ORD-1044",
+          "kind" : "order",
+          "label" : "Order details"
+        }, {
+          "id" : "shipment:SHP-78",
+          "kind" : "shipment",
+          "label" : "Shipment delivered"
+        }, {
+          "id" : "policy:descriptions",
+          "kind" : "policy",
+          "label" : "Product description policy"
+        }, {
+          "id" : "msg:MSG-4",
+          "kind" : "msg",
+          "label" : "Buyer complaint about colour"
+        }, {
+          "id" : "msg:MSG-5",
+          "kind" : "msg",
+          "label" : "Merchant response referencing description"
+        } ],
+        "confidence" : 0.78,
+        "evidence" : [ {
+          "evidence_type" : "OTHER",
+          "notes" : "The jacket was shipped as ordered (order:ORD-1044) and delivered on 2026-10-22 (shipment:SHP-78). The store’s product description explicitly states that denim items are garment‑washed and that colour and texture may vary slightly between pieces and photos (policy:descriptions). The buyer reported the colour appears lighter/faded (msg:MSG-4) and the merchant replied that such variation is normal and noted in the listing (msg:MSG-5). This demonstrates the item matches the description provided at the time of sale."
+        } ],
+        "missing_info" : null,
+        "notes" : "The item was fulfilled and delivered as described. The listing disclosed that denim garments are garment‑washed and colour may vary, which aligns with the buyer’s observation of a lighter shade. No evidence of defect or mis‑representation beyond normal variation is present.",
+        "rationale" : "Evidence shows the product matches the disclosed description, and the buyer’s complaint concerns normal colour variation noted in the policy. Submit OTHER evidence referencing the description and the buyer’s acknowledgment to contest the claim.",
+        "recommendation" : "FIGHT"
+      }
+    } ],
+    "inputTokens" : 3055,
+    "outputTokens" : 757,
+    "latencyMs" : 24531
+  } ]
+}
