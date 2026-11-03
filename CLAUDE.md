@@ -20,6 +20,7 @@ Backend (`backend/`):
 - Run locally: `./mvnw spring-boot:run` (reads env vars below)
 - Postgres in a cloud VM: `service postgresql start`, then create the `disputepilot` database and user; or `docker compose up -d db` from the repo root
 - Tests use Testcontainers (Postgres 16) by default. Where Docker isn't usable (cloud VMs), start the VM's Postgres and run `DP_TEST_DB_URL=jdbc:postgresql://localhost:5432/disputepilot_test ./mvnw -B verify` (optional `DP_TEST_DB_USER` / `DP_TEST_DB_PASSWORD`, default `disputepilot`/`disputepilot`). Integration tests are named `*Test` so Surefire runs them.
+- PayPal sandbox over curl: `scripts/sandbox/{token,list,get,require-evidence,adjudicate,provide-evidence}.sh` (sandbox hosts only). The one test that calls PayPal is skipped unless you ask for it: `PAYPAL_MODE=sandbox ./mvnw -B test -Dtest=SandboxSmokeTest`. See `docs/paypal-integration.md`.
 - Backend serves `/actuator/health` publicly; every `/api/**` route needs `X-Admin-Token` (set `DP_ADMIN_TOKEN`; unset means all `/api/**` is rejected). Planned-but-unbuilt endpoints answer 501 via `PlannedEndpointStubs`; a real controller for the same route takes over automatically, so add yours without deleting the stub entry.
 
 Web (`web/`):
@@ -51,6 +52,9 @@ Repo root:
 | `SPRING_DATASOURCE_URL` / `_USERNAME` / `_PASSWORD` | Postgres connection |
 | `DP_API_BASE_URL`, `DP_API_MODE` | Web app → backend URL; `mock` serves `web/mocks/*.json` |
 | `AG_STUDIO_LICENSE_KEY` | Optional, Session F only; never committed |
+| `DP_SYNC_SCHEDULING` | `false` stops the webhook outbox worker and the reconciliation poller (they are off in tests, which drive them directly) |
+| `DP_OUTBOX_INTERVAL` | How often the webhook outbox drains, ISO-8601 (default `PT5S`) |
+| `DP_SYNC_POLL_INTERVAL` | Reconciliation interval, ISO-8601 (default `PT10M`) |
 
 ## Conventions
 

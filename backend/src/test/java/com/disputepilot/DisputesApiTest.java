@@ -131,7 +131,11 @@ class DisputesApiTest {
                 .andExpect(jsonPath("$.status").value(501));
         mvc.perform(post("/api/disputes/abc/drafts").header("X-Admin-Token", TOKEN))
                 .andExpect(status().isNotImplemented());
+        // POST /webhooks/paypal is no longer a stub: Session A's controller took the route over, so an
+        // unusable body is now answered with 400 rather than 501. Other stub routes are unaffected.
         mvc.perform(post("/webhooks/paypal").content("{}").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+        mvc.perform(get("/api/system").header("X-Admin-Token", TOKEN))
                 .andExpect(status().isNotImplemented());
     }
 }
