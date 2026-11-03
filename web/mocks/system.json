@@ -1,0 +1,6 @@
+{
+  "paypalMode": "mock",
+  "llmMode": "sample",
+  "model": "",
+  "simulatedEnabled": true
+}

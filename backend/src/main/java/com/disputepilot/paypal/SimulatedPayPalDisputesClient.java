@@ -1,6 +1,5 @@
 package com.disputepilot.paypal;
 
-import com.disputepilot.domain.Money;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -13,6 +12,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
@@ -36,9 +36,13 @@ public class SimulatedPayPalDisputesClient implements PayPalDisputesClient {
     static final Instant FIXTURE_EPOCH = Instant.parse("2026-11-03T00:00:00Z");
     private static final String WAITING_FOR_SELLER = "WAITING_FOR_SELLER_RESPONSE";
 
+    private static final PayPalDisputeMapper MAPPER = new PayPalDisputeMapper();
+
     private final JsonMapper mapper = JsonMapper.builder().build();
+    private final AtomicInteger createdSequence = new AtomicInteger();
     private final Map<String, ObjectNode> disputes = new LinkedHashMap<>();
     private final Map<String, JsonNode> fullLinks = new LinkedHashMap<>();
+    private final Map<String, ObjectNode> templates = new LinkedHashMap<>();
 
     public SimulatedPayPalDisputesClient() {
         reset();
@@ -48,6 +52,7 @@ public class SimulatedPayPalDisputesClient implements PayPalDisputesClient {
     public final synchronized void reset() {
         disputes.clear();
         fullLinks.clear();
+        templates.clear();
         try {
             Resource[] files = new PathMatchingResourcePatternResolver()
                     .getResources("classpath:fixtures/paypal/disputes/*.json");
@@ -56,17 +61,79 @@ public class SimulatedPayPalDisputesClient implements PayPalDisputesClient {
             for (Resource file : files) {
                 try (InputStream in = file.getInputStream()) {
                     ObjectNode node = (ObjectNode) mapper.readTree(in);
-                    Instant due = Instant.parse(node.path("seller_response_due_date").asString());
-                    node.put("seller_response_due_date", now.plus(Duration.between(FIXTURE_EPOCH, due)).toString());
+                    rebase(node, "seller_response_due_date", now, false);
+                    rebase(node, "create_time", now, true);
+                    rebase(node, "update_time", now, true);
+                    node.path("messages").forEach(m -> rebase((ObjectNode) m, "time_posted", now, true));
                     node.remove("_note");
                     String id = node.path("dispute_id").asString();
                     fullLinks.put(id, node.get("links").deepCopy());
+                    templates.put(id, node.deepCopy());
                     disputes.put(id, node);
                 }
             }
         } catch (IOException e) {
             throw new UncheckedIOException("Cannot load dispute fixtures", e);
         }
+    }
+
+    /**
+     * Fixture timestamps are written relative to {@link #FIXTURE_EPOCH} and shifted to "now" at load time, so
+     * the due-in countdown in the UI is always realistic. Timestamps that record something that already
+     * happened ({@code create_time}, {@code update_time}, message times) are never allowed into the future.
+     */
+    private static void rebase(ObjectNode node, String field, Instant now, boolean inThePast) {
+        String value = node.path(field).asString(null);
+        if (value == null || value.isBlank()) {
+            return;
+        }
+        Instant shifted = now.plus(Duration.between(FIXTURE_EPOCH, Instant.parse(value)));
+        if (inThePast && shifted.isAfter(now)) {
+            shifted = now;
+        }
+        node.put(field, shifted.toString());
+    }
+
+    /** The fixture dispute IDs that {@link #createFromTemplate} can clone, in fixture order. */
+    public synchronized List<String> templates() {
+        return List.copyOf(templates.keySet());
+    }
+
+    /**
+     * Clone one of the fixture disputes under a fresh {@code DEMO-} ID, as if a buyer had just opened it, and
+     * return it. Used by the demo endpoints so a judge can create a dispute and watch it travel the whole
+     * webhook -> outbox -> agent -> submit pipeline.
+     */
+    public synchronized PayPalDispute createFromTemplate(String template) {
+        ObjectNode source = templates.get(template);
+        if (source == null) {
+            throw error(404, "RESOURCE_NOT_FOUND", "No such dispute template: " + template, "INVALID_RESOURCE_ID");
+        }
+        String templateId = source.path("dispute_id").asString();
+        String id = DEMO_PREFIX + "D-" + (9000 + createdSequence.incrementAndGet());
+        Instant now = Instant.now();
+        ObjectNode copy = source.deepCopy();
+        copy.put("dispute_id", id);
+        copy.put("create_time", now.toString());
+        copy.put("update_time", now.toString());
+        copy.put("status", WAITING_FOR_SELLER);
+        copy.remove("dispute_outcome");
+        copy.put("seller_response_due_date", now.plus(Duration.ofDays(9)).toString());
+        ArrayNode links = mapper.createArrayNode();
+        for (JsonNode l : source.path("links")) {
+            ObjectNode link = (ObjectNode) l.deepCopy();
+            link.put("href", link.path("href").asString("").replace(templateId, id));
+            links.add(link);
+        }
+        copy.set("links", links);
+        fullLinks.put(id, links.deepCopy());
+        disputes.put(id, copy);
+        return toDispute(copy);
+    }
+
+    /** Forget every dispute created through {@link #createFromTemplate} and restore the fixture set. */
+    public synchronized void resetToFixtures() {
+        reset();
     }
 
     @Override
@@ -219,41 +286,9 @@ public class SimulatedPayPalDisputesClient implements PayPalDisputesClient {
         return rels;
     }
 
+    /** Mapping is shared with the real client so both produce identical domain objects. */
     private PayPalDispute toDispute(ObjectNode d) {
-        List<String> requested = new ArrayList<>();
-        d.path("evidences").forEach(e -> {
-            if ("REQUESTED_FROM_SELLER".equals(e.path("source").asString())) {
-                requested.add(e.path("evidence_type").asString());
-            }
-        });
-        List<String> actions = new ArrayList<>();
-        for (String rel : allowedRels(d)) {
-            switch (rel) {
-                case "provide_evidence" -> actions.add("PROVIDE_EVIDENCE");
-                case "accept_claim" -> actions.add("ACCEPT_CLAIM");
-                case "make_offer" -> actions.add("MAKE_OFFER");
-                case "send_message" -> actions.add("SEND_MESSAGE");
-                default -> { }
-            }
-        }
-        JsonNode amt = d.path("dispute_amount");
-        String due = d.path("seller_response_due_date").asString(null);
-        String upd = d.path("update_time").asString(null);
-        JsonNode outcome = d.path("dispute_outcome").path("outcome_code");
-        return new PayPalDispute(
-                d.path("dispute_id").asString(),
-                true,
-                d.path("reason").asString(),
-                d.path("status").asString(),
-                d.path("dispute_life_cycle_stage").asString(null),
-                new Money(amt.path("currency_code").asString(), new BigDecimal(amt.path("value").asString())),
-                due == null ? null : Instant.parse(due),
-                d.path("disputed_transactions").path(0).path("seller_transaction_id").asString(null),
-                List.copyOf(requested),
-                List.copyOf(actions),
-                outcome.isMissingNode() ? null : outcome.asString(),
-                upd == null ? null : Instant.parse(upd),
-                d.deepCopy());
+        return MAPPER.toDispute(d);
     }
 
     private static PayPalApiException error(int status, String name, String message, String issue) {

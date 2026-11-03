@@ -42,6 +42,10 @@ class AutoDraftListenerTest {
         }
     }
 
+    /** The change types really published: the PayPal event type, or RECONCILED / MANUAL_SYNC. */
+    private static final String CREATED = "CUSTOMER.DISPUTE.CREATED";
+    private static final String UPDATED = "CUSTOMER.DISPUTE.UPDATED";
+
     @Autowired MockMvc mvc;
     @Autowired JdbcClient jdbc;
     @Autowired ApplicationEventPublisher events;
@@ -63,7 +67,7 @@ class AutoDraftListenerTest {
     void anActionableDisputeIsDraftedOnTheChangeEvent() {
         UUID id = disputeId("DEMO-D-1001");
 
-        events.publishEvent(new DisputeChangedEvent(id, DisputeChangedEvent.CREATED));
+        events.publishEvent(new DisputeChangedEvent(id, CREATED));
 
         assertThat(drafts.findLatest(id)).isPresent();
         assertThat(drafts.findLatest(id).orElseThrow().version()).isEqualTo(1);
@@ -73,8 +77,8 @@ class AutoDraftListenerTest {
     void aSecondEventDoesNotDraftAgain() {
         UUID id = disputeId("DEMO-D-1001");
 
-        events.publishEvent(new DisputeChangedEvent(id, DisputeChangedEvent.CREATED));
-        events.publishEvent(new DisputeChangedEvent(id, DisputeChangedEvent.UPDATED));
+        events.publishEvent(new DisputeChangedEvent(id, CREATED));
+        events.publishEvent(new DisputeChangedEvent(id, UPDATED));
 
         assertThat(drafts.findLatest(id).orElseThrow().version()).isEqualTo(1);
     }
@@ -85,14 +89,14 @@ class AutoDraftListenerTest {
         jdbc.sql("update disputes set status = 'UNDER_REVIEW', allowed_actions = '{}' where id = :id")
                 .param("id", id).update();
 
-        events.publishEvent(new DisputeChangedEvent(id, DisputeChangedEvent.UPDATED));
+        events.publishEvent(new DisputeChangedEvent(id, UPDATED));
 
         assertThat(drafts.findLatest(id)).isEmpty();
     }
 
     @Test
     void anUnknownDisputeIsIgnoredRatherThanBreakingIngestion() {
-        events.publishEvent(new DisputeChangedEvent(UUID.randomUUID(), DisputeChangedEvent.CREATED));
+        events.publishEvent(new DisputeChangedEvent(UUID.randomUUID(), CREATED));
         assertThat(jdbc.sql("select count(*) from drafts").query(Integer.class).single()).isZero();
     }
 }

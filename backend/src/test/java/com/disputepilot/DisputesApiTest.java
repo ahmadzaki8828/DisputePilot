@@ -129,11 +129,17 @@ class DisputesApiTest {
                 .andExpect(status().isNotImplemented())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
                 .andExpect(jsonPath("$.status").value(501));
-        // Session B implemented POST /api/disputes/{id}/drafts, so its real controller now takes over the
-        // stub route. POST /api/sync is still planned-but-unbuilt (Session A).
-        mvc.perform(post("/api/sync").header("X-Admin-Token", TOKEN))
+        // Session B implemented POST /api/disputes/{id}/drafts and the other draft routes, so their real
+        // controllers now take over those stub routes. POST /api/drafts/{id}/submit is still
+        // planned-but-unbuilt (Session D), and taking over its siblings must not take it over too.
+        mvc.perform(post("/api/drafts/{id}/submit", java.util.UUID.randomUUID())
+                        .header("X-Admin-Token", TOKEN))
                 .andExpect(status().isNotImplemented());
+        // POST /webhooks/paypal is no longer a stub: Session A's controller took the route over, so an
+        // unusable body is now answered with 400 rather than 501. Other stub routes are unaffected.
         mvc.perform(post("/webhooks/paypal").content("{}").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+        mvc.perform(get("/api/system").header("X-Admin-Token", TOKEN))
                 .andExpect(status().isNotImplemented());
     }
 }

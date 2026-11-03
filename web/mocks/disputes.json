@@ -1,0 +1,643 @@
+[
+  {
+    "id": "10000000-0000-4000-8000-000000000001",
+    "paypalDisputeId": "DEMO-D-1001",
+    "simulated": true,
+    "reason": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+    "reasonLabel": "Item not received",
+    "status": "WAITING_FOR_SELLER_RESPONSE",
+    "stage": "CHARGEBACK",
+    "amount": {
+      "currency": "CAD",
+      "value": 180
+    },
+    "_dueInHours": 228,
+    "requestedEvidence": [
+      "PROOF_OF_FULFILLMENT"
+    ],
+    "allowedActions": [
+      "PROVIDE_EVIDENCE",
+      "ACCEPT_CLAIM",
+      "SEND_MESSAGE"
+    ],
+    "messages": [
+      {
+        "postedBy": "BUYER",
+        "postedAt": "2026-11-02T15:20:11.000Z",
+        "content": "My order never arrived and I need it refunded."
+      }
+    ],
+    "caseFile": {
+      "order": {
+        "id": "ORD-1042",
+        "paypalTransactionId": "TXN-8F3A1001",
+        "placedAt": "2026-10-15T13:00:00Z",
+        "buyerName": "Jordan Ellis",
+        "buyerEmail": "jordan.ellis@buyer.example",
+        "buyerPhone": "+1-416-555-0101",
+        "shippingAddress": {
+          "line1": "1201 Example Street",
+          "city": "Toronto",
+          "region": "ON",
+          "postalCode": "M5V 0A0",
+          "country": "CA"
+        },
+        "items": [
+          {
+            "sku": "SKU-1001",
+            "name": "Merino Wool Cardigan",
+            "quantity": 1,
+            "unitPrice": {
+              "currency": "CAD",
+              "value": "150.00"
+            }
+          }
+        ],
+        "total": {
+          "currency": "CAD",
+          "value": "180.00"
+        },
+        "status": "FULFILLED",
+        "refunds": []
+      },
+      "shipments": [
+        {
+          "id": "SHP-77",
+          "orderId": "ORD-1042",
+          "carrier": "Northline Courier",
+          "trackingNumber": "NLC4417002931",
+          "status": "DELIVERED",
+          "shippedAt": "2026-10-16T14:05:00Z",
+          "deliveredAt": "2026-10-21T16:40:00Z",
+          "signedBy": "J. Ellis",
+          "deliveredToCity": "Toronto",
+          "events": [
+            {
+              "at": "2026-10-16T14:05:00Z",
+              "description": "Picked up by Northline Courier"
+            },
+            {
+              "at": "2026-10-21T16:40:00Z",
+              "description": "Delivered, signed by J. Ellis"
+            }
+          ]
+        }
+      ],
+      "customerMessages": [
+        {
+          "id": "MSG-1",
+          "orderId": "ORD-1042",
+          "at": "2026-10-23T09:30:00Z",
+          "from": "BUYER",
+          "body": "Hi, tracking says delivered but I can't find the parcel. Can you check?"
+        },
+        {
+          "id": "MSG-2",
+          "orderId": "ORD-1042",
+          "at": "2026-10-23T11:00:00Z",
+          "from": "MERCHANT",
+          "body": "Northline Courier shows it was signed for by J. Ellis on Oct 21. Could someone in your household have received it?"
+        }
+      ],
+      "policy": {
+        "merchantName": "Maple & Thread Co.",
+        "returns": "Unworn items may be returned within 30 days of delivery for a full refund of the item price. Return shipping is paid by the buyer.",
+        "shipping": "Orders ship within 2 business days via Northline Courier. Tracking numbers are emailed at dispatch. Signature is required for orders over CAD 150.",
+        "refunds": "Refunds are issued to the original payment method within 5 business days of receiving a return.",
+        "productDescriptions": "Denim and linen items are garment-washed; colour and texture vary slightly between pieces and photos.",
+        "contact": "support@maple-and-thread.example"
+      }
+    },
+    "latestDraft": {
+      "recommendation": "FIGHT",
+      "confidence": 0.93,
+      "status": "DRAFT"
+    }
+  },
+  {
+    "id": "10000000-0000-4000-8000-000000000002",
+    "paypalDisputeId": "DEMO-D-1002",
+    "simulated": true,
+    "reason": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+    "reasonLabel": "Item not received",
+    "status": "WAITING_FOR_SELLER_RESPONSE",
+    "stage": "INQUIRY",
+    "amount": {
+      "currency": "CAD",
+      "value": 64.5
+    },
+    "_dueInHours": 180,
+    "requestedEvidence": [
+      "PROOF_OF_FULFILLMENT",
+      "OTHER"
+    ],
+    "allowedActions": [
+      "PROVIDE_EVIDENCE",
+      "ACCEPT_CLAIM",
+      "MAKE_OFFER",
+      "SEND_MESSAGE"
+    ],
+    "messages": [
+      {
+        "postedBy": "BUYER",
+        "postedAt": "2026-11-01T10:02:45.000Z",
+        "content": "I ordered a tote bag weeks ago and nothing has shown up."
+      }
+    ],
+    "caseFile": {
+      "order": {
+        "id": "ORD-1043",
+        "paypalTransactionId": "TXN-8F3A1002",
+        "placedAt": "2026-10-14T13:00:00Z",
+        "buyerName": "Priya Natarajan",
+        "buyerEmail": "priya.n@buyer.example",
+        "buyerPhone": "+1-416-555-0102",
+        "shippingAddress": {
+          "line1": "1202 Example Street",
+          "city": "Toronto",
+          "region": "ON",
+          "postalCode": "M5V 0A0",
+          "country": "CA"
+        },
+        "items": [
+          {
+            "sku": "SKU-1002",
+            "name": "Linen Market Tote",
+            "quantity": 1,
+            "unitPrice": {
+              "currency": "CAD",
+              "value": "54.50"
+            }
+          }
+        ],
+        "total": {
+          "currency": "CAD",
+          "value": "64.50"
+        },
+        "status": "PAID_NOT_SHIPPED",
+        "refunds": []
+      },
+      "shipments": [],
+      "customerMessages": [
+        {
+          "id": "MSG-3",
+          "orderId": "ORD-1043",
+          "at": "2026-10-25T08:00:00Z",
+          "from": "BUYER",
+          "body": "Any update on my tote bag order?"
+        }
+      ],
+      "policy": {
+        "merchantName": "Maple & Thread Co.",
+        "returns": "Unworn items may be returned within 30 days of delivery for a full refund of the item price. Return shipping is paid by the buyer.",
+        "shipping": "Orders ship within 2 business days via Northline Courier. Tracking numbers are emailed at dispatch. Signature is required for orders over CAD 150.",
+        "refunds": "Refunds are issued to the original payment method within 5 business days of receiving a return.",
+        "productDescriptions": "Denim and linen items are garment-washed; colour and texture vary slightly between pieces and photos.",
+        "contact": "support@maple-and-thread.example"
+      }
+    },
+    "latestDraft": {
+      "recommendation": "OFFER",
+      "confidence": 0.6,
+      "status": "NEEDS_REVIEW"
+    }
+  },
+  {
+    "id": "10000000-0000-4000-8000-000000000003",
+    "paypalDisputeId": "DEMO-D-1003",
+    "simulated": true,
+    "reason": "MERCHANDISE_OR_SERVICE_NOT_AS_DESCRIBED",
+    "reasonLabel": "Not as described",
+    "status": "WAITING_FOR_SELLER_RESPONSE",
+    "stage": "INQUIRY",
+    "amount": {
+      "currency": "CAD",
+      "value": 129
+    },
+    "_dueInHours": 276,
+    "requestedEvidence": [
+      "OTHER"
+    ],
+    "allowedActions": [
+      "PROVIDE_EVIDENCE",
+      "ACCEPT_CLAIM",
+      "MAKE_OFFER",
+      "SEND_MESSAGE"
+    ],
+    "messages": [
+      {
+        "postedBy": "BUYER",
+        "postedAt": "2026-11-03T09:11:30.000Z",
+        "content": "The jacket colour is much more faded than in the listing photos."
+      }
+    ],
+    "caseFile": {
+      "order": {
+        "id": "ORD-1044",
+        "paypalTransactionId": "TXN-8F3A1003",
+        "placedAt": "2026-10-17T13:00:00Z",
+        "buyerName": "Marcus Webb",
+        "buyerEmail": "marcus.webb@buyer.example",
+        "buyerPhone": "+1-416-555-0103",
+        "shippingAddress": {
+          "line1": "1203 Example Street",
+          "city": "Toronto",
+          "region": "ON",
+          "postalCode": "M5V 0A0",
+          "country": "CA"
+        },
+        "items": [
+          {
+            "sku": "SKU-1003",
+            "name": "Indigo Denim Jacket",
+            "quantity": 1,
+            "unitPrice": {
+              "currency": "CAD",
+              "value": "119.00"
+            }
+          }
+        ],
+        "total": {
+          "currency": "CAD",
+          "value": "129.00"
+        },
+        "status": "FULFILLED",
+        "refunds": []
+      },
+      "shipments": [
+        {
+          "id": "SHP-78",
+          "orderId": "ORD-1044",
+          "carrier": "Northline Courier",
+          "trackingNumber": "NLC4417002944",
+          "status": "DELIVERED",
+          "shippedAt": "2026-10-18T14:00:00Z",
+          "deliveredAt": "2026-10-22T11:15:00Z",
+          "signedBy": null,
+          "deliveredToCity": "Toronto",
+          "events": [
+            {
+              "at": "2026-10-18T14:00:00Z",
+              "description": "Picked up by Northline Courier"
+            },
+            {
+              "at": "2026-10-22T11:15:00Z",
+              "description": "Delivered, left at front door (no signature)"
+            }
+          ]
+        }
+      ],
+      "customerMessages": [
+        {
+          "id": "MSG-4",
+          "orderId": "ORD-1044",
+          "at": "2026-10-24T17:20:00Z",
+          "from": "BUYER",
+          "body": "The jacket arrived but the colour looks much lighter than the photos."
+        },
+        {
+          "id": "MSG-5",
+          "orderId": "ORD-1044",
+          "at": "2026-10-24T18:05:00Z",
+          "from": "MERCHANT",
+          "body": "Sorry to hear that. Our listing notes that denim is garment-washed so shades vary slightly between pieces."
+        }
+      ],
+      "policy": {
+        "merchantName": "Maple & Thread Co.",
+        "returns": "Unworn items may be returned within 30 days of delivery for a full refund of the item price. Return shipping is paid by the buyer.",
+        "shipping": "Orders ship within 2 business days via Northline Courier. Tracking numbers are emailed at dispatch. Signature is required for orders over CAD 150.",
+        "refunds": "Refunds are issued to the original payment method within 5 business days of receiving a return.",
+        "productDescriptions": "Denim and linen items are garment-washed; colour and texture vary slightly between pieces and photos.",
+        "contact": "support@maple-and-thread.example"
+      }
+    },
+    "latestDraft": {
+      "recommendation": "FIGHT",
+      "confidence": 0.72,
+      "status": "DRAFT"
+    }
+  },
+  {
+    "id": "10000000-0000-4000-8000-000000000004",
+    "paypalDisputeId": "DEMO-D-1004",
+    "simulated": true,
+    "reason": "UNAUTHORISED",
+    "reasonLabel": "Unauthorised transaction",
+    "status": "WAITING_FOR_SELLER_RESPONSE",
+    "stage": "CHARGEBACK",
+    "amount": {
+      "currency": "CAD",
+      "value": 215
+    },
+    "_dueInHours": 156,
+    "requestedEvidence": [
+      "OTHER"
+    ],
+    "allowedActions": [
+      "PROVIDE_EVIDENCE",
+      "ACCEPT_CLAIM",
+      "SEND_MESSAGE"
+    ],
+    "messages": [
+      {
+        "postedBy": "BUYER",
+        "postedAt": "2026-10-31T18:45:00.000Z",
+        "content": "I did not make this purchase and do not recognise this charge."
+      }
+    ],
+    "caseFile": {
+      "order": {
+        "id": "ORD-1045",
+        "paypalTransactionId": "TXN-8F3A1004",
+        "placedAt": "2026-10-16T13:00:00Z",
+        "buyerName": "Sam Okonkwo",
+        "buyerEmail": "sam.okonkwo@buyer.example",
+        "buyerPhone": "+1-416-555-0104",
+        "shippingAddress": {
+          "line1": "1204 Example Street",
+          "city": "Toronto",
+          "region": "ON",
+          "postalCode": "M5V 0A0",
+          "country": "CA"
+        },
+        "items": [
+          {
+            "sku": "SKU-1004",
+            "name": "Waxed Canvas Weekender Bag",
+            "quantity": 1,
+            "unitPrice": {
+              "currency": "CAD",
+              "value": "205.00"
+            }
+          }
+        ],
+        "total": {
+          "currency": "CAD",
+          "value": "215.00"
+        },
+        "status": "FULFILLED",
+        "refunds": []
+      },
+      "shipments": [
+        {
+          "id": "SHP-79",
+          "orderId": "ORD-1045",
+          "carrier": "Northline Courier",
+          "trackingNumber": "NLC4417002957",
+          "status": "DELIVERED",
+          "shippedAt": "2026-10-17T14:00:00Z",
+          "deliveredAt": "2026-10-21T13:20:00Z",
+          "signedBy": "S. Okonkwo",
+          "deliveredToCity": "Toronto",
+          "events": [
+            {
+              "at": "2026-10-17T14:00:00Z",
+              "description": "Picked up by Northline Courier"
+            },
+            {
+              "at": "2026-10-21T13:20:00Z",
+              "description": "Delivered, signed by S. Okonkwo"
+            }
+          ]
+        }
+      ],
+      "customerMessages": [
+        {
+          "id": "MSG-6",
+          "orderId": "ORD-1045",
+          "at": "2026-10-22T10:00:00Z",
+          "from": "BUYER",
+          "body": "Is this bag from your shop? I see a charge I don't recognise."
+        }
+      ],
+      "policy": {
+        "merchantName": "Maple & Thread Co.",
+        "returns": "Unworn items may be returned within 30 days of delivery for a full refund of the item price. Return shipping is paid by the buyer.",
+        "shipping": "Orders ship within 2 business days via Northline Courier. Tracking numbers are emailed at dispatch. Signature is required for orders over CAD 150.",
+        "refunds": "Refunds are issued to the original payment method within 5 business days of receiving a return.",
+        "productDescriptions": "Denim and linen items are garment-washed; colour and texture vary slightly between pieces and photos.",
+        "contact": "support@maple-and-thread.example"
+      }
+    },
+    "latestDraft": {
+      "recommendation": "ACCEPT",
+      "confidence": 0.81,
+      "status": "DRAFT"
+    }
+  },
+  {
+    "id": "10000000-0000-4000-8000-000000000005",
+    "paypalDisputeId": "DEMO-D-1005",
+    "simulated": true,
+    "reason": "CREDIT_NOT_PROCESSED",
+    "reasonLabel": "Credit not processed",
+    "status": "WAITING_FOR_SELLER_RESPONSE",
+    "stage": "CHARGEBACK",
+    "amount": {
+      "currency": "CAD",
+      "value": 78
+    },
+    "_dueInHours": 204,
+    "requestedEvidence": [
+      "PROOF_OF_REFUND"
+    ],
+    "allowedActions": [
+      "PROVIDE_EVIDENCE",
+      "ACCEPT_CLAIM",
+      "SEND_MESSAGE"
+    ],
+    "messages": [
+      {
+        "postedBy": "BUYER",
+        "postedAt": "2026-11-01T21:30:12.000Z",
+        "content": "I returned the shirt but never got my money back."
+      }
+    ],
+    "caseFile": {
+      "order": {
+        "id": "ORD-1046",
+        "paypalTransactionId": "TXN-8F3A1005",
+        "placedAt": "2026-10-05T13:00:00Z",
+        "buyerName": "Elena Marchetti",
+        "buyerEmail": "elena.m@buyer.example",
+        "buyerPhone": "+1-416-555-0105",
+        "shippingAddress": {
+          "line1": "1205 Example Street",
+          "city": "Toronto",
+          "region": "ON",
+          "postalCode": "M5V 0A0",
+          "country": "CA"
+        },
+        "items": [
+          {
+            "sku": "SKU-1005",
+            "name": "Cotton Overshirt",
+            "quantity": 1,
+            "unitPrice": {
+              "currency": "CAD",
+              "value": "68.00"
+            }
+          }
+        ],
+        "total": {
+          "currency": "CAD",
+          "value": "78.00"
+        },
+        "status": "FULFILLED",
+        "refunds": [
+          {
+            "id": "REF-5001",
+            "amount": {
+              "currency": "CAD",
+              "value": "78.00"
+            },
+            "issuedAt": "2026-10-20T16:00:00Z",
+            "reason": "Item returned by buyer"
+          }
+        ]
+      },
+      "shipments": [
+        {
+          "id": "SHP-80",
+          "orderId": "ORD-1046",
+          "carrier": "Northline Courier",
+          "trackingNumber": "NLC4417002968",
+          "status": "DELIVERED",
+          "shippedAt": "2026-10-06T14:00:00Z",
+          "deliveredAt": "2026-10-10T10:05:00Z",
+          "signedBy": null,
+          "deliveredToCity": "Toronto",
+          "events": [
+            {
+              "at": "2026-10-06T14:00:00Z",
+              "description": "Picked up by Northline Courier"
+            },
+            {
+              "at": "2026-10-10T10:05:00Z",
+              "description": "Delivered, left at front door (no signature)"
+            }
+          ]
+        }
+      ],
+      "customerMessages": [
+        {
+          "id": "MSG-7",
+          "orderId": "ORD-1046",
+          "at": "2026-10-12T09:00:00Z",
+          "from": "BUYER",
+          "body": "I'd like to return the overshirt, it doesn't fit."
+        },
+        {
+          "id": "MSG-8",
+          "orderId": "ORD-1046",
+          "at": "2026-10-12T10:10:00Z",
+          "from": "MERCHANT",
+          "body": "No problem, send it back within 30 days and we'll refund you once it arrives."
+        }
+      ],
+      "policy": {
+        "merchantName": "Maple & Thread Co.",
+        "returns": "Unworn items may be returned within 30 days of delivery for a full refund of the item price. Return shipping is paid by the buyer.",
+        "shipping": "Orders ship within 2 business days via Northline Courier. Tracking numbers are emailed at dispatch. Signature is required for orders over CAD 150.",
+        "refunds": "Refunds are issued to the original payment method within 5 business days of receiving a return.",
+        "productDescriptions": "Denim and linen items are garment-washed; colour and texture vary slightly between pieces and photos.",
+        "contact": "support@maple-and-thread.example"
+      }
+    },
+    "latestDraft": {
+      "recommendation": "FIGHT",
+      "confidence": 0.9,
+      "status": "DRAFT"
+    }
+  },
+  {
+    "id": "10000000-0000-4000-8000-000000000006",
+    "paypalDisputeId": "DEMO-D-1006",
+    "simulated": true,
+    "reason": "DUPLICATE_TRANSACTION",
+    "reasonLabel": "Duplicate transaction",
+    "status": "WAITING_FOR_SELLER_RESPONSE",
+    "stage": "CHARGEBACK",
+    "amount": {
+      "currency": "CAD",
+      "value": 92
+    },
+    "_dueInHours": 252,
+    "requestedEvidence": [
+      "PROOF_OF_REFUND",
+      "OTHER"
+    ],
+    "allowedActions": [
+      "PROVIDE_EVIDENCE",
+      "ACCEPT_CLAIM",
+      "SEND_MESSAGE"
+    ],
+    "messages": [
+      {
+        "postedBy": "BUYER",
+        "postedAt": "2026-11-02T12:00:00.000Z",
+        "content": "I was charged twice for the same blanket."
+      }
+    ],
+    "caseFile": {
+      "order": {
+        "id": "ORD-1048",
+        "paypalTransactionId": "TXN-8F3A1007",
+        "placedAt": "2026-10-19T13:00:30Z",
+        "buyerName": "Hannah Kowalski",
+        "buyerEmail": "hannah.k@buyer.example",
+        "buyerPhone": "+1-416-555-0106",
+        "shippingAddress": {
+          "line1": "1206 Example Street",
+          "city": "Toronto",
+          "region": "ON",
+          "postalCode": "M5V 0A0",
+          "country": "CA"
+        },
+        "items": [
+          {
+            "sku": "SKU-1006",
+            "name": "Linen Throw Blanket",
+            "quantity": 1,
+            "unitPrice": {
+              "currency": "CAD",
+              "value": "82.00"
+            }
+          }
+        ],
+        "total": {
+          "currency": "CAD",
+          "value": "92.00"
+        },
+        "status": "REFUNDED",
+        "refunds": [
+          {
+            "id": "REF-5002",
+            "amount": {
+              "currency": "CAD",
+              "value": "92.00"
+            },
+            "issuedAt": "2026-10-24T15:30:00Z",
+            "reason": "Duplicate charge refunded"
+          }
+        ]
+      },
+      "shipments": [],
+      "customerMessages": [],
+      "policy": {
+        "merchantName": "Maple & Thread Co.",
+        "returns": "Unworn items may be returned within 30 days of delivery for a full refund of the item price. Return shipping is paid by the buyer.",
+        "shipping": "Orders ship within 2 business days via Northline Courier. Tracking numbers are emailed at dispatch. Signature is required for orders over CAD 150.",
+        "refunds": "Refunds are issued to the original payment method within 5 business days of receiving a return.",
+        "productDescriptions": "Denim and linen items are garment-washed; colour and texture vary slightly between pieces and photos.",
+        "contact": "support@maple-and-thread.example"
+      }
+    },
+    "latestDraft": {
+      "recommendation": "FIGHT",
+      "confidence": 0.7,
+      "status": "DRAFT"
+    }
+  }
+]

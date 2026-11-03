@@ -24,7 +24,16 @@ paths:
           application/json:
             schema: { type: object, additionalProperties: true }
       responses:
-        '200': { description: Event stored (or duplicate, ignored) }
+        '200':
+          description: Event stored (or duplicate, ignored)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, enum: [stored, duplicate, rejected] }
+                  verification: { type: string, enum: [VERIFIED, SKIPPED_SIMULATED, FAILED] }
+        '400': { $ref: '#/components/responses/Problem' }
         '501': { $ref: '#/components/responses/Problem' }
 
   /api/disputes:
@@ -73,6 +82,8 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/DisputeDetail' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '502': { $ref: '#/components/responses/Problem' }
         '501': { $ref: '#/components/responses/Problem' }
 
   /api/sync:
@@ -89,6 +100,9 @@ paths:
                 type: object
                 properties:
                   synced: { type: integer }
+                  listed: { type: integer }
+                  failed: { type: integer }
+                  cursor: { type: string, format: date-time }
         '501': { $ref: '#/components/responses/Problem' }
 
   /api/disputes/{id}/drafts:
