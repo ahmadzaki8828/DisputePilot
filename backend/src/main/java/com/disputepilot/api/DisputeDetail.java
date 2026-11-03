@@ -23,7 +23,8 @@ public record DisputeDetail(
         List<String> requestedEvidence,
         List<String> allowedActions,
         List<DisputeMessage> messages,
-        CaseFile caseFile) {
+        CaseFile caseFile,
+        String disputedTransactionId) {
 
     /** A message on the PayPal dispute thread (buyer text is untrusted). */
     public record DisputeMessage(String postedBy, Instant postedAt, String content) {

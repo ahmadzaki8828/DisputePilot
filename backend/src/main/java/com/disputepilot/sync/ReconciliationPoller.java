@@ -1,5 +1,6 @@
 package com.disputepilot.sync;
 
+import com.disputepilot.common.audit.AuditLogWriter;
 import com.disputepilot.paypal.DisputePage;
 import com.disputepilot.paypal.DisputeQuery;
 import com.disputepilot.paypal.PayPalApiException;
@@ -100,7 +101,7 @@ public class ReconciliationPoller {
         }
         Summary summary = new Summary(listed, synced, failed, state.cursor().orElse(from));
         if (listed > 0 || failed > 0) {
-            audit.system("DISPUTES_RECONCILED", null, Map.of(
+            audit.system(AuditLogWriter.DISPUTES_RECONCILED, null, Map.of(
                     "listed", listed, "synced", synced, "failed", failed, "cursor", summary.cursor().toString()));
             log.info("Reconciliation listed {} dispute(s), synced {}, failed {}, cursor now {}", listed, synced,
                     failed, summary.cursor());

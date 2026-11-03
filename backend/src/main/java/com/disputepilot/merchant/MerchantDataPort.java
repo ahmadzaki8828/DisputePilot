@@ -16,4 +16,9 @@ public interface MerchantDataPort {
     List<CustomerMessage> messagesForOrder(String orderId);
 
     StorePolicy policy();
+
+    /** An order by its own ID (not the PayPal transaction). Optional so existing implementations keep working. */
+    default Optional<Order> findOrderById(String orderId) {
+        return Optional.empty();
+    }
 }

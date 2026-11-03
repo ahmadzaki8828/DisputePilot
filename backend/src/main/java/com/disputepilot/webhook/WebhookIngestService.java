@@ -5,7 +5,7 @@ import com.disputepilot.paypal.PayPalDispute;
 import com.disputepilot.paypal.PayPalDisputesClient;
 import com.disputepilot.paypal.WebhookHeaders;
 import com.disputepilot.paypal.WebhookVerification;
-import com.disputepilot.sync.AuditLogWriter;
+import com.disputepilot.common.audit.AuditLogWriter;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
@@ -106,7 +106,7 @@ public class WebhookIngestService {
             log.info("Webhook {} ({}) already stored; ignoring the repeat delivery", eventId, eventType);
             return new Ingested(Ingested.DUPLICATE, verification, Optional.empty());
         }
-        audit.system("WEBHOOK_RECEIVED", null, Map.of(
+        audit.system(AuditLogWriter.WEBHOOK_RECEIVED, null, Map.of(
                 "paypalEventId", eventId,
                 "eventType", eventType,
                 "resourceId", resourceId == null ? "" : resourceId,

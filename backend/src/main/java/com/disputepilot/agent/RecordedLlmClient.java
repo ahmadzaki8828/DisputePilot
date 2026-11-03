@@ -91,12 +91,39 @@ public class RecordedLlmClient implements LlmClient {
         map.put(recording.caseKey(), recording);
     }
 
+    private static tools.jackson.databind.JsonNode rewrite(tools.jackson.databind.JsonNode input, String from,
+                                                           String to) {
+        if (input == null) {
+            return null;
+        }
+        return MAPPER.readTree(MAPPER.writeValueAsString(input).replace(from, to));
+    }
+
     public Set<String> caseKeys() {
         return byCaseKey.keySet();
     }
 
     public boolean has(String caseKey) {
-        return byCaseKey.containsKey(caseKey);
+        return byCaseKey.containsKey(templateOf(caseKey));
+    }
+
+    public java.util.Collection<Recording> recordings() {
+        return byCaseKey.values();
+    }
+
+    /**
+     * A case key may name a clone of a recorded dispute as {@code template@cloneId} (a simulated dispute created
+     * from a template gets a new ID). The recording of {@code template} is replayed with its dispute ID
+     * rewritten to {@code cloneId}, so citations such as {@code dispute:DEMO-D-1001} still match the case file.
+     */
+    public static String templateOf(String caseKey) {
+        int at = caseKey == null ? -1 : caseKey.indexOf('@');
+        return at < 0 ? caseKey : caseKey.substring(0, at);
+    }
+
+    private static String cloneOf(String caseKey) {
+        int at = caseKey == null ? -1 : caseKey.indexOf('@');
+        return at < 0 ? null : caseKey.substring(at + 1);
     }
 
     @Override
@@ -106,7 +133,7 @@ public class RecordedLlmClient implements LlmClient {
 
     @Override
     public LlmResult run(LlmRequest request) {
-        Recording recording = byCaseKey.get(request.caseKey());
+        Recording recording = byCaseKey.get(templateOf(request.caseKey()));
         if (recording == null) {
             throw new LlmException("recorded", 0,
                     "No recorded response for case '" + request.caseKey() + "'. Available: " + byCaseKey.keySet());
@@ -121,7 +148,10 @@ public class RecordedLlmClient implements LlmClient {
         Recording.Turn turn = recording.turns().get(turnIndex);
         List<LlmRequest.ToolCall> calls = new ArrayList<>();
         if (turn.toolCalls() != null) {
-            turn.toolCalls().forEach(c -> calls.add(new LlmRequest.ToolCall(c.id(), c.name(), c.input())));
+            String template = templateOf(request.caseKey());
+            String clone = cloneOf(request.caseKey());
+            turn.toolCalls().forEach(c -> calls.add(new LlmRequest.ToolCall(c.id(), c.name(),
+                    clone == null ? c.input() : rewrite(c.input(), template, clone))));
         }
         String provider = recording.provider() == null ? "Recorded responses"
                 : "Recorded: " + recording.provider();

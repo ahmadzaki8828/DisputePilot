@@ -26,7 +26,7 @@ public record AppProperties(
     public record Llm(
             @DefaultValue("") String mode,
             @DefaultValue("") String apiKey,
-            @DefaultValue("claude-haiku-5-5") String model,
+            @DefaultValue("") String model,
             @DefaultValue("300") int dailyCap,
             @DefaultValue("openai-compatible") String provider,
             @DefaultValue("") String baseUrl,
@@ -41,6 +41,17 @@ public record AppProperties(
             return apiKey != null && !apiKey.isBlank() ? "live" : "recorded";
         }
 
+        /**
+         * DP_LLM_MODEL, or the provider's default when it is blank: openai/gpt-oss-120b on an OpenAI-compatible
+         * API (Groq), claude-haiku-5-5 on the Claude API.
+         */
+        public String effectiveModel() {
+            if (model != null && !model.isBlank()) {
+                return model.trim();
+            }
+            return "anthropic".equals(effectiveProvider()) ? "claude-haiku-5-5" : "openai/gpt-oss-120b";
+        }
+
         public boolean hasApiKey() {
             return apiKey != null && !apiKey.isBlank();
         }
@@ -51,7 +62,15 @@ public record AppProperties(
         }
     }
 
-    public record Demo(@DefaultValue("6") int rateLimit) {
+    /**
+     * @param rateLimit   live drafts per client IP per hour (DP_DEMO_RATE_LIMIT)
+     * @param actionLimit "Simulate a dispute" / "Reset demo" calls per client IP per hour (DP_DEMO_ACTION_LIMIT)
+     * @param seedOnStart load the starter disputes into an empty database at startup (DP_DEMO_SEED_ON_START)
+     */
+    public record Demo(
+            @DefaultValue("6") int rateLimit,
+            @DefaultValue("30") int actionLimit,
+            @DefaultValue("false") boolean seedOnStart) {
     }
 
     public record Eval(@DefaultValue("fake") String mode) {

@@ -136,6 +136,14 @@
         <directory>../evals/recordings</directory>
         <targetPath>recordings</targetPath>
       </resource>
+      <resource>
+        <!-- The committed eval report, so GET /api/evals/latest works from the jar (and from the Docker image). -->
+        <directory>../evals</directory>
+        <includes>
+          <include>report.json</include>
+        </includes>
+        <targetPath>evals</targetPath>
+      </resource>
     </resources>
     <plugins>
       <plugin>

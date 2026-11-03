@@ -55,6 +55,11 @@ public class AnthropicLlmClient implements LlmClient {
     }
 
     @Override
+    public boolean isLive() {
+        return true;
+    }
+
+    @Override
     public String providerName() {
         return "Anthropic Claude API";
     }

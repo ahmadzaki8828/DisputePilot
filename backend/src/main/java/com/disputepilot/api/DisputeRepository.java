@@ -110,6 +110,28 @@ public class DisputeRepository {
                 .optional();
     }
 
+    public Optional<UUID> findIdByPaypalDisputeId(String paypalDisputeId) {
+        return jdbc.sql("select id from disputes where paypal_dispute_id = :p").param("p", paypalDisputeId)
+                .query(UUID.class).optional();
+    }
+
+    public int countSimulated() {
+        return jdbc.sql("select count(*) from disputes where simulated").query(Integer.class).single();
+    }
+
+    /**
+     * Deletes every simulated dispute with its submissions, drafts, audit entries and webhook events (the real
+     * sandbox disputes are left alone). Returns how many disputes were removed.
+     */
+    public int deleteSimulated() {
+        jdbc.sql("delete from submissions where draft_id in (select dr.id from drafts dr join disputes d "
+                + "on d.id = dr.dispute_id where d.simulated)").update();
+        jdbc.sql("delete from drafts where dispute_id in (select id from disputes where simulated)").update();
+        jdbc.sql("delete from audit_log where dispute_id in (select id from disputes where simulated)").update();
+        jdbc.sql("delete from webhook_events where resource_id like 'DEMO-%'").update();
+        return jdbc.sql("delete from disputes where simulated").update();
+    }
+
     public record StoredDispute(DisputeSummary summary, List<String> requestedEvidence, List<String> allowedActions,
                                 String disputedTransactionId, JsonNode raw) {
     }
