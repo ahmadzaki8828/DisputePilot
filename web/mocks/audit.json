@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "at": "2026-11-03T11:00:00Z",
+    "actor": "system",
+    "action": "DISPUTE_SYNCED",
+    "disputeId": "10000000-0000-4000-8000-000000000001",
+    "details": {}
+  },
+  {
+    "id": 2,
+    "at": "2026-11-03T11:00:00Z",
+    "actor": "system",
+    "action": "DISPUTE_SYNCED",
+    "disputeId": "10000000-0000-4000-8000-000000000002",
+    "details": {}
+  },
+  {
+    "id": 3,
+    "at": "2026-11-03T11:00:00Z",
+    "actor": "system",
+    "action": "DISPUTE_SYNCED",
+    "disputeId": "10000000-0000-4000-8000-000000000003",
+    "details": {}
+  },
+  {
+    "id": 4,
+    "at": "2026-11-03T11:00:00Z",
+    "actor": "system",
+    "action": "DISPUTE_SYNCED",
+    "disputeId": "10000000-0000-4000-8000-000000000004",
+    "details": {}
+  },
+  {
+    "id": 5,
+    "at": "2026-11-03T11:00:00Z",
+    "actor": "system",
+    "action": "DISPUTE_SYNCED",
+    "disputeId": "10000000-0000-4000-8000-000000000005",
+    "details": {}
+  },
+  {
+    "id": 6,
+    "at": "2026-11-03T11:00:00Z",
+    "actor": "system",
+    "action": "DISPUTE_SYNCED",
+    "disputeId": "10000000-0000-4000-8000-000000000006",
+    "details": {}
+  }
+]

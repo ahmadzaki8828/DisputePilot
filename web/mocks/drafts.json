@@ -1,0 +1,304 @@
+[
+  {
+    "id": "20000000-0000-4000-8000-000000000001",
+    "disputeId": "10000000-0000-4000-8000-000000000001",
+    "version": 1,
+    "status": "DRAFT",
+    "missingInfo": [],
+    "validation": {
+      "passed": true,
+      "issues": []
+    },
+    "llmMode": "sample",
+    "model": null,
+    "promptVersion": null,
+    "inputTokens": null,
+    "outputTokens": null,
+    "latencyMs": null,
+    "editedByHuman": false,
+    "createdAt": "2026-11-03T11:00:00Z",
+    "recommendation": "FIGHT",
+    "confidence": 0.93,
+    "rationale": "The parcel was delivered on Oct 21 and signed for by the buyer, and the buyer's own message acknowledges the tracking status.",
+    "evidence": [
+      {
+        "evidence_type": "PROOF_OF_FULFILLMENT",
+        "evidence_info": {
+          "tracking_info": [
+            {
+              "carrier_name": "OTHER",
+              "carrier_name_other": "Northline Courier",
+              "tracking_number": "NLC4417002931"
+            }
+          ]
+        },
+        "notes": "Delivered Oct 21 to Toronto, signed for by J. Ellis."
+      }
+    ],
+    "notes": "Order ORD-1042 shipped with Northline Courier (tracking NLC4417002931) and was delivered on 2026-10-21 in Toronto, signed for by J. Ellis. Our policy requires a signature on orders over CAD 150.",
+    "citations": [
+      {
+        "id": "dispute:DEMO-D-1001",
+        "kind": "dispute",
+        "label": "Dispute DEMO-D-1001"
+      },
+      {
+        "id": "order:ORD-1042",
+        "kind": "order",
+        "label": "Order ORD-1042"
+      },
+      {
+        "id": "shipment:SHP-77",
+        "kind": "shipment",
+        "label": "Shipment SHP-77"
+      },
+      {
+        "id": "policy:shipping",
+        "kind": "policy",
+        "label": "Shipping policy"
+      }
+    ]
+  },
+  {
+    "id": "20000000-0000-4000-8000-000000000002",
+    "disputeId": "10000000-0000-4000-8000-000000000002",
+    "version": 1,
+    "status": "NEEDS_REVIEW",
+    "missingInfo": [
+      "Tracking number or proof of shipment"
+    ],
+    "validation": {
+      "passed": false,
+      "issues": [
+        {
+          "code": "MISSING_EVIDENCE",
+          "message": "No proof of fulfilment is available for this order.",
+          "path": "evidence[0]"
+        }
+      ]
+    },
+    "llmMode": "sample",
+    "model": null,
+    "promptVersion": null,
+    "inputTokens": null,
+    "outputTokens": null,
+    "latencyMs": null,
+    "editedByHuman": false,
+    "createdAt": "2026-11-03T11:00:00Z",
+    "recommendation": "OFFER",
+    "confidence": 0.6,
+    "rationale": "There is no shipment record for this order, so proof of delivery cannot be shown. A partial-refund offer limits the loss.",
+    "evidence": [
+      {
+        "evidence_type": "OTHER",
+        "notes": "We cannot locate a tracking record and would like to offer a partial refund."
+      }
+    ],
+    "notes": "We could not find tracking for order ORD-1043 and would like to resolve this with a partial refund.",
+    "citations": [
+      {
+        "id": "dispute:DEMO-D-1002",
+        "kind": "dispute",
+        "label": "Dispute DEMO-D-1002"
+      },
+      {
+        "id": "order:ORD-1043",
+        "kind": "order",
+        "label": "Order ORD-1043"
+      }
+    ]
+  },
+  {
+    "id": "20000000-0000-4000-8000-000000000003",
+    "disputeId": "10000000-0000-4000-8000-000000000003",
+    "version": 1,
+    "status": "DRAFT",
+    "missingInfo": [],
+    "validation": {
+      "passed": true,
+      "issues": []
+    },
+    "llmMode": "sample",
+    "model": null,
+    "promptVersion": null,
+    "inputTokens": null,
+    "outputTokens": null,
+    "latencyMs": null,
+    "editedByHuman": false,
+    "createdAt": "2026-11-03T11:00:00Z",
+    "recommendation": "FIGHT",
+    "confidence": 0.72,
+    "rationale": "The listing disclosed that denim is garment-washed and colour varies slightly; the item matches its description.",
+    "evidence": [
+      {
+        "evidence_type": "OTHER",
+        "notes": "Product description discloses natural colour variation."
+      }
+    ],
+    "notes": "Our product descriptions state that denim and linen items are garment-washed and that colour varies slightly between pieces and photos.",
+    "citations": [
+      {
+        "id": "dispute:DEMO-D-1003",
+        "kind": "dispute",
+        "label": "Dispute DEMO-D-1003"
+      },
+      {
+        "id": "order:ORD-1044",
+        "kind": "order",
+        "label": "Order ORD-1044"
+      },
+      {
+        "id": "msg:MSG-4",
+        "kind": "msg",
+        "label": "Buyer message MSG-4"
+      },
+      {
+        "id": "policy:productDescriptions",
+        "kind": "policy",
+        "label": "Product description policy"
+      }
+    ]
+  },
+  {
+    "id": "20000000-0000-4000-8000-000000000004",
+    "disputeId": "10000000-0000-4000-8000-000000000004",
+    "version": 1,
+    "status": "DRAFT",
+    "missingInfo": [],
+    "validation": {
+      "passed": true,
+      "issues": []
+    },
+    "llmMode": "sample",
+    "model": null,
+    "promptVersion": null,
+    "inputTokens": null,
+    "outputTokens": null,
+    "latencyMs": null,
+    "editedByHuman": false,
+    "createdAt": "2026-11-03T11:00:00Z",
+    "recommendation": "ACCEPT",
+    "confidence": 0.81,
+    "rationale": "Delivery was not signed for and there is no evidence linking the buyer to the purchase. Fighting would likely lose and cost the seller time.",
+    "evidence": [],
+    "notes": "",
+    "citations": [
+      {
+        "id": "dispute:DEMO-D-1004",
+        "kind": "dispute",
+        "label": "Dispute DEMO-D-1004"
+      },
+      {
+        "id": "order:ORD-1045",
+        "kind": "order",
+        "label": "Order ORD-1045"
+      },
+      {
+        "id": "shipment:SHP-79",
+        "kind": "shipment",
+        "label": "Shipment SHP-79"
+      }
+    ]
+  },
+  {
+    "id": "20000000-0000-4000-8000-000000000005",
+    "disputeId": "10000000-0000-4000-8000-000000000005",
+    "version": 1,
+    "status": "DRAFT",
+    "missingInfo": [],
+    "validation": {
+      "passed": true,
+      "issues": []
+    },
+    "llmMode": "sample",
+    "model": null,
+    "promptVersion": null,
+    "inputTokens": null,
+    "outputTokens": null,
+    "latencyMs": null,
+    "editedByHuman": false,
+    "createdAt": "2026-11-03T11:00:00Z",
+    "recommendation": "FIGHT",
+    "confidence": 0.9,
+    "rationale": "A refund for this order was already issued, which answers the credit-not-processed claim.",
+    "evidence": [
+      {
+        "evidence_type": "PROOF_OF_REFUND",
+        "evidence_info": {
+          "refund_ids": [
+            {
+              "refund_id": "REF-5001"
+            }
+          ]
+        },
+        "notes": "Refund already issued."
+      }
+    ],
+    "notes": "Refund REF-5001 for order ORD-1046 was issued to the original payment method.",
+    "citations": [
+      {
+        "id": "dispute:DEMO-D-1005",
+        "kind": "dispute",
+        "label": "Dispute DEMO-D-1005"
+      },
+      {
+        "id": "order:ORD-1046",
+        "kind": "order",
+        "label": "Order ORD-1046"
+      },
+      {
+        "id": "policy:refunds",
+        "kind": "policy",
+        "label": "Refund policy"
+      }
+    ]
+  },
+  {
+    "id": "20000000-0000-4000-8000-000000000006",
+    "disputeId": "10000000-0000-4000-8000-000000000006",
+    "version": 1,
+    "status": "DRAFT",
+    "missingInfo": [],
+    "validation": {
+      "passed": true,
+      "issues": []
+    },
+    "llmMode": "sample",
+    "model": null,
+    "promptVersion": null,
+    "inputTokens": null,
+    "outputTokens": null,
+    "latencyMs": null,
+    "editedByHuman": false,
+    "createdAt": "2026-11-03T11:00:00Z",
+    "recommendation": "FIGHT",
+    "confidence": 0.7,
+    "rationale": "One of the two charges was already refunded.",
+    "evidence": [
+      {
+        "evidence_type": "PROOF_OF_REFUND",
+        "evidence_info": {
+          "refund_ids": [
+            {
+              "refund_id": "REF-5002"
+            }
+          ]
+        },
+        "notes": "Duplicate charge refunded."
+      }
+    ],
+    "notes": "The duplicate charge on order ORD-1048 was refunded (REF-5002).",
+    "citations": [
+      {
+        "id": "dispute:DEMO-D-1006",
+        "kind": "dispute",
+        "label": "Dispute DEMO-D-1006"
+      },
+      {
+        "id": "order:ORD-1048",
+        "kind": "order",
+        "label": "Order ORD-1048"
+      }
+    ]
+  }
+]

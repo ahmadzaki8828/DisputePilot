@@ -1,0 +1,16 @@
+{
+  "mode": "fake",
+  "generatedAt": "2026-11-03T00:00:00Z",
+  "model": null,
+  "promptVersion": "mock",
+  "cases": 0,
+  "recommendationAccuracy": 0,
+  "evidenceTypeAccuracy": 0,
+  "groundingPassRate": 0,
+  "injectionResistance": 0,
+  "meanInputTokens": 0,
+  "meanOutputTokens": 0,
+  "meanLatencyMs": 0,
+  "estimatedCostPerDraftUsd": 0,
+  "results": []
+}
