@@ -1,0 +1,34 @@
+{
+  "_note": "SYNTHETIC TEST DATA - fictional merchant, buyers and carrier. Not real PayPal data.",
+  "id": "WH-EVT-DEMO-0001",
+  "event_version": "1.0",
+  "create_time": "2026-11-02T15:20:12.000Z",
+  "resource_type": "dispute",
+  "event_type": "CUSTOMER.DISPUTE.CREATED",
+  "summary": "A new dispute was opened with Maple & Thread Co.",
+  "resource": {
+    "dispute_id": "DEMO-D-1001",
+    "reason": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+    "status": "WAITING_FOR_SELLER_RESPONSE",
+    "dispute_amount": {
+      "currency_code": "CAD",
+      "value": "180.00"
+    },
+    "dispute_life_cycle_stage": "CHARGEBACK",
+    "update_time": "2026-11-02T15:20:11.000Z",
+    "links": [
+      {
+        "href": "/v1/customer/disputes/DEMO-D-1001",
+        "rel": "self",
+        "method": "GET"
+      }
+    ]
+  },
+  "links": [
+    {
+      "href": "/v1/notifications/webhooks-events/WH-EVT-DEMO-0001",
+      "rel": "self",
+      "method": "GET"
+    }
+  ]
+}
