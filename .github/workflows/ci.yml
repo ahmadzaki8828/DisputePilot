@@ -23,7 +23,7 @@ jobs:
           cache: maven
       # Testcontainers starts Postgres 16 (Docker is available on GitHub-hosted runners).
       - run: ./mvnw -B verify
-      # Evals in fake (recorded) mode; the profile is a placeholder until Session B adds the runner.
+      # Evals in fake (recorded) mode: replays evals/recordings, so CI never calls a provider.
       - run: ./mvnw -B -Peval test
         env:
           DP_EVAL_MODE: fake
