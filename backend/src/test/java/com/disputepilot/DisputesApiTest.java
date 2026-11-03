@@ -129,7 +129,9 @@ class DisputesApiTest {
                 .andExpect(status().isNotImplemented())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
                 .andExpect(jsonPath("$.status").value(501));
-        mvc.perform(post("/api/disputes/abc/drafts").header("X-Admin-Token", TOKEN))
+        // Session B implemented POST /api/disputes/{id}/drafts, so its real controller now takes over the
+        // stub route. POST /api/sync is still planned-but-unbuilt (Session A).
+        mvc.perform(post("/api/sync").header("X-Admin-Token", TOKEN))
                 .andExpect(status().isNotImplemented());
         mvc.perform(post("/webhooks/paypal").content("{}").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotImplemented());

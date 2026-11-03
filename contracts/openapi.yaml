@@ -577,13 +577,25 @@ components:
         citations: { type: array, items: { $ref: '#/components/schemas/Citation' } }
         missingInfo: { type: array, items: { type: string } }
         validation: { $ref: '#/components/schemas/ValidationResult' }
-        llmMode: { type: string, enum: [live, recorded] }
+        llmMode:
+          type: string
+          enum: [live, recorded, sample]
+          description: >-
+            live = the provider was called; recorded = a real provider response from evals/recordings was
+            replayed; sample = a hand-written stand-in was replayed, so no model produced this draft.
+        provider:
+          type: string
+          nullable: true
+          description: Human-readable provider behind this draft, e.g. "Groq (OpenAI-compatible API)".
         model: { type: string, nullable: true }
         promptVersion: { type: string, nullable: true }
         inputTokens: { type: integer, nullable: true }
         outputTokens: { type: integer, nullable: true }
         latencyMs: { type: integer, nullable: true }
         editedByHuman: { type: boolean }
+        repairAttempted:
+          type: boolean
+          description: True when the first draft failed validation and the agent was asked to repair it.
         createdAt: { type: string, format: date-time }
 
     DraftEdit:
@@ -659,6 +671,7 @@ components:
       required: [paypalMode, llmMode, model, simulatedEnabled]
       properties:
         paypalMode: { type: string, enum: [mock, sandbox] }
-        llmMode: { type: string, enum: [live, recorded] }
+        llmMode: { type: string, enum: [live, recorded, sample] }
+        provider: { type: string, description: Model provider behind live drafts }
         model: { type: string }
         simulatedEnabled: { type: boolean }
