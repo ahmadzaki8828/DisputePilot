@@ -2,6 +2,14 @@
 
 DisputePilot is an AI copilot that drafts responses to PayPal disputes for small merchants, with a human approving every submission. Built for the PayPal AI Hackathon 2026. The repo is **public** and judges must be able to run it or use a hosted demo.
 
+## Sessions run unattended — these rules override any skill's workflow
+
+Cloud sessions here work unattended from a plan the owner has already approved (`docs/plan.md`). Nobody is watching to answer questions.
+- Don't brainstorm, write a new plan, or stop to ask design questions. Where the plan is silent, choose the simplest reasonable option, note it in the PR description, and keep going.
+- Don't use the brainstorming, writing-plans, executing-plans, subagent-driven-development, using-git-worktrees or finishing-a-development-branch skills. Work directly on the session's own branch.
+- Do use test-driven-development, systematic-debugging and verification-before-completion when they help.
+- Only stop to ask if continuing would break one of the Hard rules below.
+
 **Read `docs/plan.md` first.** Every cloud session executes exactly one session section from §13 of the plan. Stay inside the paths that section owns (see §5). You may *add* to shared files (new OpenAPI paths, config keys, fixtures, migrations in your version range) but never rewrite or reformat existing content — other sessions are working in parallel.
 
 ## Commands
