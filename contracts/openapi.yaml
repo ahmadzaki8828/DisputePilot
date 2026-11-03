@@ -1,0 +1,664 @@
+openapi: 3.0.3
+info:
+  title: DisputePilot API
+  version: 0.1.0
+  description: |
+    REST API for DisputePilot, an AI copilot that drafts PayPal dispute responses with a human approving every submission.
+    All `/api/**` routes require the `X-Admin-Token` header. Errors are RFC 7807 problem JSON.
+    Owned by Session S0; other sessions may ADD paths and schemas but must not reorder or rewrite existing content.
+servers:
+  - url: http://localhost:8080
+security:
+  - AdminToken: []
+
+paths:
+  /webhooks/paypal:
+    post:
+      tags: [Webhooks]
+      summary: PayPal webhook receiver (signature verified; no admin token)
+      operationId: receivePayPalWebhook
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, additionalProperties: true }
+      responses:
+        '200': { description: Event stored (or duplicate, ignored) }
+        '501': { $ref: '#/components/responses/Problem' }
+
+  /api/disputes:
+    get:
+      tags: [Disputes]
+      summary: Inbox list
+      operationId: listDisputes
+      parameters:
+        - { name: status, in: query, schema: { type: string } }
+        - { name: reason, in: query, schema: { type: string } }
+        - { name: dueWithinHours, in: query, schema: { type: integer, minimum: 0 } }
+        - { name: simulated, in: query, schema: { type: boolean } }
+      responses:
+        '200':
+          description: Disputes ordered by response deadline
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/DisputeSummary' } }
+        '401': { $ref: '#/components/responses/Problem' }
+
+  /api/disputes/{id}:
+    get:
+      tags: [Disputes]
+      summary: Dispute detail with case file, messages and allowed actions
+      operationId: getDispute
+      parameters:
+        - { $ref: '#/components/parameters/DisputeId' }
+      responses:
+        '200':
+          description: Dispute detail
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DisputeDetail' }
+        '404': { $ref: '#/components/responses/Problem' }
+
+  /api/disputes/{id}/sync:
+    post:
+      tags: [Sync]
+      summary: Re-fetch one dispute from PayPal
+      operationId: syncDispute
+      parameters:
+        - { $ref: '#/components/parameters/DisputeId' }
+      responses:
+        '200':
+          description: Synced dispute
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DisputeDetail' }
+        '501': { $ref: '#/components/responses/Problem' }
+
+  /api/sync:
+    post:
+      tags: [Sync]
+      summary: Run reconciliation now
+      operationId: runSync
+      responses:
+        '200':
+          description: Reconciliation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  synced: { type: integer }
+        '501': { $ref: '#/components/responses/Problem' }
+
+  /api/disputes/{id}/drafts:
+    post:
+      tags: [Drafts]
+      summary: Generate a new draft with the agent (rate-limited)
+      operationId: createDraft
+      parameters:
+        - { $ref: '#/components/parameters/DisputeId' }
+      responses:
+        '201':
+          description: New draft (supersedes the previous one)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Draft' }
+        '429': { $ref: '#/components/responses/Problem' }
+        '501': { $ref: '#/components/responses/Problem' }
+
+  /api/disputes/{id}/drafts/latest:
+    get:
+      tags: [Drafts]
+      summary: Latest draft for a dispute
+      operationId: getLatestDraft
+      parameters:
+        - { $ref: '#/components/parameters/DisputeId' }
+      responses:
+        '200':
+          description: Latest draft
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Draft' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '501': { $ref: '#/components/responses/Problem' }
+
+  /api/drafts/{id}:
+    patch:
+      tags: [Drafts]
+      summary: Edit notes/evidence; re-validates and sets editedByHuman=true
+      operationId: updateDraft
+      parameters:
+        - { $ref: '#/components/parameters/DraftId' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DraftEdit' }
+      responses:
+        '200':
+          description: Updated draft
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Draft' }
+        '501': { $ref: '#/components/responses/Problem' }
+
+  /api/drafts/{id}/approve:
+    post:
+      tags: [Drafts]
+      summary: Mark APPROVED (validation must have passed, or pass overrideValidation)
+      operationId: approveDraft
+      parameters:
+        - { $ref: '#/components/parameters/DraftId' }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                overrideValidation: { type: boolean, default: false }
+      responses:
+        '200':
+          description: Approved draft
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Draft' }
+        '409': { $ref: '#/components/responses/Problem' }
+        '501': { $ref: '#/components/responses/Problem' }
+
+  /api/drafts/{id}/submit:
+    post:
+      tags: [Submissions]
+      summary: Submit an APPROVED draft to PayPal (provide-evidence or accept-claim)
+      operationId: submitDraft
+      parameters:
+        - { $ref: '#/components/parameters/DraftId' }
+        - name: Idempotency-Key
+          in: header
+          required: true
+          description: Same key returns the stored result instead of calling PayPal again.
+          schema: { type: string, minLength: 8, maxLength: 128 }
+      responses:
+        '200':
+          description: Submission result
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Submission' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+        '501': { $ref: '#/components/responses/Problem' }
+
+  /api/audit:
+    get:
+      tags: [Insights]
+      summary: Audit trail
+      operationId: listAudit
+      parameters:
+        - { name: disputeId, in: query, schema: { type: string, format: uuid } }
+      responses:
+        '200':
+          description: Audit entries, newest last
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/AuditEntry' } }
+        '501': { $ref: '#/components/responses/Problem' }
+
+  /api/metrics:
+    get:
+      tags: [Insights]
+      summary: KPIs
+      operationId: getMetrics
+      responses:
+        '200':
+          description: Metrics
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Metrics' }
+        '501': { $ref: '#/components/responses/Problem' }
+
+  /api/evals/latest:
+    get:
+      tags: [Insights]
+      summary: Latest eval report (evals/report.json)
+      operationId: getLatestEvalReport
+      responses:
+        '200':
+          description: Eval report
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EvalReport' }
+        '501': { $ref: '#/components/responses/Problem' }
+
+  /api/system:
+    get:
+      tags: [Insights]
+      summary: Modes for the UI badges
+      operationId: getSystemInfo
+      responses:
+        '200':
+          description: System info
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SystemInfo' }
+        '501': { $ref: '#/components/responses/Problem' }
+
+  /api/demo/disputes:
+    post:
+      tags: [Demo]
+      summary: Create a simulated DEMO- dispute and push its CREATED event through the webhook pipeline (rate-limited)
+      operationId: createDemoDispute
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [template]
+              properties:
+                template: { $ref: '#/components/schemas/DemoTemplate' }
+      responses:
+        '201':
+          description: Created simulated dispute
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DisputeSummary' }
+        '429': { $ref: '#/components/responses/Problem' }
+        '501': { $ref: '#/components/responses/Problem' }
+
+  /api/demo/reset:
+    post:
+      tags: [Demo]
+      summary: Delete simulated disputes (and their drafts/submissions) and re-seed the starter set (rate-limited)
+      operationId: resetDemo
+      responses:
+        '200':
+          description: Reset done
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  seeded: { type: integer }
+        '429': { $ref: '#/components/responses/Problem' }
+        '501': { $ref: '#/components/responses/Problem' }
+
+  /api/dev/seed:
+    post:
+      tags: [Dev]
+      summary: Load the fixture disputes (PAYPAL_MODE=mock only)
+      operationId: seedFixtures
+      responses:
+        '200':
+          description: Number of disputes loaded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  seeded: { type: integer }
+        '403': { $ref: '#/components/responses/Problem' }
+
+  /api/dev/link-transaction:
+    post:
+      tags: [Dev]
+      summary: Map a real sandbox transaction to a seeded order (only when DP_DEV_ENDPOINTS=true)
+      operationId: linkTransaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sellerTransactionId, orderId]
+              properties:
+                sellerTransactionId: { type: string }
+                orderId: { type: string }
+      responses:
+        '200': { description: Linked }
+        '403': { $ref: '#/components/responses/Problem' }
+        '501': { $ref: '#/components/responses/Problem' }
+
+components:
+  securitySchemes:
+    AdminToken:
+      type: apiKey
+      in: header
+      name: X-Admin-Token
+
+  parameters:
+    DisputeId:
+      name: id
+      in: path
+      required: true
+      description: Internal dispute UUID (not the PayPal dispute ID)
+      schema: { type: string, format: uuid }
+    DraftId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+
+  responses:
+    Problem:
+      description: RFC 7807 problem JSON
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+
+  schemas:
+    Problem:
+      type: object
+      properties:
+        type: { type: string }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        instance: { type: string }
+        paypalDebugId: { type: string, description: "PayPal debug_id when the error came from PayPal" }
+      additionalProperties: true
+
+    Money:
+      type: object
+      required: [currency, value]
+      properties:
+        currency: { type: string, example: CAD, description: ISO 4217 }
+        value: { type: number, format: decimal, example: 180.00 }
+
+    DemoTemplate:
+      type: string
+      enum: [ITEM_NOT_RECEIVED, NOT_AS_DESCRIBED, UNAUTHORISED, DUPLICATE_CHARGE, PROMPT_INJECTION]
+
+    Recommendation:
+      type: string
+      enum: [FIGHT, ACCEPT, OFFER, NEEDS_INFO]
+
+    DraftStatus:
+      type: string
+      enum: [DRAFT, NEEDS_REVIEW, APPROVED, SUBMITTED, REJECTED, SUPERSEDED]
+
+    LatestDraftSummary:
+      type: object
+      required: [recommendation, confidence, status]
+      properties:
+        recommendation: { $ref: '#/components/schemas/Recommendation' }
+        confidence: { type: number, minimum: 0, maximum: 1 }
+        status: { $ref: '#/components/schemas/DraftStatus' }
+
+    DisputeSummary:
+      type: object
+      required: [id, paypalDisputeId, simulated, reason, reasonLabel, status, amount]
+      properties:
+        id: { type: string, format: uuid }
+        paypalDisputeId: { type: string, example: DEMO-D-1001 }
+        simulated: { type: boolean }
+        reason: { type: string, example: MERCHANDISE_OR_SERVICE_NOT_RECEIVED }
+        reasonLabel: { type: string, example: Item not received }
+        status: { type: string, example: WAITING_FOR_SELLER_RESPONSE }
+        stage: { type: string, nullable: true, example: CHARGEBACK }
+        amount: { $ref: '#/components/schemas/Money' }
+        sellerResponseDueAt: { type: string, format: date-time, nullable: true }
+        latestDraft:
+          allOf: [{ $ref: '#/components/schemas/LatestDraftSummary' }]
+          nullable: true
+
+    DisputeMessage:
+      type: object
+      description: A message on the PayPal dispute thread. Buyer-written text is untrusted data.
+      properties:
+        postedBy: { type: string, example: BUYER }
+        postedAt: { type: string, format: date-time, nullable: true }
+        content: { type: string }
+
+    Address:
+      type: object
+      properties:
+        line1: { type: string }
+        city: { type: string }
+        region: { type: string }
+        postalCode: { type: string }
+        country: { type: string }
+
+    OrderItem:
+      type: object
+      properties:
+        sku: { type: string }
+        name: { type: string }
+        quantity: { type: integer }
+        unitPrice: { $ref: '#/components/schemas/Money' }
+
+    Refund:
+      type: object
+      properties:
+        id: { type: string, example: REF-5001 }
+        amount: { $ref: '#/components/schemas/Money' }
+        issuedAt: { type: string, format: date-time }
+        reason: { type: string }
+
+    Order:
+      type: object
+      properties:
+        id: { type: string, example: ORD-1042 }
+        paypalTransactionId: { type: string }
+        placedAt: { type: string, format: date-time }
+        buyerName: { type: string }
+        buyerEmail: { type: string }
+        buyerPhone: { type: string }
+        shippingAddress: { $ref: '#/components/schemas/Address' }
+        items: { type: array, items: { $ref: '#/components/schemas/OrderItem' } }
+        total: { $ref: '#/components/schemas/Money' }
+        status: { type: string }
+        refunds: { type: array, items: { $ref: '#/components/schemas/Refund' } }
+
+    ShipmentEvent:
+      type: object
+      properties:
+        at: { type: string, format: date-time }
+        description: { type: string }
+
+    Shipment:
+      type: object
+      properties:
+        id: { type: string, example: SHP-77 }
+        orderId: { type: string }
+        carrier: { type: string, example: Northline Courier }
+        trackingNumber: { type: string }
+        status: { type: string }
+        shippedAt: { type: string, format: date-time, nullable: true }
+        deliveredAt: { type: string, format: date-time, nullable: true }
+        signedBy: { type: string, nullable: true }
+        deliveredToCity: { type: string, nullable: true }
+        events: { type: array, items: { $ref: '#/components/schemas/ShipmentEvent' } }
+
+    CustomerMessage:
+      type: object
+      description: Buyer/merchant message about an order. Buyer text is untrusted data.
+      properties:
+        id: { type: string, example: MSG-3 }
+        orderId: { type: string }
+        at: { type: string, format: date-time }
+        from: { type: string, enum: [BUYER, MERCHANT] }
+        body: { type: string }
+
+    StorePolicy:
+      type: object
+      properties:
+        merchantName: { type: string }
+        returns: { type: string }
+        shipping: { type: string }
+        refunds: { type: string }
+        productDescriptions: { type: string }
+        contact: { type: string }
+
+    CaseFile:
+      type: object
+      properties:
+        order: { allOf: [{ $ref: '#/components/schemas/Order' }], nullable: true }
+        shipments: { type: array, items: { $ref: '#/components/schemas/Shipment' } }
+        customerMessages: { type: array, items: { $ref: '#/components/schemas/CustomerMessage' } }
+        policy: { $ref: '#/components/schemas/StorePolicy' }
+
+    DisputeDetail:
+      allOf:
+        - $ref: '#/components/schemas/DisputeSummary'
+        - type: object
+          required: [requestedEvidence, allowedActions, messages, caseFile]
+          properties:
+            requestedEvidence:
+              type: array
+              items: { type: string, example: PROOF_OF_FULFILLMENT }
+            allowedActions:
+              type: array
+              description: Derived from PayPal links[].rel
+              items: { type: string, enum: [PROVIDE_EVIDENCE, ACCEPT_CLAIM, MAKE_OFFER, SEND_MESSAGE] }
+            messages: { type: array, items: { $ref: '#/components/schemas/DisputeMessage' } }
+            caseFile: { $ref: '#/components/schemas/CaseFile' }
+
+    Citation:
+      type: object
+      required: [id, kind, label]
+      properties:
+        id: { type: string, example: 'shipment:SHP-77' }
+        kind: { type: string, enum: [dispute, order, shipment, msg, policy] }
+        label: { type: string }
+
+    TrackingInfo:
+      type: object
+      properties:
+        carrier_name: { type: string, example: OTHER }
+        carrier_name_other: { type: string, example: Northline Courier }
+        tracking_number: { type: string }
+
+    Evidence:
+      type: object
+      description: One entry of PayPal's evidences[] in the shape that would be submitted
+      required: [evidence_type]
+      properties:
+        evidence_type: { type: string, example: PROOF_OF_FULFILLMENT }
+        evidence_info:
+          type: object
+          properties:
+            tracking_info: { type: array, items: { $ref: '#/components/schemas/TrackingInfo' } }
+            refund_ids:
+              type: array
+              items:
+                type: object
+                properties:
+                  refund_id: { type: string }
+        notes: { type: string }
+
+    ValidationIssue:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string, example: UNKNOWN_TRACKING_NUMBER }
+        message: { type: string }
+        path: { type: string, example: 'evidence[0].evidence_info.tracking_info[0].tracking_number' }
+
+    ValidationResult:
+      type: object
+      required: [passed, issues]
+      properties:
+        passed: { type: boolean }
+        issues: { type: array, items: { $ref: '#/components/schemas/ValidationIssue' } }
+
+    Draft:
+      type: object
+      required: [id, disputeId, version, status, recommendation, confidence, rationale, evidence, notes, citations, validation, llmMode]
+      properties:
+        id: { type: string, format: uuid }
+        disputeId: { type: string, format: uuid }
+        version: { type: integer }
+        status: { $ref: '#/components/schemas/DraftStatus' }
+        recommendation: { $ref: '#/components/schemas/Recommendation' }
+        confidence: { type: number, minimum: 0, maximum: 1 }
+        rationale: { type: string, maxLength: 600 }
+        evidence: { type: array, items: { $ref: '#/components/schemas/Evidence' } }
+        notes: { type: string, maxLength: 2000, description: Text sent to PayPal }
+        citations: { type: array, items: { $ref: '#/components/schemas/Citation' } }
+        missingInfo: { type: array, items: { type: string } }
+        validation: { $ref: '#/components/schemas/ValidationResult' }
+        llmMode: { type: string, enum: [live, recorded] }
+        model: { type: string, nullable: true }
+        promptVersion: { type: string, nullable: true }
+        inputTokens: { type: integer, nullable: true }
+        outputTokens: { type: integer, nullable: true }
+        latencyMs: { type: integer, nullable: true }
+        editedByHuman: { type: boolean }
+        createdAt: { type: string, format: date-time }
+
+    DraftEdit:
+      type: object
+      properties:
+        notes: { type: string, maxLength: 2000 }
+        evidence: { type: array, items: { $ref: '#/components/schemas/Evidence' } }
+
+    Submission:
+      type: object
+      required: [id, draftId, idempotencyKey, action, status]
+      properties:
+        id: { type: string, format: uuid }
+        draftId: { type: string, format: uuid }
+        idempotencyKey: { type: string }
+        action: { type: string, enum: [PROVIDE_EVIDENCE, ACCEPT_CLAIM, MAKE_OFFER] }
+        status: { type: string, enum: [PENDING, SUCCEEDED, FAILED] }
+        paypalDebugId: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+
+    AuditEntry:
+      type: object
+      required: [id, at, actor, action]
+      properties:
+        id: { type: integer, format: int64 }
+        at: { type: string, format: date-time }
+        actor: { type: string, enum: [system, agent, user] }
+        action: { type: string, example: DRAFT_CREATED }
+        disputeId: { type: string, format: uuid, nullable: true }
+        details: { type: object, additionalProperties: true }
+
+    Metrics:
+      type: object
+      properties:
+        openDisputes: { type: integer }
+        dueWithin48h: { type: integer }
+        draftsReady: { type: integer }
+        submitted: { type: integer }
+        meanTimeToDraftSeconds: { type: number, nullable: true }
+        winRate: { type: number, minimum: 0, maximum: 1, nullable: true }
+
+    EvalCaseResult:
+      type: object
+      properties:
+        caseId: { type: string }
+        expectedRecommendation: { type: string }
+        actualRecommendation: { type: string }
+        recommendationCorrect: { type: boolean }
+        evidenceTypesCorrect: { type: boolean }
+        grounded: { type: boolean }
+        injectionResisted: { type: boolean, nullable: true }
+
+    EvalReport:
+      type: object
+      properties:
+        mode: { type: string, enum: [fake, live], description: Live numbers only are quoted in the README }
+        generatedAt: { type: string, format: date-time }
+        model: { type: string, nullable: true }
+        promptVersion: { type: string }
+        cases: { type: integer }
+        recommendationAccuracy: { type: number }
+        evidenceTypeAccuracy: { type: number }
+        groundingPassRate: { type: number }
+        injectionResistance: { type: number }
+        meanInputTokens: { type: number }
+        meanOutputTokens: { type: number }
+        meanLatencyMs: { type: number }
+        estimatedCostPerDraftUsd: { type: number }
+        results: { type: array, items: { $ref: '#/components/schemas/EvalCaseResult' } }
+
+    SystemInfo:
+      type: object
+      required: [paypalMode, llmMode, model, simulatedEnabled]
+      properties:
+        paypalMode: { type: string, enum: [mock, sandbox] }
+        llmMode: { type: string, enum: [live, recorded] }
+        model: { type: string }
+        simulatedEnabled: { type: boolean }
