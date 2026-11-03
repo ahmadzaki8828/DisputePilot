@@ -1,0 +1,85 @@
+{
+  "_note": "SYNTHETIC TEST DATA - fictional merchant, buyers and carrier. Not real PayPal data.",
+  "dispute_id": "DEMO-D-1002",
+  "create_time": "2026-11-01T10:02:45.000Z",
+  "update_time": "2026-11-01T10:02:45.000Z",
+  "disputed_transactions": [
+    {
+      "seller_transaction_id": "TXN-8F3A1002",
+      "create_time": "2026-10-14T13:00:00.000Z",
+      "transaction_status": "COMPLETED",
+      "gross_amount": {
+        "currency_code": "CAD",
+        "value": "64.50"
+      },
+      "buyer": {
+        "name": "Priya Natarajan"
+      },
+      "seller": {
+        "name": "Maple & Thread Co.",
+        "merchant_id": "DEMOMERCHANT01",
+        "email": "orders@maple-and-thread.example"
+      },
+      "items": [
+        {
+          "item_id": "SKU-1002",
+          "item_name": "Linen Market Tote",
+          "item_quantity": "1"
+        }
+      ]
+    }
+  ],
+  "reason": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+  "status": "WAITING_FOR_SELLER_RESPONSE",
+  "dispute_amount": {
+    "currency_code": "CAD",
+    "value": "64.50"
+  },
+  "dispute_life_cycle_stage": "INQUIRY",
+  "dispute_channel": "INTERNAL",
+  "messages": [
+    {
+      "posted_by": "BUYER",
+      "time_posted": "2026-11-01T10:02:45.000Z",
+      "content": "I ordered a tote bag weeks ago and nothing has shown up."
+    }
+  ],
+  "evidences": [
+    {
+      "evidence_type": "PROOF_OF_FULFILLMENT",
+      "source": "REQUESTED_FROM_SELLER"
+    },
+    {
+      "evidence_type": "OTHER",
+      "source": "REQUESTED_FROM_SELLER"
+    }
+  ],
+  "seller_response_due_date": "2026-11-10T23:59:59.000Z",
+  "links": [
+    {
+      "href": "/v1/customer/disputes/DEMO-D-1002",
+      "rel": "self",
+      "method": "GET"
+    },
+    {
+      "href": "/v1/customer/disputes/DEMO-D-1002/provide-evidence",
+      "rel": "provide_evidence",
+      "method": "POST"
+    },
+    {
+      "href": "/v1/customer/disputes/DEMO-D-1002/accept-claim",
+      "rel": "accept_claim",
+      "method": "POST"
+    },
+    {
+      "href": "/v1/customer/disputes/DEMO-D-1002/make-offer",
+      "rel": "make_offer",
+      "method": "POST"
+    },
+    {
+      "href": "/v1/customer/disputes/DEMO-D-1002/send-message",
+      "rel": "send_message",
+      "method": "POST"
+    }
+  ]
+}
