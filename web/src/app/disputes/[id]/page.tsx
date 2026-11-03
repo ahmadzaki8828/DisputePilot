@@ -15,7 +15,12 @@ async function DisputeContent({ params }: { params: Promise<{ id: string }> }) {
       ? <ErrorPanel title="Dispute not found" message="It may have been removed by a demo reset." retryHref="/" />
       : <ErrorPanel title="Could not load this dispute" message={r.error} retryHref={`/disputes/${id}`} />;
   }
-  const [dispute, draft, audit] = r.data;
+  const [raw, draft, audit] = r.data;
+  // The browser never needs buyer contact details; keep them server-side.
+  const order = raw.caseFile.order;
+  const dispute = order
+    ? { ...raw, caseFile: { ...raw.caseFile, order: { ...order, buyerEmail: undefined, buyerPhone: undefined, shippingAddress: undefined } } }
+    : raw;
   return <DisputeView key={draft?.id ?? "none"} dispute={dispute} initialDraft={draft} audit={audit} />;
 }
 

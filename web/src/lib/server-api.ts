@@ -167,7 +167,9 @@ export async function getDispute(id: string): Promise<DisputeDetail> {
   if (isMock()) {
     const d = mock().disputes.find((x) => x.id === id);
     if (!d) throw new ApiError(404, "Dispute not found");
-    return { ...d, latestDraft: summary(d).latestDraft } as DisputeDetail;
+    const { _dueInHours: _h, ...rest } = d;
+    void _h;
+    return { ...rest, latestDraft: summary(d).latestDraft } as DisputeDetail;
   }
   return (await real("GET", `/api/disputes/${encodeURIComponent(id)}`)) as DisputeDetail;
 }
