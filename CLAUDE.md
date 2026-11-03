@@ -19,6 +19,8 @@ Backend (`backend/`):
 - Evals: `./mvnw -B -Peval test` (mode from `DP_EVAL_MODE=fake|live`, default `fake`)
 - Run locally: `./mvnw spring-boot:run` (reads env vars below)
 - Postgres in a cloud VM: `service postgresql start`, then create the `disputepilot` database and user; or `docker compose up -d db` from the repo root
+- Tests use Testcontainers (Postgres 16) by default. Where Docker isn't usable (cloud VMs), start the VM's Postgres and run `DP_TEST_DB_URL=jdbc:postgresql://localhost:5432/disputepilot_test ./mvnw -B verify` (optional `DP_TEST_DB_USER` / `DP_TEST_DB_PASSWORD`, default `disputepilot`/`disputepilot`). Integration tests are named `*Test` so Surefire runs them.
+- Backend serves `/actuator/health` publicly; every `/api/**` route needs `X-Admin-Token` (set `DP_ADMIN_TOKEN`; unset means all `/api/**` is rejected). Planned-but-unbuilt endpoints answer 501 via `PlannedEndpointStubs`; a real controller for the same route takes over automatically, so add yours without deleting the stub entry.
 
 Web (`web/`):
 - `npm ci`, `npm run dev`, `npm run lint`, `npm test`, `npm run build`
@@ -26,7 +28,7 @@ Web (`web/`):
 
 Repo root:
 - Judges' path (no keys needed): `docker compose up --build` → http://localhost:3000 (once Session D has built it)
-- `make dev`, `make test`, `make seed`, `make demo` (once they exist)
+- `make dev` (db + backend in mock mode + web), `make test`, `make seed` exist now; `make demo` arrives with Session E
 
 ## Environment variables
 
@@ -37,11 +39,9 @@ Repo root:
 | `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET` | Sandbox REST app credentials |
 | `PAYPAL_WEBHOOK_ID` | Webhook ID from the PayPal developer dashboard (sandbox mode) |
 | `DP_ADMIN_TOKEN` | Shared secret between the web server and `/api/**` (`X-Admin-Token`) |
-| `DP_LLM_PROVIDER` | `openai-compatible` (default; Groq's free tier or any OpenAI-compatible API) or `anthropic` (Claude API) |
-| `DP_LLM_BASE_URL` | For `openai-compatible`, e.g. `https://api.groq.com/openai/v1` |
-| `DP_LLM_MODE` | `live` (calls the provider), `recorded` (replays real responses in `evals/recordings/`), or `sample` (only hand-written samples exist). Defaults to `recorded` when no key is set. |
-| `DP_LLM_API_KEY` | The app's model-provider key (Groq or Claude). Never name it `ANTHROPIC_API_KEY`. |
-| `DP_LLM_MODEL` | Provider's model ID, e.g. a Groq model ID, or `claude-haiku-5-5` / `claude-sonnet-5-5` |
+| `DP_LLM_MODE` | `live` (Claude API) or `recorded` (replays `evals/recordings/`). Defaults to `recorded` when no key is set. |
+| `DP_LLM_API_KEY` | Claude API key **for the app**. Never name it `ANTHROPIC_API_KEY`. |
+| `DP_LLM_MODEL` | Default `claude-haiku-5-5`; `claude-sonnet-5-5` for higher quality |
 | `DP_DEMO_RATE_LIMIT` | Live drafts per client IP per hour on the public demo (default 6) |
 | `DP_LLM_DAILY_CAP` | Max live LLM calls per day (default 300); over it, fall back to recorded or return 429 |
 | `DP_DEV_ENDPOINTS` | `true` enables `/api/dev/**` outside mock mode (linking a real sandbox transaction) |
