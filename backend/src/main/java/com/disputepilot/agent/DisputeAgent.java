@@ -93,8 +93,8 @@ public class DisputeAgent {
         boolean repaired = false;
 
         if (!validation.passed()) {
-            log.info("Draft for {} failed validation ({} issue(s)); one repair attempt",
-                    caseKey, validation.issues().size());
+            log.info("Draft for {} failed validation ({}); one repair attempt", caseKey,
+                    validation.issues().stream().map(ValidationResult.Issue::code).toList());
             repaired = true;
             messages.add(user(repairInstruction(validation)));
             DraftProposal second = converse(caseKey, caseFile, messages, usage);

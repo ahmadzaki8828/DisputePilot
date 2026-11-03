@@ -35,8 +35,10 @@ public record Playbook(
             new Playbook(DisputeReason.UNAUTHORISED,
                     List.of(OTHER, PROOF_OF_FULFILLMENT),
                     Recommendation.ACCEPT,
-                    "Unauthorised-transaction claims are decided on the issuer's fraud evidence, not the "
-                            + "seller's. Accept unless the records tie the buyer to the order beyond delivery alone."),
+                    "Unauthorised-transaction claims are decided on the card issuer's fraud evidence, not the "
+                            + "seller's. Proof of delivery, signature included, does not answer 'I never "
+                            + "authorised this payment'. Accept unless the buyer's own messages show they knew "
+                            + "about the order - chasing it, arranging a return, asking to exchange it."),
             new Playbook(DisputeReason.CREDIT_NOT_PROCESSED,
                     List.of(PROOF_OF_REFUND, OTHER),
                     Recommendation.FIGHT,

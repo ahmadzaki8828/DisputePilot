@@ -90,7 +90,7 @@ class DraftsApiTest {
         assertThat(draft.path("llmMode").asString()).isEqualTo("SAMPLE");
         assertThat(draft.path("provider").asString()).isEqualTo("FakeLlmClient (test double)");
         assertThat(draft.path("model").asString()).isEqualTo("fake-model");
-        assertThat(draft.path("promptVersion").asString()).isEqualTo("v1");
+        assertThat(draft.path("promptVersion").asString()).matches("v\\d+");
         assertThat(draft.path("inputTokens").asInt()).isEqualTo(100);
         assertThat(draft.path("editedByHuman").asBoolean()).isFalse();
         assertThat(draft.path("evidence").get(0).path("evidence_type").asString())

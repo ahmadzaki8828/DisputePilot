@@ -1,0 +1,184 @@
+{
+  "_note": "SYNTHETIC TEST DATA - fictional merchant, buyers and carrier. Not real PayPal data.",
+  "name": "07-inr-in-transit-past-eta",
+  "caseKey": "DEMO-D-2001",
+  "description": "Item not received: the parcel is genuinely still in transit two weeks past its ETA, so there is no delivery to prove but the merchant did ship.",
+  "dispute": {
+    "_note": "SYNTHETIC TEST DATA - fictional merchant, buyers and carrier. Not real PayPal data.",
+    "dispute_id": "DEMO-D-2001",
+    "create_time": "2026-11-02T15:00:00.000Z",
+    "update_time": "2026-11-02T15:00:00.000Z",
+    "disputed_transactions": [
+      {
+        "seller_transaction_id": "TXN-9F3B2001",
+        "create_time": "2026-10-15T13:00:00.000Z",
+        "transaction_status": "COMPLETED",
+        "gross_amount": {
+          "currency_code": "CAD",
+          "value": "112.00"
+        },
+        "buyer": {
+          "name": "Rowan Patel"
+        },
+        "seller": {
+          "name": "Maple & Thread Co.",
+          "merchant_id": "DEMOMERCHANT01",
+          "email": "orders@maple-and-thread.example"
+        },
+        "items": [
+          {
+            "item_id": "SKU-2001",
+            "item_name": "Wool Scarf Set",
+            "item_quantity": "1"
+          }
+        ]
+      }
+    ],
+    "reason": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+    "status": "WAITING_FOR_SELLER_RESPONSE",
+    "dispute_amount": {
+      "currency_code": "CAD",
+      "value": "112.00"
+    },
+    "dispute_life_cycle_stage": "INQUIRY",
+    "dispute_channel": "INTERNAL",
+    "messages": [
+      {
+        "posted_by": "BUYER",
+        "time_posted": "2026-11-01T09:00:00.000Z",
+        "content": "It has been two weeks and the tracking has not moved. Where is my order?"
+      }
+    ],
+    "evidences": [
+      {
+        "evidence_type": "PROOF_OF_FULFILLMENT",
+        "source": "REQUESTED_FROM_SELLER"
+      },
+      {
+        "evidence_type": "OTHER",
+        "source": "REQUESTED_FROM_SELLER"
+      }
+    ],
+    "seller_response_due_date": "2026-11-12T23:59:59.000Z",
+    "links": [
+      {
+        "href": "/v1/customer/disputes/DEMO-D-2001",
+        "rel": "self",
+        "method": "GET"
+      },
+      {
+        "href": "/v1/customer/disputes/DEMO-D-2001/provide-evidence",
+        "rel": "provide_evidence",
+        "method": "POST"
+      },
+      {
+        "href": "/v1/customer/disputes/DEMO-D-2001/accept-claim",
+        "rel": "accept_claim",
+        "method": "POST"
+      },
+      {
+        "href": "/v1/customer/disputes/DEMO-D-2001/make-offer",
+        "rel": "make_offer",
+        "method": "POST"
+      },
+      {
+        "href": "/v1/customer/disputes/DEMO-D-2001/send-message",
+        "rel": "send_message",
+        "method": "POST"
+      }
+    ]
+  },
+  "merchant": {
+    "orders": [
+      {
+        "id": "ORD-2001",
+        "paypalTransactionId": "TXN-9F3B2001",
+        "placedAt": "2026-10-16T13:00:00Z",
+        "buyerName": "Rowan Patel",
+        "buyerEmail": "buyer@buyer.example",
+        "buyerPhone": "+1-416-555-0150",
+        "shippingAddress": {
+          "line1": "1300 Example Street",
+          "city": "Toronto",
+          "region": "ON",
+          "postalCode": "M5V 0A0",
+          "country": "CA"
+        },
+        "items": [
+          {
+            "sku": "SKU-2001",
+            "name": "Wool Scarf Set",
+            "quantity": 1,
+            "unitPrice": {
+              "currency": "CAD",
+              "value": "102.00"
+            }
+          }
+        ],
+        "total": {
+          "currency": "CAD",
+          "value": "112.00"
+        },
+        "status": "SHIPPED",
+        "refunds": []
+      }
+    ],
+    "shipments": [
+      {
+        "id": "SHP-2001",
+        "orderId": "ORD-2001",
+        "carrier": "Northline Courier",
+        "trackingNumber": "NLC4417003104",
+        "status": "IN_TRANSIT",
+        "shippedAt": "2026-10-17T14:00:00Z",
+        "deliveredAt": null,
+        "signedBy": null,
+        "deliveredToCity": "Toronto",
+        "events": [
+          {
+            "at": "2026-10-17T14:00:00Z",
+            "description": "Picked up by Northline Courier"
+          },
+          {
+            "at": "2026-10-18T03:00:00Z",
+            "description": "In transit, estimated delivery 2026-10-22"
+          }
+        ]
+      }
+    ],
+    "messages": [
+      {
+        "id": "MSG-2001",
+        "orderId": "ORD-2001",
+        "at": "2026-10-30T09:00:00Z",
+        "from": "BUYER",
+        "body": "Tracking has not updated in days."
+      },
+      {
+        "id": "MSG-2002",
+        "orderId": "ORD-2001",
+        "at": "2026-10-30T11:00:00Z",
+        "from": "MERCHANT",
+        "body": "We have asked Northline Courier to trace the parcel."
+      }
+    ],
+    "policy": {
+      "merchantName": "Maple & Thread Co.",
+      "returns": "Unworn items may be returned within 30 days of delivery for a full refund of the item price. Return shipping is paid by the buyer.",
+      "shipping": "Orders ship within 2 business days via Northline Courier. Tracking numbers are emailed at dispatch. Signature is required for orders over CAD 150.",
+      "refunds": "Refunds are issued to the original payment method within 5 business days of receiving a return.",
+      "productDescriptions": "Denim and linen items are garment-washed; colour and texture vary slightly between pieces and photos.",
+      "contact": "support@maple-and-thread.example"
+    }
+  },
+  "expected": {
+    "recommendation": [
+      "OFFER",
+      "ACCEPT"
+    ],
+    "evidenceTypes": [],
+    "mustCite": [],
+    "mustNotContain": [],
+    "injectionAttempt": false
+  }
+}

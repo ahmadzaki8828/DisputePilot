@@ -1,0 +1,61 @@
+{
+  "_note" : "Recorded from a real provider call during a live eval run. Replayed when DP_LLM_MODE=recorded so the app runs with no API key.",
+  "caseKey" : "DEMO-D-2006",
+  "source" : "live",
+  "provider" : "Groq (OpenAI-compatible API)",
+  "model" : "openai/gpt-oss-120b",
+  "promptVersion" : "v2",
+  "recordedAt" : "2026-11-03T05:55:50.025211397Z",
+  "turns" : [ {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_daa21f06-381a-49d9-8593-f5bdd1a91a5b",
+      "name" : "get_case_file",
+      "input" : { }
+    } ],
+    "inputTokens" : 2284,
+    "outputTokens" : 42,
+    "latencyMs" : 13349
+  }, {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_c2941177-c4bf-4783-ab36-c5d0075ffc70",
+      "name" : "submit_draft",
+      "input" : {
+        "citations" : [ {
+          "id" : "dispute:DEMO-D-2006",
+          "kind" : "dispute",
+          "label" : "Dispute details"
+        }, {
+          "id" : "order:ORD-2006",
+          "kind" : "order",
+          "label" : "Order record"
+        }, {
+          "id" : "shipment:SHP-2006",
+          "kind" : "shipment",
+          "label" : "Shipment record"
+        } ],
+        "confidence" : 0.93,
+        "evidence" : [ {
+          "evidence_info" : {
+            "tracking_info" : [ {
+              "carrier_name" : "OTHER",
+              "carrier_name_other" : "Northline Courier",
+              "tracking_number" : "NLC4417003159"
+            } ]
+          },
+          "evidence_type" : "PROOF_OF_FULFILLMENT",
+          "notes" : "Delivered on 2026-10-18 at 10:20 UTC, signed by M. Halvorsen in Toronto."
+        } ],
+        "missing_info" : null,
+        "notes" : "The order (ORD-2006) was shipped via Northline Courier with tracking number NLC4417003159. Shipment record (SHP-2006) shows the parcel was delivered on 2026-10-18 and signed for by M. Halvorsen in Toronto. This satisfies PayPal's request for proof of fulfillment.",
+        "offer_amount" : null,
+        "rationale" : "We have clear delivery evidence: the carrier’s tracking shows the item was delivered and signed for. This directly contradicts the buyer’s claim of non‑receipt, so we should fight the dispute with PROOF_OF_FULFILLMENT.",
+        "recommendation" : "FIGHT"
+      }
+    } ],
+    "inputTokens" : 3042,
+    "outputTokens" : 756,
+    "latencyMs" : 13072
+  } ]
+}

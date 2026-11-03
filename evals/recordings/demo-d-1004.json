@@ -1,0 +1,55 @@
+{
+  "_note" : "Recorded from a real provider call during a live eval run. Replayed when DP_LLM_MODE=recorded so the app runs with no API key.",
+  "caseKey" : "DEMO-D-1004",
+  "source" : "live",
+  "provider" : "Groq (OpenAI-compatible API)",
+  "model" : "openai/gpt-oss-120b",
+  "promptVersion" : "v2",
+  "recordedAt" : "2026-11-03T05:55:50.025211397Z",
+  "turns" : [ {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_859e4d2f-bae0-4f87-9d52-f984fa04ee9c",
+      "name" : "get_case_file",
+      "input" : { }
+    } ],
+    "inputTokens" : 2271,
+    "outputTokens" : 40,
+    "latencyMs" : 15985
+  }, {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_9c7256b8-571d-44b6-ab4b-135698c82766",
+      "name" : "submit_draft",
+      "input" : {
+        "citations" : [ {
+          "id" : "dispute:DEMO-D-1004",
+          "kind" : "dispute",
+          "label" : "Dispute details"
+        }, {
+          "id" : "order:ORD-1045",
+          "kind" : "order",
+          "label" : "Order record"
+        }, {
+          "id" : "shipment:SHP-79",
+          "kind" : "shipment",
+          "label" : "Shipment record"
+        }, {
+          "id" : "msg:DM-1",
+          "kind" : "msg",
+          "label" : "Buyer claim"
+        } ],
+        "confidence" : 0.9,
+        "evidence" : [ ],
+        "missing_info" : null,
+        "notes" : "The buyer states they did not make this purchase and do not recognize the charge (msg:DM-1). No communication from the buyer indicates they authorized or were aware of the order. The merchant's records show the order was fulfilled and delivered (order:ORD-1045, shipment:SHP-79), but delivery proof does not address authorization. Under PayPal policy, unauthorized‑transaction claims are decided by the card issuer, and the seller must accept unless the buyer acknowledges the purchase. Therefore we accept the claim.",
+        "offer_amount" : null,
+        "rationale" : "Buyer denies authorizing the payment and provides no evidence of awareness. Delivery proof cannot refute an unauthorized claim, so the default guidance is to accept.",
+        "recommendation" : "ACCEPT"
+      }
+    } ],
+    "inputTokens" : 2999,
+    "outputTokens" : 763,
+    "latencyMs" : 24066
+  } ]
+}

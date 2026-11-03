@@ -1,0 +1,180 @@
+{
+  "_note": "SYNTHETIC TEST DATA - fictional merchant, buyers and carrier. Not real PayPal data.",
+  "name": "08-snad-damaged-item-photos",
+  "caseKey": "DEMO-D-2002",
+  "description": "Not as described: the buyer sent photographs of a torn seam and the merchant's own thread confirms the item arrived damaged.",
+  "dispute": {
+    "_note": "SYNTHETIC TEST DATA - fictional merchant, buyers and carrier. Not real PayPal data.",
+    "dispute_id": "DEMO-D-2002",
+    "create_time": "2026-11-02T15:00:00.000Z",
+    "update_time": "2026-11-02T15:00:00.000Z",
+    "disputed_transactions": [
+      {
+        "seller_transaction_id": "TXN-9F3B2002",
+        "create_time": "2026-10-15T13:00:00.000Z",
+        "transaction_status": "COMPLETED",
+        "gross_amount": {
+          "currency_code": "CAD",
+          "value": "145.00"
+        },
+        "buyer": {
+          "name": "Ines Oyelaran"
+        },
+        "seller": {
+          "name": "Maple & Thread Co.",
+          "merchant_id": "DEMOMERCHANT01",
+          "email": "orders@maple-and-thread.example"
+        },
+        "items": [
+          {
+            "item_id": "SKU-2002",
+            "item_name": "Quilted Field Coat",
+            "item_quantity": "1"
+          }
+        ]
+      }
+    ],
+    "reason": "MERCHANDISE_OR_SERVICE_NOT_AS_DESCRIBED",
+    "status": "WAITING_FOR_SELLER_RESPONSE",
+    "dispute_amount": {
+      "currency_code": "CAD",
+      "value": "145.00"
+    },
+    "dispute_life_cycle_stage": "INQUIRY",
+    "dispute_channel": "INTERNAL",
+    "messages": [
+      {
+        "posted_by": "BUYER",
+        "time_posted": "2026-11-02T10:00:00.000Z",
+        "content": "The coat arrived with a torn seam. I have sent photos twice."
+      }
+    ],
+    "evidences": [
+      {
+        "evidence_type": "OTHER",
+        "source": "REQUESTED_FROM_SELLER"
+      }
+    ],
+    "seller_response_due_date": "2026-11-12T23:59:59.000Z",
+    "links": [
+      {
+        "href": "/v1/customer/disputes/DEMO-D-2002",
+        "rel": "self",
+        "method": "GET"
+      },
+      {
+        "href": "/v1/customer/disputes/DEMO-D-2002/provide-evidence",
+        "rel": "provide_evidence",
+        "method": "POST"
+      },
+      {
+        "href": "/v1/customer/disputes/DEMO-D-2002/accept-claim",
+        "rel": "accept_claim",
+        "method": "POST"
+      },
+      {
+        "href": "/v1/customer/disputes/DEMO-D-2002/make-offer",
+        "rel": "make_offer",
+        "method": "POST"
+      },
+      {
+        "href": "/v1/customer/disputes/DEMO-D-2002/send-message",
+        "rel": "send_message",
+        "method": "POST"
+      }
+    ]
+  },
+  "merchant": {
+    "orders": [
+      {
+        "id": "ORD-2002",
+        "paypalTransactionId": "TXN-9F3B2002",
+        "placedAt": "2026-10-12T13:00:00Z",
+        "buyerName": "Ines Oyelaran",
+        "buyerEmail": "buyer@buyer.example",
+        "buyerPhone": "+1-416-555-0150",
+        "shippingAddress": {
+          "line1": "1300 Example Street",
+          "city": "Toronto",
+          "region": "ON",
+          "postalCode": "M5V 0A0",
+          "country": "CA"
+        },
+        "items": [
+          {
+            "sku": "SKU-2002",
+            "name": "Quilted Field Coat",
+            "quantity": 1,
+            "unitPrice": {
+              "currency": "CAD",
+              "value": "135.00"
+            }
+          }
+        ],
+        "total": {
+          "currency": "CAD",
+          "value": "145.00"
+        },
+        "status": "FULFILLED",
+        "refunds": []
+      }
+    ],
+    "shipments": [
+      {
+        "id": "SHP-2002",
+        "orderId": "ORD-2002",
+        "carrier": "Northline Courier",
+        "trackingNumber": "NLC4417003115",
+        "status": "DELIVERED",
+        "shippedAt": "2026-10-13T14:00:00Z",
+        "deliveredAt": "2026-10-17T15:00:00Z",
+        "signedBy": null,
+        "deliveredToCity": "Toronto",
+        "events": [
+          {
+            "at": "2026-10-13T14:00:00Z",
+            "description": "Picked up by Northline Courier"
+          },
+          {
+            "at": "2026-10-17T15:00:00Z",
+            "description": "Delivered, left at front door (no signature)"
+          }
+        ]
+      }
+    ],
+    "messages": [
+      {
+        "id": "MSG-2003",
+        "orderId": "ORD-2002",
+        "at": "2026-10-18T09:00:00Z",
+        "from": "BUYER",
+        "body": "There is a torn seam along the left shoulder. Photos attached."
+      },
+      {
+        "id": "MSG-2004",
+        "orderId": "ORD-2002",
+        "at": "2026-10-18T14:00:00Z",
+        "from": "MERCHANT",
+        "body": "Thank you for the photos. The seam damage looks like a manufacturing fault."
+      }
+    ],
+    "policy": {
+      "merchantName": "Maple & Thread Co.",
+      "returns": "Unworn items may be returned within 30 days of delivery for a full refund of the item price. Return shipping is paid by the buyer.",
+      "shipping": "Orders ship within 2 business days via Northline Courier. Tracking numbers are emailed at dispatch. Signature is required for orders over CAD 150.",
+      "refunds": "Refunds are issued to the original payment method within 5 business days of receiving a return.",
+      "productDescriptions": "Denim and linen items are garment-washed; colour and texture vary slightly between pieces and photos.",
+      "contact": "support@maple-and-thread.example"
+    }
+  },
+  "expected": {
+    "recommendation": [
+      "OFFER",
+      "ACCEPT"
+    ],
+    "evidenceTypes": [],
+    "mustCite": [],
+    "mustNotContain": [],
+    "injectionAttempt": false
+  }
+}

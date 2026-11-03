@@ -1,0 +1,58 @@
+{
+  "_note" : "Recorded from a real provider call during a live eval run. Replayed when DP_LLM_MODE=recorded so the app runs with no API key.",
+  "caseKey" : "DEMO-D-1006",
+  "source" : "live",
+  "provider" : "Groq (OpenAI-compatible API)",
+  "model" : "openai/gpt-oss-120b",
+  "promptVersion" : "v2",
+  "recordedAt" : "2026-11-03T05:55:50.025211397Z",
+  "turns" : [ {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_0f8e4cba-1edb-4120-ae02-5059232bef95",
+      "name" : "get_case_file",
+      "input" : { }
+    } ],
+    "inputTokens" : 2230,
+    "outputTokens" : 40,
+    "latencyMs" : 4543
+  }, {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_bb83e1bd-d327-41ab-ba33-ceb5db713bc3",
+      "name" : "submit_draft",
+      "input" : {
+        "citations" : [ {
+          "id" : "order:ORD-1048",
+          "kind" : "order",
+          "label" : "Order ORD-1048"
+        }, {
+          "id" : "dispute:DEMO-D-1006",
+          "kind" : "dispute",
+          "label" : "Dispute DEMO-D-1006"
+        } ],
+        "confidence" : 0.95,
+        "evidence" : [ {
+          "evidence_info" : {
+            "refund_ids" : [ {
+              "refund_id" : "REF-5002"
+            } ]
+          },
+          "evidence_type" : "PROOF_OF_REFUND",
+          "notes" : "Full refund of CAD 92.00 issued on 2026-10-24 for duplicate charge (refund ID REF-5002)."
+        }, {
+          "evidence_type" : "OTHER",
+          "notes" : "The duplicate transaction was identified and refunded in accordance with store policy."
+        } ],
+        "missing_info" : null,
+        "notes" : "The buyer was charged twice for order ORD-1048 (Linen Throw Blanket, CAD 92.00). A full refund of CAD 92.00 was issued on 2026-10-24 (refund ID REF-5002), covering the duplicate charge. This refund is documented in the order record.",
+        "offer_amount" : null,
+        "rationale" : "Store records show a full refund was issued for the duplicate charge, providing clear proof. Submit PROOF_OF_REFUND evidence to contest the claim.",
+        "recommendation" : "FIGHT"
+      }
+    } ],
+    "inputTokens" : 2807,
+    "outputTokens" : 701,
+    "latencyMs" : 22466
+  } ]
+}

@@ -84,10 +84,10 @@ public final class AgentTools {
                             "description": "An evidence type allowed for this dispute, e.g. PROOF_OF_FULFILLMENT."
                           },
                           "evidence_info": {
-                            "type": "object",
+                            "type": ["object", "null"],
                             "properties": {
                               "tracking_info": {
-                                "type": "array",
+                                "type": ["array", "null"],
                                 "items": {
                                   "type": "object",
                                   "properties": {
@@ -96,7 +96,7 @@ public final class AgentTools {
                                       "description": "Use OTHER when the carrier is not one of PayPal's."
                                     },
                                     "carrier_name_other": {
-                                      "type": "string",
+                                      "type": ["string", "null"],
                                       "description": "The real carrier name, when carrier_name is OTHER."
                                     },
                                     "tracking_number": {
@@ -108,7 +108,7 @@ public final class AgentTools {
                                 }
                               },
                               "refund_ids": {
-                                "type": "array",
+                                "type": ["array", "null"],
                                 "items": {
                                   "type": "object",
                                   "properties": {
@@ -123,7 +123,7 @@ public final class AgentTools {
                             }
                           },
                           "notes": {
-                            "type": "string",
+                            "type": ["string", "null"],
                             "description": "The argument for this evidence entry, in facts only."
                           }
                         },
@@ -154,12 +154,12 @@ public final class AgentTools {
                       }
                     },
                     "missing_info": {
-                      "type": "array",
+                      "type": ["array", "null"],
                       "items": {"type": "string"},
                       "description": "What the merchant would have to supply to do better. Empty when nothing."
                     },
                     "offer_amount": {
-                      "type": "number",
+                      "type": ["number", "null"],
                       "description": "Only for OFFER: the refund to offer, never more than the disputed amount."
                     }
                   },

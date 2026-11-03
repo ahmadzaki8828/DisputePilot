@@ -63,7 +63,7 @@ class DisputeAgentTest {
         assertThat(outcome.outputTokens()).isEqualTo(80);
         assertThat(outcome.llmMode()).isEqualTo(LlmMode.LIVE);
         assertThat(outcome.model()).isEqualTo("scripted-model");
-        assertThat(outcome.promptVersion()).isEqualTo("v1");
+        assertThat(outcome.promptVersion()).isEqualTo("v2");
 
         // The tool result for get_shipments was fed back as a tool message carrying the real shipment.
         LlmRequest second = llm.requests().get(1);

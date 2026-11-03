@@ -1,0 +1,74 @@
+{
+  "_note" : "Recorded from a real provider call during a live eval run. Replayed when DP_LLM_MODE=recorded so the app runs with no API key.",
+  "caseKey" : "DEMO-D-2002",
+  "source" : "live",
+  "provider" : "Groq (OpenAI-compatible API)",
+  "model" : "openai/gpt-oss-120b",
+  "promptVersion" : "v2",
+  "recordedAt" : "2026-11-03T05:55:50.025211397Z",
+  "turns" : [ {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_f0930abe-778f-4bae-8302-0ef39d5f6018",
+      "name" : "get_case_file",
+      "input" : { }
+    } ],
+    "inputTokens" : 2268,
+    "outputTokens" : 44,
+    "latencyMs" : 19167
+  }, {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_0e199a1f-9d67-437a-a391-fe7baad15fd6",
+      "name" : "submit_draft",
+      "input" : {
+        "citations" : [ {
+          "id" : "dispute:DEMO-D-2002",
+          "kind" : "dispute",
+          "label" : "Dispute"
+        }, {
+          "id" : "order:ORD-2002",
+          "kind" : "order",
+          "label" : "Order"
+        }, {
+          "id" : "shipment:SHP-2002",
+          "kind" : "shipment",
+          "label" : "Shipment"
+        }, {
+          "id" : "msg:DM-1",
+          "kind" : "msg",
+          "label" : "Buyer dispute message"
+        }, {
+          "id" : "msg:MSG-2003",
+          "kind" : "msg",
+          "label" : "Buyer defect report"
+        }, {
+          "id" : "msg:MSG-2004",
+          "kind" : "msg",
+          "label" : "Merchant acknowledgement"
+        }, {
+          "id" : "policy:returns",
+          "kind" : "policy",
+          "label" : "Returns policy"
+        }, {
+          "id" : "policy:descriptions",
+          "kind" : "policy",
+          "label" : "Product description policy"
+        } ],
+        "confidence" : 0.92,
+        "evidence" : [ {
+          "evidence_type" : "OTHER",
+          "notes" : "Buyer reported a torn seam on the Quilted Field Coat (msg:DM-1, msg:MSG-2003) and provided photos. Merchant acknowledged the damage appears to be a manufacturing fault (msg:MSG-2004). According to the store's returns policy, unworn items may be returned within 30 days for a full refund (policy:returns). The defect qualifies for a refund without return, as the item is not as described per product description policy (policy:descriptions)."
+        } ],
+        "missing_info" : null,
+        "notes" : "The buyer received a coat with a torn seam, documented with photos. The merchant confirmed the damage is a manufacturing fault. Under the store's returns policy, the buyer is entitled to a full refund for an unworn defective item. We are offering a full refund of CAD 145.00 to resolve the dispute.",
+        "offer_amount" : 145,
+        "rationale" : "Buyer provided evidence of a defect and the merchant acknowledged it. The store's policy allows a full refund for unworn defective items. Offering the full purchase amount resolves the claim fairly and aligns with PayPal guidance.",
+        "recommendation" : "OFFER"
+      }
+    } ],
+    "inputTokens" : 3064,
+    "outputTokens" : 824,
+    "latencyMs" : 13494
+  } ]
+}

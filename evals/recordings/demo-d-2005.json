@@ -1,0 +1,61 @@
+{
+  "_note" : "Recorded from a real provider call during a live eval run. Replayed when DP_LLM_MODE=recorded so the app runs with no API key.",
+  "caseKey" : "DEMO-D-2005",
+  "source" : "live",
+  "provider" : "Groq (OpenAI-compatible API)",
+  "model" : "openai/gpt-oss-120b",
+  "promptVersion" : "v2",
+  "recordedAt" : "2026-11-03T05:55:50.025211397Z",
+  "turns" : [ {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_8b95e9fa-7aae-463a-ac28-5c3bf07f5198",
+      "name" : "get_case_file",
+      "input" : { }
+    } ],
+    "inputTokens" : 2292,
+    "outputTokens" : 42,
+    "latencyMs" : 19552
+  }, {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_2b8ecfea-3b4b-4dd1-8c1c-76b0f78f16f5",
+      "name" : "submit_draft",
+      "input" : {
+        "citations" : [ {
+          "id" : "dispute:DEMO-D-2005",
+          "kind" : "dispute",
+          "label" : "Dispute"
+        }, {
+          "id" : "order:ORD-2005",
+          "kind" : "order",
+          "label" : "Order"
+        }, {
+          "id" : "shipment:SHP-2005",
+          "kind" : "shipment",
+          "label" : "Shipment"
+        } ],
+        "confidence" : 0.95,
+        "evidence" : [ {
+          "evidence_info" : {
+            "tracking_info" : [ {
+              "carrier_name" : "OTHER",
+              "carrier_name_other" : "Northline Courier",
+              "tracking_number" : "NLC4417003148"
+            } ]
+          },
+          "evidence_type" : "PROOF_OF_FULFILLMENT",
+          "notes" : "Delivered to Toronto on 2026-10-19, signed by C. Whitfield."
+        } ],
+        "missing_info" : null,
+        "notes" : "The order (ORD-2005) was shipped via Northline Courier (tracking NLC4417003148) on 2026-10-15 and delivered on 2026-10-19 to the buyer's address in Toronto, signed by C. Whitfield, confirming receipt of the item.",
+        "offer_amount" : null,
+        "rationale" : "Shipment records show delivery with buyer's signature, directly contradicting the buyer's claim of non‑receipt. Providing the delivery proof satisfies PayPal's requested evidence, making a strong case to fight the dispute.",
+        "recommendation" : "FIGHT"
+      }
+    } ],
+    "inputTokens" : 3053,
+    "outputTokens" : 602,
+    "latencyMs" : 12087
+  } ]
+}

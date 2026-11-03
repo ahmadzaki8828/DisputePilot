@@ -1,0 +1,42 @@
+{
+  "_note" : "Recorded from a real provider call during a live eval run. Replayed when DP_LLM_MODE=recorded so the app runs with no API key.",
+  "caseKey" : "DEMO-D-1002",
+  "source" : "live",
+  "provider" : "Groq (OpenAI-compatible API)",
+  "model" : "openai/gpt-oss-120b",
+  "promptVersion" : "v2",
+  "recordedAt" : "2026-11-03T05:55:50.025211397Z",
+  "turns" : [ {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_48119e92-e273-4762-90da-1badeaafd51b",
+      "name" : "get_case_file",
+      "input" : { }
+    } ],
+    "inputTokens" : 2268,
+    "outputTokens" : 42,
+    "latencyMs" : 594
+  }, {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_46fe2d92-ec94-4b90-b13a-5d1281cd54f2",
+      "name" : "submit_draft",
+      "input" : {
+        "citations" : [ {
+          "id" : "order:ORD-1043",
+          "kind" : "order",
+          "label" : "Order ORD-1043"
+        } ],
+        "confidence" : 0.95,
+        "evidence" : [ ],
+        "missing_info" : null,
+        "notes" : "The order (ORD-1043) was never shipped; the store has no tracking information or proof of delivery (status: PAID_NOT_SHIPPED).",
+        "rationale" : "No shipment record exists, so the seller cannot provide proof of fulfillment. Accepting the claim avoids further dispute risk.",
+        "recommendation" : "ACCEPT"
+      }
+    } ],
+    "inputTokens" : 2868,
+    "outputTokens" : 493,
+    "latencyMs" : 20684
+  } ]
+}

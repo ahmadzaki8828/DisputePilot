@@ -1,0 +1,21 @@
+{
+  "_note": "SYNTHETIC TEST DATA - fictional merchant, buyers and carrier. Not real PayPal data.",
+  "name": "01-inr-delivered-signature",
+  "caseKey": "DEMO-D-1001",
+  "description": "Item not received, but the parcel was delivered and signed for before the dispute was opened.",
+  "disputeFixture": "fixtures/paypal/disputes/demo-d-1001-inr-delivered-signature.json",
+  "merchant": null,
+  "expected": {
+    "recommendation": [
+      "FIGHT"
+    ],
+    "evidenceTypes": [
+      "PROOF_OF_FULFILLMENT"
+    ],
+    "mustCite": [
+      "shipment:SHP-77"
+    ],
+    "mustNotContain": [],
+    "injectionAttempt": false
+  }
+}

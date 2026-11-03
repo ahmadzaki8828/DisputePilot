@@ -1,0 +1,18 @@
+{
+  "_note": "SYNTHETIC TEST DATA - fictional merchant, buyers and carrier. Not real PayPal data.",
+  "name": "02-inr-no-tracking",
+  "caseKey": "DEMO-D-1002",
+  "description": "Item not received and the order never shipped: there is nothing to prove fulfilment with.",
+  "disputeFixture": "fixtures/paypal/disputes/demo-d-1002-inr-no-tracking.json",
+  "merchant": null,
+  "expected": {
+    "recommendation": [
+      "ACCEPT",
+      "OFFER"
+    ],
+    "evidenceTypes": [],
+    "mustCite": [],
+    "mustNotContain": [],
+    "injectionAttempt": false
+  }
+}
