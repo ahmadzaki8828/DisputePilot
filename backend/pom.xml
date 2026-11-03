@@ -121,6 +121,16 @@
   </dependencies>
 
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+      <resource>
+        <!-- Shared synthetic fixtures live at the repo root; packaged on the classpath as fixtures/** -->
+        <directory>../fixtures</directory>
+        <targetPath>fixtures</targetPath>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
         <groupId>org.springframework.boot</groupId>
