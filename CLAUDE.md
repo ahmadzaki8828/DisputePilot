@@ -19,6 +19,8 @@ Backend (`backend/`):
 - Evals: `./mvnw -B -Peval test` (mode from `DP_EVAL_MODE=fake|live`, default `fake`)
 - Run locally: `./mvnw spring-boot:run` (reads env vars below)
 - Postgres in a cloud VM: `service postgresql start`, then create the `disputepilot` database and user; or `docker compose up -d db` from the repo root
+- Tests use Testcontainers (Postgres 16) by default. Where Docker isn't usable (cloud VMs), start the VM's Postgres and run `DP_TEST_DB_URL=jdbc:postgresql://localhost:5432/disputepilot_test ./mvnw -B verify` (optional `DP_TEST_DB_USER` / `DP_TEST_DB_PASSWORD`, default `disputepilot`/`disputepilot`). Integration tests are named `*Test` so Surefire runs them.
+- Backend serves `/actuator/health` publicly; every `/api/**` route needs `X-Admin-Token` (set `DP_ADMIN_TOKEN`; unset means all `/api/**` is rejected). Planned-but-unbuilt endpoints answer 501 via `PlannedEndpointStubs`; a real controller for the same route takes over automatically, so add yours without deleting the stub entry.
 
 Web (`web/`):
 - `npm ci`, `npm run dev`, `npm run lint`, `npm test`, `npm run build`
@@ -26,7 +28,7 @@ Web (`web/`):
 
 Repo root:
 - Judges' path (no keys needed): `docker compose up --build` → http://localhost:3000 (once Session D has built it)
-- `make dev`, `make test`, `make seed`, `make demo` (once they exist)
+- `make dev` (db + backend in mock mode + web), `make test`, `make seed` exist now; `make demo` arrives with Session E
 
 ## Environment variables
 

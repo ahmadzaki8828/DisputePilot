@@ -1,0 +1,76 @@
+{
+  "_note": "SYNTHETIC TEST DATA - fictional merchant, buyers and carrier. Not real PayPal data.",
+  "dispute_id": "DEMO-D-1001",
+  "create_time": "2026-11-02T15:20:11.000Z",
+  "update_time": "2026-11-02T15:20:11.000Z",
+  "disputed_transactions": [
+    {
+      "seller_transaction_id": "TXN-8F3A1001",
+      "create_time": "2026-10-15T13:00:00.000Z",
+      "transaction_status": "COMPLETED",
+      "gross_amount": {
+        "currency_code": "CAD",
+        "value": "180.00"
+      },
+      "buyer": {
+        "name": "Jordan Ellis"
+      },
+      "seller": {
+        "name": "Maple & Thread Co.",
+        "merchant_id": "DEMOMERCHANT01",
+        "email": "orders@maple-and-thread.example"
+      },
+      "items": [
+        {
+          "item_id": "SKU-1001",
+          "item_name": "Merino Wool Cardigan",
+          "item_quantity": "1"
+        }
+      ]
+    }
+  ],
+  "reason": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+  "status": "WAITING_FOR_SELLER_RESPONSE",
+  "dispute_amount": {
+    "currency_code": "CAD",
+    "value": "180.00"
+  },
+  "dispute_life_cycle_stage": "CHARGEBACK",
+  "dispute_channel": "INTERNAL",
+  "messages": [
+    {
+      "posted_by": "BUYER",
+      "time_posted": "2026-11-02T15:20:11.000Z",
+      "content": "My order never arrived and I need it refunded."
+    }
+  ],
+  "evidences": [
+    {
+      "evidence_type": "PROOF_OF_FULFILLMENT",
+      "source": "REQUESTED_FROM_SELLER"
+    }
+  ],
+  "seller_response_due_date": "2026-11-12T23:59:59.000Z",
+  "links": [
+    {
+      "href": "/v1/customer/disputes/DEMO-D-1001",
+      "rel": "self",
+      "method": "GET"
+    },
+    {
+      "href": "/v1/customer/disputes/DEMO-D-1001/provide-evidence",
+      "rel": "provide_evidence",
+      "method": "POST"
+    },
+    {
+      "href": "/v1/customer/disputes/DEMO-D-1001/accept-claim",
+      "rel": "accept_claim",
+      "method": "POST"
+    },
+    {
+      "href": "/v1/customer/disputes/DEMO-D-1001/send-message",
+      "rel": "send_message",
+      "method": "POST"
+    }
+  ]
+}

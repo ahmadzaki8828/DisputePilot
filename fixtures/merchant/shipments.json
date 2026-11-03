@@ -1,0 +1,110 @@
+{
+  "_note": "SYNTHETIC TEST DATA - fictional merchant, buyers and carrier. Not real PayPal data.",
+  "shipments": [
+    {
+      "id": "SHP-77",
+      "orderId": "ORD-1042",
+      "carrier": "Northline Courier",
+      "trackingNumber": "NLC4417002931",
+      "status": "DELIVERED",
+      "shippedAt": "2026-10-16T14:05:00Z",
+      "deliveredAt": "2026-10-21T16:40:00Z",
+      "signedBy": "J. Ellis",
+      "deliveredToCity": "Toronto",
+      "events": [
+        {
+          "at": "2026-10-16T14:05:00Z",
+          "description": "Picked up by Northline Courier"
+        },
+        {
+          "at": "2026-10-21T16:40:00Z",
+          "description": "Delivered, signed by J. Ellis"
+        }
+      ]
+    },
+    {
+      "id": "SHP-78",
+      "orderId": "ORD-1044",
+      "carrier": "Northline Courier",
+      "trackingNumber": "NLC4417002944",
+      "status": "DELIVERED",
+      "shippedAt": "2026-10-18T14:00:00Z",
+      "deliveredAt": "2026-10-22T11:15:00Z",
+      "signedBy": null,
+      "deliveredToCity": "Toronto",
+      "events": [
+        {
+          "at": "2026-10-18T14:00:00Z",
+          "description": "Picked up by Northline Courier"
+        },
+        {
+          "at": "2026-10-22T11:15:00Z",
+          "description": "Delivered, left at front door (no signature)"
+        }
+      ]
+    },
+    {
+      "id": "SHP-79",
+      "orderId": "ORD-1045",
+      "carrier": "Northline Courier",
+      "trackingNumber": "NLC4417002957",
+      "status": "DELIVERED",
+      "shippedAt": "2026-10-17T14:00:00Z",
+      "deliveredAt": "2026-10-21T13:20:00Z",
+      "signedBy": "S. Okonkwo",
+      "deliveredToCity": "Toronto",
+      "events": [
+        {
+          "at": "2026-10-17T14:00:00Z",
+          "description": "Picked up by Northline Courier"
+        },
+        {
+          "at": "2026-10-21T13:20:00Z",
+          "description": "Delivered, signed by S. Okonkwo"
+        }
+      ]
+    },
+    {
+      "id": "SHP-80",
+      "orderId": "ORD-1046",
+      "carrier": "Northline Courier",
+      "trackingNumber": "NLC4417002968",
+      "status": "DELIVERED",
+      "shippedAt": "2026-10-06T14:00:00Z",
+      "deliveredAt": "2026-10-10T10:05:00Z",
+      "signedBy": null,
+      "deliveredToCity": "Toronto",
+      "events": [
+        {
+          "at": "2026-10-06T14:00:00Z",
+          "description": "Picked up by Northline Courier"
+        },
+        {
+          "at": "2026-10-10T10:05:00Z",
+          "description": "Delivered, left at front door (no signature)"
+        }
+      ]
+    },
+    {
+      "id": "SHP-81",
+      "orderId": "ORD-1047",
+      "carrier": "Northline Courier",
+      "trackingNumber": "NLC4417002979",
+      "status": "DELIVERED",
+      "shippedAt": "2026-10-20T14:00:00Z",
+      "deliveredAt": "2026-10-24T12:45:00Z",
+      "signedBy": null,
+      "deliveredToCity": "Toronto",
+      "events": [
+        {
+          "at": "2026-10-20T14:00:00Z",
+          "description": "Picked up by Northline Courier"
+        },
+        {
+          "at": "2026-10-24T12:45:00Z",
+          "description": "Delivered, left at front door (no signature)"
+        }
+      ]
+    }
+  ]
+}
