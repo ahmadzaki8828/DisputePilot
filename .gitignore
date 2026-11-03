@@ -1,0 +1,19 @@
+# Build output
+backend/target/
+web/.next/
+web/node_modules/
+web/out/
+web/coverage/
+node_modules/
+# Env / secrets (never commit)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+*.log
