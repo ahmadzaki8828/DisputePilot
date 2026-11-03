@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { Evidence, SubmitAction } from "@/lib/types";
 
 const keys = new Map<string, string>();
@@ -32,7 +32,7 @@ export function SubmitModal(props: {
   onCancel: () => void;
   onConfirm: (idempotencyKey: string) => Promise<void>;
 }) {
-  const key = useRef(idempotencyKeyFor(props.draftId, props.action)).current;
+  const [key] = useState(() => idempotencyKeyFor(props.draftId, props.action));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const payload =
