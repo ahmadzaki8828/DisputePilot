@@ -1,0 +1,75 @@
+{
+  "_note": "SYNTHETIC TEST DATA - fictional merchant, buyers and carrier. Not real PayPal data.",
+  "messages": [
+    {
+      "id": "MSG-1",
+      "orderId": "ORD-1042",
+      "at": "2026-10-23T09:30:00Z",
+      "from": "BUYER",
+      "body": "Hi, tracking says delivered but I can't find the parcel. Can you check?"
+    },
+    {
+      "id": "MSG-2",
+      "orderId": "ORD-1042",
+      "at": "2026-10-23T11:00:00Z",
+      "from": "MERCHANT",
+      "body": "Northline Courier shows it was signed for by J. Ellis on Oct 21. Could someone in your household have received it?"
+    },
+    {
+      "id": "MSG-3",
+      "orderId": "ORD-1043",
+      "at": "2026-10-25T08:00:00Z",
+      "from": "BUYER",
+      "body": "Any update on my tote bag order?"
+    },
+    {
+      "id": "MSG-4",
+      "orderId": "ORD-1044",
+      "at": "2026-10-24T17:20:00Z",
+      "from": "BUYER",
+      "body": "The jacket arrived but the colour looks much lighter than the photos."
+    },
+    {
+      "id": "MSG-5",
+      "orderId": "ORD-1044",
+      "at": "2026-10-24T18:05:00Z",
+      "from": "MERCHANT",
+      "body": "Sorry to hear that. Our listing notes that denim is garment-washed so shades vary slightly between pieces."
+    },
+    {
+      "id": "MSG-6",
+      "orderId": "ORD-1045",
+      "at": "2026-10-22T10:00:00Z",
+      "from": "BUYER",
+      "body": "Is this bag from your shop? I see a charge I don't recognise."
+    },
+    {
+      "id": "MSG-7",
+      "orderId": "ORD-1046",
+      "at": "2026-10-12T09:00:00Z",
+      "from": "BUYER",
+      "body": "I'd like to return the overshirt, it doesn't fit."
+    },
+    {
+      "id": "MSG-8",
+      "orderId": "ORD-1046",
+      "at": "2026-10-12T10:10:00Z",
+      "from": "MERCHANT",
+      "body": "No problem, send it back within 30 days and we'll refund you once it arrives."
+    },
+    {
+      "id": "MSG-9",
+      "orderId": "ORD-1047",
+      "at": "2026-10-23T14:00:00Z",
+      "from": "BUYER",
+      "body": "I think I was charged twice for the blanket."
+    },
+    {
+      "id": "MSG-10",
+      "orderId": "ORD-1047",
+      "at": "2026-10-24T15:35:00Z",
+      "from": "MERCHANT",
+      "body": "You're right, the second charge was a duplicate. We've refunded it (REF-5002)."
+    }
+  ]
+}
