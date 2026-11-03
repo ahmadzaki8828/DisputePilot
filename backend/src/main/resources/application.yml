@@ -2,7 +2,8 @@ spring:
   application:
     name: disputepilot
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/disputepilot}
+    # Either one JDBC URL, or the parts (Render hands out host, port and database separately).
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${DP_DB_HOST:localhost}:${DP_DB_PORT:5432}/${DP_DB_NAME:disputepilot}}
     username: ${SPRING_DATASOURCE_USERNAME:disputepilot}
     password: ${SPRING_DATASOURCE_PASSWORD:disputepilot}
   mvc:

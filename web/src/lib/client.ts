@@ -20,9 +20,22 @@ export async function bff<T>(method: "POST" | "PATCH", path: string, body?: unkn
   if (!res.ok) {
     const msg =
       res.status === 429
-        ? "Rate limit reached for the public demo. Please wait a while before trying again."
+        ? (data.detail ?? "Rate limit reached for the public demo. Please wait a while before trying again.")
         : (data.detail ?? data.title ?? `Request failed (${res.status})`);
     throw new ClientError(res.status, msg, data.paypalDebugId);
   }
+  return data as T;
+}
+
+/** Read-only fetch through the /bff proxy (used to poll while a draft is being written). */
+export async function bffGet<T>(path: string): Promise<T> {
+  let res: Response;
+  try {
+    res = await fetch(`/bff${path}`, { cache: "no-store" });
+  } catch {
+    throw new ClientError(0, "Network error. Check your connection and try again.");
+  }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new ClientError(res.status, data.detail ?? data.title ?? `Request failed (${res.status})`);
   return data as T;
 }

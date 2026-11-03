@@ -7,6 +7,8 @@ import { AllCommunityModule, ModuleRegistry, colorSchemeVariable, themeQuartz, t
 import type { DisputeSummary } from "@/lib/types";
 import { DueBadge } from "./DueBadge";
 import { RecommendationChip } from "./RecommendationChip";
+import { InboxRefresh } from "./InboxRefresh";
+import { awaitingAutoDraft } from "./DraftingNotice";
 import { SimulatedTag } from "./ui";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -14,6 +16,9 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 const theme = themeQuartz.withPart(colorSchemeVariable);
 const money = (a: DisputeSummary["amount"]) => new Intl.NumberFormat("en-CA", { style: "currency", currency: a.currency }).format(a.value);
 const statusLabel = (s: string) => s.replaceAll("_", " ").toLowerCase().replace(/^\w/, (c) => c.toUpperCase());
+
+/** The summary has no allowed-actions list; a dispute still waiting on the seller with no draft is being drafted. */
+const drafting = (d?: DisputeSummary) => !!d && !d.latestDraft && awaitingAutoDraft(d.status, ["PROVIDE_EVIDENCE"]);
 
 export function InboxGrid({ rows }: { rows: DisputeSummary[] }) {
   useEffect(() => {
@@ -43,7 +48,7 @@ export function InboxGrid({ rows }: { rows: DisputeSummary[] }) {
       {
         headerName: "AI recommendation", width: 190, valueGetter: (p) => p.data?.latestDraft?.recommendation ?? "",
         cellRenderer: (p: { data?: DisputeSummary }) =>
-          p.data?.latestDraft ? <RecommendationChip recommendation={p.data.latestDraft.recommendation} confidence={p.data.latestDraft.confidence} /> : <span className="opacity-60">No draft yet</span>,
+          p.data?.latestDraft ? <RecommendationChip recommendation={p.data.latestDraft.recommendation} confidence={p.data.latestDraft.confidence} /> : <span className="opacity-60">{drafting(p.data) ? "Drafting…" : "No draft yet"}</span>,
       },
     ],
     [],
@@ -51,6 +56,7 @@ export function InboxGrid({ rows }: { rows: DisputeSummary[] }) {
 
   return (
     <>
+      <InboxRefresh active={rows.some(drafting)} />
       {/* Phones: simple cards. Larger screens: the grid. */}
       <ul className="space-y-3 md:hidden" aria-label="Disputes">
         {rows.map((d) => (
@@ -60,7 +66,7 @@ export function InboxGrid({ rows }: { rows: DisputeSummary[] }) {
               <DueBadge dueAt={d.sellerResponseDueAt} />
             </div>
             <p className="mt-1 text-sm">{d.reasonLabel} · {money(d.amount)}{d.simulated && <SimulatedTag />}</p>
-            <div className="mt-2">{d.latestDraft ? <RecommendationChip recommendation={d.latestDraft.recommendation} confidence={d.latestDraft.confidence} /> : <span className="text-xs opacity-60">No draft yet</span>}</div>
+            <div className="mt-2">{d.latestDraft ? <RecommendationChip recommendation={d.latestDraft.recommendation} confidence={d.latestDraft.confidence} /> : <span className="text-xs opacity-60">{drafting(d) ? "Drafting…" : "No draft yet"}</span>}</div>
           </li>
         ))}
       </ul>

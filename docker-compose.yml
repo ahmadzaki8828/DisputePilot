@@ -1,4 +1,8 @@
-# Session S0: database only. Session D extends this to the full stack (db + backend + web).
+# DisputePilot, the whole stack:  docker compose up --build   ->  http://localhost:3000
+#
+# Works from a clean clone with no .env and no keys: simulated PayPal (PAYPAL_MODE=mock), recorded AI responses
+# (DP_LLM_MODE=recorded), six starter disputes already drafted. To use the PayPal sandbox and a live model, copy
+# .env.example to .env and fill in the keys; Compose picks it up automatically.
 services:
   db:
     image: postgres:16
@@ -7,8 +11,6 @@ services:
       POSTGRES_USER: disputepilot
       # Throwaway local-development default; override with POSTGRES_PASSWORD in your shell or .env.
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-disputepilot}
-    ports:
-      - "5432:5432"
     volumes:
       - dbdata:/var/lib/postgresql/data
     healthcheck:
@@ -16,6 +18,57 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/disputepilot
+      SPRING_DATASOURCE_USERNAME: disputepilot
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-disputepilot}
+      # Shared secret between the web server and /api/**. A throwaway default: this stack is for local use.
+      DP_ADMIN_TOKEN: ${DP_ADMIN_TOKEN:-local-demo-admin-token}
+      DP_DEMO_SEED_ON_START: ${DP_DEMO_SEED_ON_START:-true}
+      PAYPAL_MODE: ${PAYPAL_MODE:-mock}
+      PAYPAL_BASE_URL: ${PAYPAL_BASE_URL:-https://api-m.sandbox.paypal.com}
+      PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID:-}
+      PAYPAL_CLIENT_SECRET: ${PAYPAL_CLIENT_SECRET:-}
+      PAYPAL_WEBHOOK_ID: ${PAYPAL_WEBHOOK_ID:-}
+      DP_LLM_MODE: ${DP_LLM_MODE:-recorded}
+      DP_LLM_PROVIDER: ${DP_LLM_PROVIDER:-openai-compatible}
+      DP_LLM_BASE_URL: ${DP_LLM_BASE_URL:-https://api.groq.com/openai/v1}
+      DP_LLM_API_KEY: ${DP_LLM_API_KEY:-}
+      DP_LLM_MODEL: ${DP_LLM_MODEL:-}
+      DP_LLM_DAILY_CAP: ${DP_LLM_DAILY_CAP:-300}
+      DP_DEMO_RATE_LIMIT: ${DP_DEMO_RATE_LIMIT:-6}
+      DP_DEMO_ACTION_LIMIT: ${DP_DEMO_ACTION_LIMIT:-30}
+      DP_DEV_ENDPOINTS: ${DP_DEV_ENDPOINTS:-false}
+    ports:
+      # The API, for curl and the Postman collection (send X-Admin-Token). Local only.
+      - "127.0.0.1:8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+      start_period: 40s
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      DP_API_BASE_URL: http://backend:8080
+      DP_ADMIN_TOKEN: ${DP_ADMIN_TOKEN:-local-demo-admin-token}
+    ports:
+      - "3000:3000"
 
 volumes:
   dbdata:

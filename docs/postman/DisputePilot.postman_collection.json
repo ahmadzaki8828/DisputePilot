@@ -1,0 +1,568 @@
+{
+  "info": {
+    "_postman_id": "65758c19-bbac-57bf-88e0-6cf1190c7370",
+    "name": "DisputePilot API",
+    "description": "Generated from contracts/openapi.yaml by scripts/gen-postman.py. Set adminToken to your DP_ADMIN_TOKEN; with docker compose it is local-demo-admin-token.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "adminToken",
+      "value": "local-demo-admin-token"
+    },
+    {
+      "key": "disputeId",
+      "value": ""
+    },
+    {
+      "key": "draftId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Webhooks",
+      "item": [
+        {
+          "name": "POST /webhooks/paypal",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/webhooks/paypal",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "webhooks",
+                "paypal"
+              ],
+              "query": []
+            },
+            "description": "PayPal webhook receiver (signature verified; no admin token)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Disputes",
+      "item": [
+        {
+          "name": "GET /api/disputes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Admin-Token",
+                "value": "{{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/disputes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "disputes"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "reason",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "dueWithinHours",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "simulated",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Inbox list"
+          }
+        },
+        {
+          "name": "GET /api/disputes/{id}",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Admin-Token",
+                "value": "{{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/disputes/{{disputeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "disputes",
+                "{{disputeId}}"
+              ],
+              "query": []
+            },
+            "description": "Dispute detail with case file, messages and allowed actions"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sync",
+      "item": [
+        {
+          "name": "POST /api/disputes/{id}/sync",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Admin-Token",
+                "value": "{{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/disputes/{{disputeId}}/sync",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "disputes",
+                "{{disputeId}}",
+                "sync"
+              ],
+              "query": []
+            },
+            "description": "Re-fetch one dispute from PayPal"
+          }
+        },
+        {
+          "name": "POST /api/sync",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Admin-Token",
+                "value": "{{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sync",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sync"
+              ],
+              "query": []
+            },
+            "description": "Run reconciliation now"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Drafts",
+      "item": [
+        {
+          "name": "POST /api/disputes/{id}/drafts",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Admin-Token",
+                "value": "{{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/disputes/{{disputeId}}/drafts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "disputes",
+                "{{disputeId}}",
+                "drafts"
+              ],
+              "query": []
+            },
+            "description": "Generate a new draft with the agent (rate-limited)"
+          }
+        },
+        {
+          "name": "GET /api/disputes/{id}/drafts/latest",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Admin-Token",
+                "value": "{{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/disputes/{{disputeId}}/drafts/latest",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "disputes",
+                "{{disputeId}}",
+                "drafts",
+                "latest"
+              ],
+              "query": []
+            },
+            "description": "Latest draft for a dispute"
+          }
+        },
+        {
+          "name": "PATCH /api/drafts/{id}",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "X-Admin-Token",
+                "value": "{{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/drafts/{{draftId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "drafts",
+                "{{draftId}}"
+              ],
+              "query": []
+            },
+            "description": "Edit notes/evidence; re-validates and sets editedByHuman=true"
+          }
+        },
+        {
+          "name": "POST /api/drafts/{id}/approve",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Admin-Token",
+                "value": "{{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/drafts/{{draftId}}/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "drafts",
+                "{{draftId}}",
+                "approve"
+              ],
+              "query": []
+            },
+            "description": "Mark APPROVED (validation must have passed, or pass overrideValidation)",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"overrideValidation\": false\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Submissions",
+      "item": [
+        {
+          "name": "POST /api/drafts/{id}/submit",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Admin-Token",
+                "value": "{{adminToken}}"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/drafts/{{draftId}}/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "drafts",
+                "{{draftId}}",
+                "submit"
+              ],
+              "query": []
+            },
+            "description": "Submit an APPROVED draft to PayPal (provide-evidence or accept-claim)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Insights",
+      "item": [
+        {
+          "name": "GET /api/audit",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Admin-Token",
+                "value": "{{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/audit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "audit"
+              ],
+              "query": [
+                {
+                  "key": "disputeId",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Audit trail"
+          }
+        },
+        {
+          "name": "GET /api/metrics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Admin-Token",
+                "value": "{{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/metrics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "metrics"
+              ],
+              "query": []
+            },
+            "description": "KPIs"
+          }
+        },
+        {
+          "name": "GET /api/evals/latest",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Admin-Token",
+                "value": "{{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/evals/latest",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "evals",
+                "latest"
+              ],
+              "query": []
+            },
+            "description": "Latest eval report (evals/report.json)"
+          }
+        },
+        {
+          "name": "GET /api/system",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Admin-Token",
+                "value": "{{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/system",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "system"
+              ],
+              "query": []
+            },
+            "description": "Modes for the UI badges"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Demo",
+      "item": [
+        {
+          "name": "POST /api/demo/disputes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Admin-Token",
+                "value": "{{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/demo/disputes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "demo",
+                "disputes"
+              ],
+              "query": []
+            },
+            "description": "Create a simulated DEMO- dispute and push its CREATED event through the webhook pipeline (rate-limited)",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"template\": \"ITEM_NOT_RECEIVED\"\n}"
+            }
+          }
+        },
+        {
+          "name": "POST /api/demo/reset",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Admin-Token",
+                "value": "{{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/demo/reset",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "demo",
+                "reset"
+              ],
+              "query": []
+            },
+            "description": "Delete simulated disputes (and their drafts/submissions) and re-seed the starter set (rate-limited)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dev",
+      "item": [
+        {
+          "name": "POST /api/dev/seed",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Admin-Token",
+                "value": "{{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dev/seed",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dev",
+                "seed"
+              ],
+              "query": []
+            },
+            "description": "Load the fixture disputes (PAYPAL_MODE=mock only)"
+          }
+        },
+        {
+          "name": "POST /api/dev/link-transaction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Admin-Token",
+                "value": "{{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dev/link-transaction",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dev",
+                "link-transaction"
+              ],
+              "query": []
+            },
+            "description": "Map a real sandbox transaction to a seeded order (only when DP_DEV_ENDPOINTS=true)",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sellerTransactionId\": \"TXN-FROM-PAYPAL-SANDBOX\",\n  \"orderId\": \"ORD-1042\"\n}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

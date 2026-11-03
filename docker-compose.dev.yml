@@ -1,0 +1,6 @@
+# Developer overlay: publishes Postgres on localhost:5432 so `make dev` (backend and web on the host) can reach it.
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d db
+services:
+  db:
+    ports:
+      - "127.0.0.1:5432:5432"
