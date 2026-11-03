@@ -1,0 +1,76 @@
+{
+  "_note": "SYNTHETIC TEST DATA - fictional merchant, buyers and carrier. Not real PayPal data.",
+  "dispute_id": "DEMO-D-1005",
+  "create_time": "2026-11-01T21:30:12.000Z",
+  "update_time": "2026-11-01T21:30:12.000Z",
+  "disputed_transactions": [
+    {
+      "seller_transaction_id": "TXN-8F3A1005",
+      "create_time": "2026-10-05T13:00:00.000Z",
+      "transaction_status": "COMPLETED",
+      "gross_amount": {
+        "currency_code": "CAD",
+        "value": "78.00"
+      },
+      "buyer": {
+        "name": "Elena Marchetti"
+      },
+      "seller": {
+        "name": "Maple & Thread Co.",
+        "merchant_id": "DEMOMERCHANT01",
+        "email": "orders@maple-and-thread.example"
+      },
+      "items": [
+        {
+          "item_id": "SKU-1005",
+          "item_name": "Cotton Overshirt",
+          "item_quantity": "1"
+        }
+      ]
+    }
+  ],
+  "reason": "CREDIT_NOT_PROCESSED",
+  "status": "WAITING_FOR_SELLER_RESPONSE",
+  "dispute_amount": {
+    "currency_code": "CAD",
+    "value": "78.00"
+  },
+  "dispute_life_cycle_stage": "CHARGEBACK",
+  "dispute_channel": "INTERNAL",
+  "messages": [
+    {
+      "posted_by": "BUYER",
+      "time_posted": "2026-11-01T21:30:12.000Z",
+      "content": "I returned the shirt but never got my money back."
+    }
+  ],
+  "evidences": [
+    {
+      "evidence_type": "PROOF_OF_REFUND",
+      "source": "REQUESTED_FROM_SELLER"
+    }
+  ],
+  "seller_response_due_date": "2026-11-11T23:59:59.000Z",
+  "links": [
+    {
+      "href": "/v1/customer/disputes/DEMO-D-1005",
+      "rel": "self",
+      "method": "GET"
+    },
+    {
+      "href": "/v1/customer/disputes/DEMO-D-1005/provide-evidence",
+      "rel": "provide_evidence",
+      "method": "POST"
+    },
+    {
+      "href": "/v1/customer/disputes/DEMO-D-1005/accept-claim",
+      "rel": "accept_claim",
+      "method": "POST"
+    },
+    {
+      "href": "/v1/customer/disputes/DEMO-D-1005/send-message",
+      "rel": "send_message",
+      "method": "POST"
+    }
+  ]
+}

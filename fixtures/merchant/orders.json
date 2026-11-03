@@ -1,0 +1,249 @@
+{
+  "_note": "SYNTHETIC TEST DATA - fictional merchant, buyers and carrier. Not real PayPal data.",
+  "orders": [
+    {
+      "id": "ORD-1042",
+      "paypalTransactionId": "TXN-8F3A1001",
+      "placedAt": "2026-10-15T13:00:00Z",
+      "buyerName": "Jordan Ellis",
+      "buyerEmail": "jordan.ellis@buyer.example",
+      "buyerPhone": "+1-416-555-0101",
+      "shippingAddress": {
+        "line1": "1201 Example Street",
+        "city": "Toronto",
+        "region": "ON",
+        "postalCode": "M5V 0A0",
+        "country": "CA"
+      },
+      "items": [
+        {
+          "sku": "SKU-1001",
+          "name": "Merino Wool Cardigan",
+          "quantity": 1,
+          "unitPrice": {
+            "currency": "CAD",
+            "value": "150.00"
+          }
+        }
+      ],
+      "total": {
+        "currency": "CAD",
+        "value": "180.00"
+      },
+      "status": "FULFILLED",
+      "refunds": []
+    },
+    {
+      "id": "ORD-1043",
+      "paypalTransactionId": "TXN-8F3A1002",
+      "placedAt": "2026-10-14T13:00:00Z",
+      "buyerName": "Priya Natarajan",
+      "buyerEmail": "priya.n@buyer.example",
+      "buyerPhone": "+1-416-555-0102",
+      "shippingAddress": {
+        "line1": "1202 Example Street",
+        "city": "Toronto",
+        "region": "ON",
+        "postalCode": "M5V 0A0",
+        "country": "CA"
+      },
+      "items": [
+        {
+          "sku": "SKU-1002",
+          "name": "Linen Market Tote",
+          "quantity": 1,
+          "unitPrice": {
+            "currency": "CAD",
+            "value": "54.50"
+          }
+        }
+      ],
+      "total": {
+        "currency": "CAD",
+        "value": "64.50"
+      },
+      "status": "PAID_NOT_SHIPPED",
+      "refunds": []
+    },
+    {
+      "id": "ORD-1044",
+      "paypalTransactionId": "TXN-8F3A1003",
+      "placedAt": "2026-10-17T13:00:00Z",
+      "buyerName": "Marcus Webb",
+      "buyerEmail": "marcus.webb@buyer.example",
+      "buyerPhone": "+1-416-555-0103",
+      "shippingAddress": {
+        "line1": "1203 Example Street",
+        "city": "Toronto",
+        "region": "ON",
+        "postalCode": "M5V 0A0",
+        "country": "CA"
+      },
+      "items": [
+        {
+          "sku": "SKU-1003",
+          "name": "Indigo Denim Jacket",
+          "quantity": 1,
+          "unitPrice": {
+            "currency": "CAD",
+            "value": "119.00"
+          }
+        }
+      ],
+      "total": {
+        "currency": "CAD",
+        "value": "129.00"
+      },
+      "status": "FULFILLED",
+      "refunds": []
+    },
+    {
+      "id": "ORD-1045",
+      "paypalTransactionId": "TXN-8F3A1004",
+      "placedAt": "2026-10-16T13:00:00Z",
+      "buyerName": "Sam Okonkwo",
+      "buyerEmail": "sam.okonkwo@buyer.example",
+      "buyerPhone": "+1-416-555-0104",
+      "shippingAddress": {
+        "line1": "1204 Example Street",
+        "city": "Toronto",
+        "region": "ON",
+        "postalCode": "M5V 0A0",
+        "country": "CA"
+      },
+      "items": [
+        {
+          "sku": "SKU-1004",
+          "name": "Waxed Canvas Weekender Bag",
+          "quantity": 1,
+          "unitPrice": {
+            "currency": "CAD",
+            "value": "205.00"
+          }
+        }
+      ],
+      "total": {
+        "currency": "CAD",
+        "value": "215.00"
+      },
+      "status": "FULFILLED",
+      "refunds": []
+    },
+    {
+      "id": "ORD-1046",
+      "paypalTransactionId": "TXN-8F3A1005",
+      "placedAt": "2026-10-05T13:00:00Z",
+      "buyerName": "Elena Marchetti",
+      "buyerEmail": "elena.m@buyer.example",
+      "buyerPhone": "+1-416-555-0105",
+      "shippingAddress": {
+        "line1": "1205 Example Street",
+        "city": "Toronto",
+        "region": "ON",
+        "postalCode": "M5V 0A0",
+        "country": "CA"
+      },
+      "items": [
+        {
+          "sku": "SKU-1005",
+          "name": "Cotton Overshirt",
+          "quantity": 1,
+          "unitPrice": {
+            "currency": "CAD",
+            "value": "68.00"
+          }
+        }
+      ],
+      "total": {
+        "currency": "CAD",
+        "value": "78.00"
+      },
+      "status": "FULFILLED",
+      "refunds": [
+        {
+          "id": "REF-5001",
+          "amount": {
+            "currency": "CAD",
+            "value": "78.00"
+          },
+          "issuedAt": "2026-10-20T16:00:00Z",
+          "reason": "Item returned by buyer"
+        }
+      ]
+    },
+    {
+      "id": "ORD-1047",
+      "paypalTransactionId": "TXN-8F3A1006",
+      "placedAt": "2026-10-19T13:00:00Z",
+      "buyerName": "Hannah Kowalski",
+      "buyerEmail": "hannah.k@buyer.example",
+      "buyerPhone": "+1-416-555-0106",
+      "shippingAddress": {
+        "line1": "1206 Example Street",
+        "city": "Toronto",
+        "region": "ON",
+        "postalCode": "M5V 0A0",
+        "country": "CA"
+      },
+      "items": [
+        {
+          "sku": "SKU-1006",
+          "name": "Linen Throw Blanket",
+          "quantity": 1,
+          "unitPrice": {
+            "currency": "CAD",
+            "value": "82.00"
+          }
+        }
+      ],
+      "total": {
+        "currency": "CAD",
+        "value": "92.00"
+      },
+      "status": "FULFILLED",
+      "refunds": []
+    },
+    {
+      "id": "ORD-1048",
+      "paypalTransactionId": "TXN-8F3A1007",
+      "placedAt": "2026-10-19T13:00:30Z",
+      "buyerName": "Hannah Kowalski",
+      "buyerEmail": "hannah.k@buyer.example",
+      "buyerPhone": "+1-416-555-0106",
+      "shippingAddress": {
+        "line1": "1206 Example Street",
+        "city": "Toronto",
+        "region": "ON",
+        "postalCode": "M5V 0A0",
+        "country": "CA"
+      },
+      "items": [
+        {
+          "sku": "SKU-1006",
+          "name": "Linen Throw Blanket",
+          "quantity": 1,
+          "unitPrice": {
+            "currency": "CAD",
+            "value": "82.00"
+          }
+        }
+      ],
+      "total": {
+        "currency": "CAD",
+        "value": "92.00"
+      },
+      "status": "REFUNDED",
+      "refunds": [
+        {
+          "id": "REF-5002",
+          "amount": {
+            "currency": "CAD",
+            "value": "92.00"
+          },
+          "issuedAt": "2026-10-24T15:30:00Z",
+          "reason": "Duplicate charge refunded"
+        }
+      ]
+    }
+  ]
+}

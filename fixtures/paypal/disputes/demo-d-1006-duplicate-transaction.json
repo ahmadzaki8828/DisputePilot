@@ -1,0 +1,80 @@
+{
+  "_note": "SYNTHETIC TEST DATA - fictional merchant, buyers and carrier. Not real PayPal data.",
+  "dispute_id": "DEMO-D-1006",
+  "create_time": "2026-11-02T12:00:00.000Z",
+  "update_time": "2026-11-02T12:00:00.000Z",
+  "disputed_transactions": [
+    {
+      "seller_transaction_id": "TXN-8F3A1007",
+      "create_time": "2026-10-19T13:00:30.000Z",
+      "transaction_status": "COMPLETED",
+      "gross_amount": {
+        "currency_code": "CAD",
+        "value": "92.00"
+      },
+      "buyer": {
+        "name": "Hannah Kowalski"
+      },
+      "seller": {
+        "name": "Maple & Thread Co.",
+        "merchant_id": "DEMOMERCHANT01",
+        "email": "orders@maple-and-thread.example"
+      },
+      "items": [
+        {
+          "item_id": "SKU-1006",
+          "item_name": "Linen Throw Blanket",
+          "item_quantity": "1"
+        }
+      ]
+    }
+  ],
+  "reason": "DUPLICATE_TRANSACTION",
+  "status": "WAITING_FOR_SELLER_RESPONSE",
+  "dispute_amount": {
+    "currency_code": "CAD",
+    "value": "92.00"
+  },
+  "dispute_life_cycle_stage": "CHARGEBACK",
+  "dispute_channel": "INTERNAL",
+  "messages": [
+    {
+      "posted_by": "BUYER",
+      "time_posted": "2026-11-02T12:00:00.000Z",
+      "content": "I was charged twice for the same blanket."
+    }
+  ],
+  "evidences": [
+    {
+      "evidence_type": "PROOF_OF_REFUND",
+      "source": "REQUESTED_FROM_SELLER"
+    },
+    {
+      "evidence_type": "OTHER",
+      "source": "REQUESTED_FROM_SELLER"
+    }
+  ],
+  "seller_response_due_date": "2026-11-13T23:59:59.000Z",
+  "links": [
+    {
+      "href": "/v1/customer/disputes/DEMO-D-1006",
+      "rel": "self",
+      "method": "GET"
+    },
+    {
+      "href": "/v1/customer/disputes/DEMO-D-1006/provide-evidence",
+      "rel": "provide_evidence",
+      "method": "POST"
+    },
+    {
+      "href": "/v1/customer/disputes/DEMO-D-1006/accept-claim",
+      "rel": "accept_claim",
+      "method": "POST"
+    },
+    {
+      "href": "/v1/customer/disputes/DEMO-D-1006/send-message",
+      "rel": "send_message",
+      "method": "POST"
+    }
+  ]
+}
