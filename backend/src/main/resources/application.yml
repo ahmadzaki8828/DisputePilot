@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: disputepilot
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/disputepilot}
+    username: ${SPRING_DATASOURCE_USERNAME:disputepilot}
+    password: ${SPRING_DATASOURCE_PASSWORD:disputepilot}
+  mvc:
+    problemdetails:
+      enabled: true
+  flyway:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+dp:
+  admin-token: ${DP_ADMIN_TOKEN:}
+  dev-endpoints: ${DP_DEV_ENDPOINTS:false}
+  paypal:
+    mode: ${PAYPAL_MODE:mock}                 # mock | sandbox (there is no live mode)
+    base-url: ${PAYPAL_BASE_URL:https://api-m.sandbox.paypal.com}
+    client-id: ${PAYPAL_CLIENT_ID:}
+    client-secret: ${PAYPAL_CLIENT_SECRET:}
+    webhook-id: ${PAYPAL_WEBHOOK_ID:}
+  llm:
+    mode: ${DP_LLM_MODE:}                     # live | recorded; blank = recorded unless a key is set
+    api-key: ${DP_LLM_API_KEY:}
+    model: ${DP_LLM_MODEL:claude-haiku-5-5}
+    daily-cap: ${DP_LLM_DAILY_CAP:300}
+  demo:
+    rate-limit: ${DP_DEMO_RATE_LIMIT:6}
+  eval:
+    mode: ${DP_EVAL_MODE:fake}                # fake | live
