@@ -7,6 +7,7 @@ public record LlmResult(
         String text,
         List<LlmRequest.ToolCall> toolCalls,
         LlmMode mode,
+        String provider,
         String model,
         int inputTokens,
         int outputTokens,

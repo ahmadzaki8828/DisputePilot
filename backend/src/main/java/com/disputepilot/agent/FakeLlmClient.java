@@ -48,13 +48,19 @@ public class FakeLlmClient implements LlmClient {
     }
 
     @Override
+    public String providerName() {
+        return "FakeLlmClient (test double)";
+    }
+
+    @Override
     public LlmResult run(LlmRequest request) {
         calls.incrementAndGet();
         JsonNode input = mapper.readTree(draftJson);
         return new LlmResult(
                 null,
                 List.of(new LlmRequest.ToolCall("fake-1", "submit_draft", input)),
-                LlmMode.RECORDED,
+                LlmMode.SAMPLE,
+                "FakeLlmClient (test double)",
                 "fake-model",
                 100,
                 50,

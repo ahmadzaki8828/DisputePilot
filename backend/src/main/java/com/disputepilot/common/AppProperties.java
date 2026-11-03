@@ -27,7 +27,11 @@ public record AppProperties(
             @DefaultValue("") String mode,
             @DefaultValue("") String apiKey,
             @DefaultValue("claude-haiku-5-5") String model,
-            @DefaultValue("300") int dailyCap) {
+            @DefaultValue("300") int dailyCap,
+            @DefaultValue("openai-compatible") String provider,
+            @DefaultValue("") String baseUrl,
+            @DefaultValue("4") int maxAttempts,
+            @DefaultValue("1000") long retryBaseDelayMs) {
 
         /** "live" or "recorded". Defaults to recorded when no API key is set. */
         public String effectiveMode() {
@@ -35,6 +39,15 @@ public record AppProperties(
                 return mode.trim().toLowerCase();
             }
             return apiKey != null && !apiKey.isBlank() ? "live" : "recorded";
+        }
+
+        public boolean hasApiKey() {
+            return apiKey != null && !apiKey.isBlank();
+        }
+
+        /** "openai-compatible" (Groq and friends) or "anthropic". */
+        public String effectiveProvider() {
+            return provider == null || provider.isBlank() ? "openai-compatible" : provider.trim().toLowerCase();
         }
     }
 

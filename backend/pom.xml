@@ -130,6 +130,12 @@
         <directory>../fixtures</directory>
         <targetPath>fixtures</targetPath>
       </resource>
+      <resource>
+        <!-- Recorded model responses live at the repo root; packaged on the classpath as recordings/** so the
+             zero-key demo (DP_LLM_MODE=recorded) works from a clean clone. -->
+        <directory>../evals/recordings</directory>
+        <targetPath>recordings</targetPath>
+      </resource>
     </resources>
     <plugins>
       <plugin>
