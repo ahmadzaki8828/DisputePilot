@@ -1,0 +1,9 @@
+.git
+.github
+**/node_modules
+**/.next
+backend/target
+web/.next
+.env
+docs
+scripts

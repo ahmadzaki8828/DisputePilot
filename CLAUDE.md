@@ -18,7 +18,7 @@ Backend (`backend/`):
 - Test everything: `./mvnw -B verify`
 - Evals: `./mvnw -B -Peval test` (mode from `DP_EVAL_MODE=fake|live`, default `fake`)
 - Run locally: `./mvnw spring-boot:run` (reads env vars below)
-- Postgres in a cloud VM: `service postgresql start`, then create the `disputepilot` database and user; or `docker compose up -d db` from the repo root
+- Postgres in a cloud VM: `service postgresql start`, then create the `disputepilot` database and user; or `docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d db` from the repo root (the overlay publishes port 5432)
 - Tests use Testcontainers (Postgres 16) by default. Where Docker isn't usable (cloud VMs), start the VM's Postgres and run `DP_TEST_DB_URL=jdbc:postgresql://localhost:5432/disputepilot_test ./mvnw -B verify` (optional `DP_TEST_DB_USER` / `DP_TEST_DB_PASSWORD`, default `disputepilot`/`disputepilot`). Integration tests are named `*Test` so Surefire runs them.
 - Evals write `evals/report.json` and `evals/report.md`; the committed report is from a `live` run and says which provider, model and prompt version produced it. `DP_EVAL_MODE=live` also writes `evals/recordings/*.json`, keyed by the dispute ID, which is what `DP_LLM_MODE=recorded` replays (they are packaged on the classpath under `recordings/`).
 - PayPal sandbox over curl: `scripts/sandbox/{token,list,get,require-evidence,adjudicate,provide-evidence}.sh` (sandbox hosts only). The one test that calls PayPal is skipped unless you ask for it: `PAYPAL_MODE=sandbox ./mvnw -B test -Dtest=SandboxSmokeTest`. See `docs/paypal-integration.md`.
@@ -29,7 +29,7 @@ Web (`web/`):
 - Regenerate API types after changing `contracts/openapi.yaml`: `npm run gen:api`
 
 Repo root:
-- Judges' path (no keys needed): `docker compose up --build` → http://localhost:3000 (once Session D has built it)
+- Judges' path (no keys needed): `docker compose up --build` → http://localhost:3000
 - `make dev` (db + backend in mock mode + web), `make test`, `make seed` exist now; `make demo` arrives with Session E
 
 ## Environment variables
@@ -45,11 +45,13 @@ Repo root:
 | `DP_LLM_BASE_URL` | For `openai-compatible`, e.g. `https://api.groq.com/openai/v1` |
 | `DP_LLM_MODE` | `live` (calls the provider), `recorded` (replays real responses in `evals/recordings/`), or `sample` (only hand-written samples exist). Defaults to `recorded` when no key is set. |
 | `DP_LLM_API_KEY` | The app's model-provider key (Groq or Claude). Never name it `ANTHROPIC_API_KEY`. |
-| `DP_LLM_MODEL` | Provider's model ID, e.g. `openai/gpt-oss-120b` on Groq, or `claude-haiku-5-5` / `claude-sonnet-5-5` |
+| `DP_LLM_MODEL` | Provider's model ID. Blank follows `DP_LLM_PROVIDER`: `openai/gpt-oss-120b` for `openai-compatible`, `claude-haiku-5-5` for `anthropic` (or set `claude-sonnet-5-5`) |
 | `DP_LLM_MAX_ATTEMPTS` | Attempts per live model call (default 4); 429 / 5xx / connection errors are retried with backoff and jitter |
 | `DP_LLM_RETRY_BASE_DELAY_MS` | Base backoff for those retries (default 1000); a provider `retry-after` hint wins |
 | `DP_DEMO_RATE_LIMIT` | Live drafts per client IP per hour on the public demo (default 6) |
-| `DP_LLM_DAILY_CAP` | Max live LLM calls per day (default 300); over it, fall back to recorded or return 429 |
+| `DP_LLM_DAILY_CAP` | Max live LLM calls per day (default 300); over it, a draft falls back to a labelled recorded response (disputes that have recordings) or returns a friendly 429. A provider 429 does the same |
+| `DP_DEMO_ACTION_LIMIT` | "Simulate a dispute" / "Reset demo" calls per client IP per hour (default 30) |
+| `DP_DEMO_SEED_ON_START` | `true` loads the six starter disputes (with recorded-AI drafts) into an empty database at startup; the Docker Compose stack and `render.yaml` set it |
 | `DP_DEV_ENDPOINTS` | `true` enables `/api/dev/**` outside mock mode (linking a real sandbox transaction) |
 | `DP_EVAL_MODE` | `fake` (recorded responses, used in CI) or `live` (needs `DP_LLM_API_KEY`) |
 | `DP_EVAL_PACE_MS` | Pause between eval cases in `live` mode (default 4000), so free-tier per-minute limits are respected |

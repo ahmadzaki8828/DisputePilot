@@ -2,7 +2,8 @@ spring:
   application:
     name: disputepilot
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/disputepilot}
+    # Either one JDBC URL, or the parts (Render hands out host, port and database separately).
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${DP_DB_HOST:localhost}:${DP_DB_PORT:5432}/${DP_DB_NAME:disputepilot}}
     username: ${SPRING_DATASOURCE_USERNAME:disputepilot}
     password: ${SPRING_DATASOURCE_PASSWORD:disputepilot}
   mvc:
@@ -29,7 +30,7 @@ dp:
   llm:
     mode: ${DP_LLM_MODE:}                     # live | recorded; blank = recorded unless a key is set
     api-key: ${DP_LLM_API_KEY:}
-    model: ${DP_LLM_MODEL:claude-haiku-5-5}
+    model: ${DP_LLM_MODEL:}                       # blank = provider default: openai/gpt-oss-120b (openai-compatible) or claude-haiku-5-5 (anthropic)
     daily-cap: ${DP_LLM_DAILY_CAP:300}
     provider: ${DP_LLM_PROVIDER:openai-compatible}   # openai-compatible | anthropic
     base-url: ${DP_LLM_BASE_URL:}                    # e.g. https://api.groq.com/openai/v1
@@ -37,6 +38,8 @@ dp:
     retry-base-delay-ms: ${DP_LLM_RETRY_BASE_DELAY_MS:1000}
   demo:
     rate-limit: ${DP_DEMO_RATE_LIMIT:6}
+    action-limit: ${DP_DEMO_ACTION_LIMIT:30}      # simulate / reset calls per client IP per hour
+    seed-on-start: ${DP_DEMO_SEED_ON_START:false} # load the starter disputes into an empty database at startup
   eval:
     mode: ${DP_EVAL_MODE:fake}                # fake | live
   sync:                                       # Session A: webhook outbox worker and reconciliation poller

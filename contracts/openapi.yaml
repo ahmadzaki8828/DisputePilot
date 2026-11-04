@@ -526,6 +526,10 @@ components:
               items: { type: string, enum: [PROVIDE_EVIDENCE, ACCEPT_CLAIM, MAKE_OFFER, SEND_MESSAGE] }
             messages: { type: array, items: { $ref: '#/components/schemas/DisputeMessage' } }
             caseFile: { $ref: '#/components/schemas/CaseFile' }
+            disputedTransactionId:
+              type: string
+              nullable: true
+              description: The seller transaction PayPal says is disputed; used to find the order (or to link one).
 
     Citation:
       type: object
@@ -677,7 +681,8 @@ components:
         meanInputTokens: { type: number }
         meanOutputTokens: { type: number }
         meanLatencyMs: { type: number }
-        estimatedCostPerDraftUsd: { type: number }
+        provider: { type: string, nullable: true }
+        estimatedCostPerDraftUsd: { type: number, nullable: true, description: 'Null unless token prices were supplied to the eval run' }
         results: { type: array, items: { $ref: '#/components/schemas/EvalCaseResult' } }
 
     SystemInfo:
@@ -686,6 +691,6 @@ components:
       properties:
         paypalMode: { type: string, enum: [mock, sandbox] }
         llmMode: { type: string, enum: [live, recorded, sample] }
-        provider: { type: string, description: Model provider behind live drafts }
+        provider: { type: string, nullable: true, description: 'Who is behind the AI: the provider of a live draft, or "Recorded: ..." / hand-written samples when a stored response is replayed' }
         model: { type: string }
         simulatedEnabled: { type: boolean }

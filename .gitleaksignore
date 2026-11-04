@@ -1,0 +1,3 @@
+# Reviewed false positive: the throwaway local-compose admin token in a CI curl header (removed in the next commit;
+# the workflow now generates a random token per run).
+448c265237ea1107de4dc5c3652031bb29e77593:.github/workflows/ci.yml:curl-auth-header:72

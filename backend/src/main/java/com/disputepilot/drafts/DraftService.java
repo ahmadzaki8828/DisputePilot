@@ -3,10 +3,12 @@ package com.disputepilot.drafts;
 import com.disputepilot.agent.DisputeAgent;
 import com.disputepilot.agent.DraftProposal;
 import com.disputepilot.agent.DraftValidator;
+import com.disputepilot.agent.LlmException;
 import com.disputepilot.agent.EvidenceAssembler;
 import com.disputepilot.agent.Playbook;
 import com.disputepilot.api.DisputeRepository;
 import com.disputepilot.common.ApiException;
+import com.disputepilot.common.audit.AuditLogWriter;
 import com.disputepilot.domain.Draft;
 import com.disputepilot.domain.DraftStatus;
 import com.disputepilot.domain.EvidenceItem;
@@ -39,32 +41,49 @@ public class DraftService {
     private final EvidenceAssembler assembler;
     private final DisputeAgent agent;
     private final DraftValidator validator;
-    private final DraftAudit audit;
+    private final AuditLogWriter audit;
+    private final RecordedFallback fallback;
 
     public DraftService(DisputeRepository disputes, DraftRepository drafts, EvidenceAssembler assembler,
-                        DisputeAgent agent, DraftValidator validator, DraftAudit audit) {
+                        DisputeAgent agent, DraftValidator validator, AuditLogWriter audit,
+                        RecordedFallback fallback) {
         this.disputes = disputes;
         this.drafts = drafts;
         this.assembler = assembler;
         this.agent = agent;
         this.validator = validator;
         this.audit = audit;
+        this.fallback = fallback;
+    }
+
+    /** True when drafts call a real model provider (so the public-demo limits apply to them). */
+    public boolean usesLiveModel() {
+        return agent.llmClient().isLive();
     }
 
     /** Runs the agent for a dispute and stores the result as a new version, superseding any earlier draft. */
     @Transactional
     public Draft createDraft(UUID disputeId) {
+        return createDraft(disputeId, true);
+    }
+
+    /**
+     * Like {@link #createDraft(UUID)}; {@code allowLive=false} skips the live provider (the caller is over the
+     * public demo's per-visitor limit) and goes straight to the recorded fallback.
+     */
+    @Transactional
+    public Draft createDraft(UUID disputeId, boolean allowLive) {
         DisputeRepository.StoredDispute stored = disputes.find(disputeId).orElseThrow(() ->
                 new ApiException(HttpStatus.NOT_FOUND, "Dispute not found", "No dispute with id " + disputeId));
         PayPalDispute dispute = toPayPalDispute(stored);
-        audit.record("user", DraftAudit.DRAFT_REQUESTED, disputeId,
+        audit.user(AuditLogWriter.DRAFT_REQUESTED, disputeId,
                 Map.of("paypalDisputeId", dispute.paypalDisputeId()));
 
         EvidenceAssembler.Assembled assembled = assembler.assemble(dispute);
-        DisputeAgent.AgentOutcome outcome = agent.draft(caseKeyFor(dispute), assembled);
+        DisputeAgent.AgentOutcome outcome = runAgent(disputeId, dispute, assembled, allowLive);
 
         if (outcome.draft() == null) {
-            audit.record("agent", DraftAudit.DRAFT_FAILED, disputeId,
+            audit.agent(AuditLogWriter.DRAFT_FAILED, disputeId,
                     Map.of("reason", "the agent produced no draft", "turns", outcome.turns()));
             throw new ApiException(HttpStatus.BAD_GATEWAY, "No draft produced",
                     "The agent did not return a draft after " + outcome.turns() + " turn(s).");
@@ -97,7 +116,7 @@ public class DraftService {
                 Instant.now());
         Draft saved = drafts.insert(draft);
 
-        audit.record("agent", DraftAudit.DRAFT_CREATED, disputeId, Map.of(
+        audit.agent(AuditLogWriter.DRAFT_CREATED, disputeId, Map.of(
                 "draftId", saved.id(),
                 "version", saved.version(),
                 "recommendation", saved.recommendation().name(),
@@ -112,6 +131,42 @@ public class DraftService {
                 outcome.validation().passed() ? "passed" : "failed", outcome.turns(),
                 saved.inputTokens(), saved.outputTokens());
         return saved;
+    }
+
+    /**
+     * One draft run. Live when the model is live and the caller may use it; when the provider answers 429 or the
+     * daily cap is spent, the whole draft is re-run from the recording for that dispute (labelled as recorded),
+     * or the caller gets a friendly 429 when there is no recording.
+     */
+    private DisputeAgent.AgentOutcome runAgent(UUID disputeId, PayPalDispute dispute,
+                                               EvidenceAssembler.Assembled assembled, boolean allowLive) {
+        String caseKey = caseKeyFor(dispute);
+        if (!usesLiveModel()) {
+            return agent.draft(caseKey, assembled);
+        }
+        String reason;
+        if (!allowLive) {
+            reason = "the public demo's per-visitor limit on live drafts was reached";
+        } else {
+            try {
+                return agent.draft(caseKey, assembled);
+            } catch (LlmException e) {
+                if (e.httpStatus() != 429) {
+                    throw new ApiException(HttpStatus.BAD_GATEWAY, "The AI provider failed",
+                            "The model provider could not draft a response: " + e.getMessage());
+                }
+                reason = "the model provider is rate-limited or the daily live-AI budget is spent";
+            }
+        }
+        if (!fallback.covers(caseKey)) {
+            throw new ApiException(HttpStatus.TOO_MANY_REQUESTS, "The AI is busy right now",
+                    "Live drafting is paused because " + reason + ", and this dispute has no recorded response "
+                            + "to fall back to. Please try again in a few minutes.");
+        }
+        audit.system(AuditLogWriter.LLM_FALLBACK, disputeId, Map.of("reason", reason,
+                "fallback", "recorded response", "caseKey", caseKey));
+        log.info("Draft for {} falls back to a recorded response: {}", dispute.paypalDisputeId(), reason);
+        return fallback.agent().draft(caseKey, assembled);
     }
 
     public Optional<Draft> latest(UUID disputeId) {
@@ -137,7 +192,7 @@ public class DraftService {
         DraftStatus status = validation.passed() ? DraftStatus.DRAFT : DraftStatus.NEEDS_REVIEW;
         Draft saved = drafts.updateEdited(draftId, newNotes, newEvidence, validation, status);
 
-        audit.record("user", DraftAudit.DRAFT_EDITED, existing.disputeId(), Map.of(
+        audit.user(AuditLogWriter.DRAFT_EDITED, existing.disputeId(), Map.of(
                 "draftId", draftId,
                 "notesChanged", notes != null,
                 "evidenceChanged", evidence != null,
@@ -159,7 +214,7 @@ public class DraftService {
                             + "Fix them, or approve again with overrideValidation=true to accept them.");
         }
         Draft saved = drafts.updateStatus(draftId, DraftStatus.APPROVED);
-        audit.record("user", DraftAudit.DRAFT_APPROVED, existing.disputeId(), Map.of(
+        audit.user(AuditLogWriter.DRAFT_APPROVED, existing.disputeId(), Map.of(
                 "draftId", draftId,
                 "version", saved.version(),
                 "overrodeValidation", overrideValidation && !existing.validation().passed()));
@@ -190,6 +245,12 @@ public class DraftService {
      * it describes, so recorded mode covers the whole demo.
      */
     public static String caseKeyFor(PayPalDispute dispute) {
+        // A simulated dispute created from a template is a clone under a new ID: replay the template's
+        // recording with the ID rewritten ("template@clone", see RecordedLlmClient).
+        String template = dispute.raw() == null ? null : dispute.raw().path("_demo_template").asString(null);
+        if (template != null && !template.isBlank() && !template.equals(dispute.paypalDisputeId())) {
+            return template + "@" + dispute.paypalDisputeId();
+        }
         return dispute.paypalDisputeId();
     }
 

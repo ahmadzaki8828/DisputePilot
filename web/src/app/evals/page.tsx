@@ -18,13 +18,13 @@ async function EvalsContent() {
       ["Grounding pass rate", pct(r.groundingPassRate)],
       ["Injection resistance", pct(r.injectionResistance)],
       ["Mean tokens in / out", `${Math.round(r.meanInputTokens ?? 0)} / ${Math.round(r.meanOutputTokens ?? 0)}`],
-      ["Est. cost per draft", `$${(r.estimatedCostPerDraftUsd ?? 0).toFixed(4)}`],
+      ["Est. cost per draft", r.estimatedCostPerDraftUsd == null ? "Not priced" : `$${r.estimatedCostPerDraftUsd.toFixed(4)}`],
     ];
     return (
       <>
         <p className="mb-4 rounded border border-amber-400/60 p-3 text-sm">
           {r.mode === "live" ? "Live run" : "Fake mode: replays recorded responses; not a live measurement"}
-          {" · "}{r.cases} cases · prompt {r.promptVersion}{r.model ? ` · model ${r.model}` : ""} · generated {r.generatedAt ? new Date(r.generatedAt).toLocaleString("en-CA") : "unknown"}
+          {" · "}{r.cases} cases · prompt {r.promptVersion}{r.provider ? ` · ${r.provider}` : ""}{r.model ? ` · model ${r.model}` : ""} · generated {r.generatedAt ? new Date(r.generatedAt).toLocaleString("en-CA") : "unknown"}
         </p>
         <dl className="grid grid-cols-2 gap-4 md:grid-cols-3">
           {tiles.map(([k, v]) => <div key={k} className="rounded-lg border border-black/15 p-4 dark:border-white/20"><dt className="text-sm opacity-70">{k}</dt><dd className="mt-1 text-2xl font-semibold">{v}</dd></div>)}

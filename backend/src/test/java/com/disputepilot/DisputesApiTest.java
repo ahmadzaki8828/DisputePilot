@@ -124,22 +124,18 @@ class DisputesApiTest {
     }
 
     @Test
-    void plannedEndpointsReturn501ProblemJson() throws Exception {
-        mvc.perform(get("/api/metrics").header("X-Admin-Token", TOKEN))
-                .andExpect(status().isNotImplemented())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
-                .andExpect(jsonPath("$.status").value(501));
-        // Session B implemented POST /api/disputes/{id}/drafts and the other draft routes, so their real
-        // controllers now take over those stub routes. POST /api/drafts/{id}/submit is still
-        // planned-but-unbuilt (Session D), and taking over its siblings must not take it over too.
-        mvc.perform(post("/api/drafts/{id}/submit", java.util.UUID.randomUUID())
-                        .header("X-Admin-Token", TOKEN))
-                .andExpect(status().isNotImplemented());
-        // POST /webhooks/paypal is no longer a stub: Session A's controller took the route over, so an
-        // unusable body is now answered with 400 rather than 501. Other stub routes are unaffected.
+    void everyPlannedEndpointNowHasARealController() throws Exception {
+        // Session D built the last of the routes PlannedEndpointStubs used to answer 501 for; each real
+        // controller takes over its stub automatically.
+        mvc.perform(get("/api/metrics").header("X-Admin-Token", TOKEN)).andExpect(status().isOk());
+        mvc.perform(get("/api/system").header("X-Admin-Token", TOKEN)).andExpect(status().isOk());
+        mvc.perform(get("/api/audit").header("X-Admin-Token", TOKEN)).andExpect(status().isOk());
+        mvc.perform(get("/api/evals/latest").header("X-Admin-Token", TOKEN)).andExpect(status().isOk());
+        // Submitting needs an Idempotency-Key: a problem-JSON 400, not a 501.
+        mvc.perform(post("/api/drafts/{id}/submit", java.util.UUID.randomUUID()).header("X-Admin-Token", TOKEN))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON));
         mvc.perform(post("/webhooks/paypal").content("{}").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
-        mvc.perform(get("/api/system").header("X-Admin-Token", TOKEN))
-                .andExpect(status().isNotImplemented());
     }
 }

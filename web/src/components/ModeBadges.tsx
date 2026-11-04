@@ -10,7 +10,7 @@ export function ModeBadges({ info }: { info: SystemInfo | null }) {
   return (
     <div className="flex flex-wrap gap-2" aria-label="Runtime modes">
       <span className={`${pill} border-sky-500/50 text-sky-800 dark:text-sky-300`}>{paypalModeLabel(info.paypalMode)}</span>
-      <span className={`${pill} border-violet-500/50 text-violet-800 dark:text-violet-300`}>{aiModeLabel(info.llmMode, info.model)}</span>
+      <span title={[info.provider, info.model].filter(Boolean).join(" · ") || undefined} className={`${pill} border-violet-500/50 text-violet-800 dark:text-violet-300`}>{aiModeLabel(info.llmMode, info.model)}</span>
     </div>
   );
 }

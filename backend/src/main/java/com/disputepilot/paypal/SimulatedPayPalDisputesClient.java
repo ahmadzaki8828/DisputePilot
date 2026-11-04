@@ -43,6 +43,8 @@ public class SimulatedPayPalDisputesClient implements PayPalDisputesClient {
     private final Map<String, ObjectNode> disputes = new LinkedHashMap<>();
     private final Map<String, JsonNode> fullLinks = new LinkedHashMap<>();
     private final Map<String, ObjectNode> templates = new LinkedHashMap<>();
+    /** Fixtures that can be cloned but are not themselves seeded disputes (fixtures/paypal/templates). */
+    private final Map<String, ObjectNode> templateOnly = new LinkedHashMap<>();
 
     public SimulatedPayPalDisputesClient() {
         reset();
@@ -53,6 +55,7 @@ public class SimulatedPayPalDisputesClient implements PayPalDisputesClient {
         disputes.clear();
         fullLinks.clear();
         templates.clear();
+        templateOnly.clear();
         try {
             Resource[] files = new PathMatchingResourcePatternResolver()
                     .getResources("classpath:fixtures/paypal/disputes/*.json");
@@ -70,6 +73,19 @@ public class SimulatedPayPalDisputesClient implements PayPalDisputesClient {
                     fullLinks.put(id, node.get("links").deepCopy());
                     templates.put(id, node.deepCopy());
                     disputes.put(id, node);
+                }
+            }
+            // Template-only fixtures: cloned by createFromTemplate, never listed as disputes themselves.
+            for (Resource file : new PathMatchingResourcePatternResolver()
+                    .getResources("classpath:fixtures/paypal/templates/*.json")) {
+                try (InputStream in = file.getInputStream()) {
+                    ObjectNode node = (ObjectNode) mapper.readTree(in);
+                    rebase(node, "seller_response_due_date", now, false);
+                    rebase(node, "create_time", now, true);
+                    rebase(node, "update_time", now, true);
+                    node.path("messages").forEach(m -> rebase((ObjectNode) m, "time_posted", now, true));
+                    node.remove("_note");
+                    templateOnly.put(node.path("dispute_id").asString(), node);
                 }
             }
         } catch (IOException e) {
@@ -105,7 +121,7 @@ public class SimulatedPayPalDisputesClient implements PayPalDisputesClient {
      * webhook -> outbox -> agent -> submit pipeline.
      */
     public synchronized PayPalDispute createFromTemplate(String template) {
-        ObjectNode source = templates.get(template);
+        ObjectNode source = templates.containsKey(template) ? templates.get(template) : templateOnly.get(template);
         if (source == null) {
             throw error(404, "RESOURCE_NOT_FOUND", "No such dispute template: " + template, "INVALID_RESOURCE_ID");
         }
@@ -114,6 +130,8 @@ public class SimulatedPayPalDisputesClient implements PayPalDisputesClient {
         Instant now = Instant.now();
         ObjectNode copy = source.deepCopy();
         copy.put("dispute_id", id);
+        // Which recording / fixture this clone stands for, so recorded AI replay can find its response.
+        copy.put("_demo_template", templateId);
         copy.put("create_time", now.toString());
         copy.put("update_time", now.toString());
         copy.put("status", WAITING_FOR_SELLER);

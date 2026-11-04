@@ -5,7 +5,7 @@ API_URL ?= http://localhost:8080
 .PHONY: dev test seed db
 
 db:
-	docker compose up -d db
+	docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d db
 
 # Runs Postgres, the backend (mock PayPal, recorded AI) and the web app. Ctrl-C stops the backend and web.
 dev: db

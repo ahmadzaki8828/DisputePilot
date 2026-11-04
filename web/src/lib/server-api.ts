@@ -14,7 +14,9 @@ export const isMock = () => process.env.DP_API_MODE === "mock";
 /* ---------------- real backend ---------------- */
 
 async function real(method: string, p: string, opts: { body?: unknown; headers?: Record<string, string> } = {}): Promise<unknown> {
-  const base = process.env.DP_API_BASE_URL ?? "http://localhost:8080";
+  const configured = process.env.DP_API_BASE_URL ?? "http://localhost:8080";
+  // Render's private-network reference is a bare host:port; add the scheme when it is missing.
+  const base = /^https?:\/\//.test(configured) ? configured : `http://${configured}`;
   let res: Response;
   try {
     res = await fetch(`${base}${p}`, {
@@ -140,7 +142,7 @@ function mockMutate(method: string, p: string, rawBody: unknown, headers: Record
     }
     if (mt[2] === "submit") {
       if (draft.status !== "APPROVED" && draft.status !== "SUBMITTED") throw new ApiError(409, "Only an APPROVED draft can be submitted.");
-      const key = headers["idempotency-key"];
+      const key = headers["Idempotency-Key"] ?? headers["idempotency-key"];
       if (!key) throw new ApiError(400, "Idempotency-Key header is required.");
       const dispute = m.disputes.find((d) => d.id === draft.disputeId)!;
       if (draft.status !== "SUBMITTED") {
@@ -216,6 +218,29 @@ export async function getEvalReport(): Promise<EvalReport> {
 export async function getAudit(disputeId: string): Promise<AuditEntry[]> {
   if (isMock()) return mock().audit.filter((a) => a.disputeId === disputeId);
   return (await real("GET", `/api/audit?disputeId=${encodeURIComponent(disputeId)}`)) as AuditEntry[];
+}
+
+/**
+ * Read-only routes the browser may fetch through /bff (the drafting state polls these). Everything else is a
+ * mutation and goes through {@link mutate}.
+ */
+export async function proxyGet(pathWithQuery: string, headers: Record<string, string> = {}): Promise<unknown> {
+  if (!isMock()) return real("GET", pathWithQuery, { headers });
+  const url = new URL(pathWithQuery, "http://mock.local");
+  const p = url.pathname;
+  if (p === "/api/system") return getSystem();
+  if (p === "/api/metrics") return getMetrics();
+  if (p === "/api/evals/latest") return getEvalReport();
+  if (p === "/api/audit") return getAudit(url.searchParams.get("disputeId") ?? "");
+  let mt = p.match(/^\/api\/disputes\/([^/]+)\/drafts\/latest$/);
+  if (mt) {
+    const d = await getLatestDraft(mt[1]);
+    if (!d) throw new ApiError(404, "No draft yet.");
+    return d;
+  }
+  mt = p.match(/^\/api\/disputes\/([^/]+)$/);
+  if (mt) return getDispute(mt[1]);
+  throw new ApiError(404, "Not available in mock mode.");
 }
 
 /** Used only by the /bff route handler. */

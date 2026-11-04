@@ -56,6 +56,6 @@ public class DisputeController {
 
         return new DisputeDetail(s.id(), s.paypalDisputeId(), s.simulated(), s.reason(), s.reasonLabel(), s.status(),
                 s.stage(), s.amount(), s.sellerResponseDueAt(), s.latestDraft(), d.requestedEvidence(),
-                d.allowedActions(), messages, caseFile);
+                d.allowedActions(), messages, caseFile, d.disputedTransactionId());
     }
 }

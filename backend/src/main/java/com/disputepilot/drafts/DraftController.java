@@ -1,6 +1,9 @@
 package com.disputepilot.drafts;
 
 import com.disputepilot.common.ApiException;
+import com.disputepilot.common.ClientIp;
+import com.disputepilot.common.limits.DemoLimits;
+import jakarta.servlet.http.HttpServletRequest;
 import com.disputepilot.domain.Draft;
 import com.disputepilot.domain.EvidenceItem;
 import java.util.List;
@@ -19,9 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class DraftController {
 
     private final DraftService drafts;
+    private final DemoLimits limits;
 
-    public DraftController(DraftService drafts) {
+    public DraftController(DraftService drafts, DemoLimits limits) {
         this.drafts = drafts;
+        this.limits = limits;
     }
 
     /** What a human may change on a draft. */
@@ -32,8 +37,10 @@ public class DraftController {
     }
 
     @PostMapping("/api/disputes/{id}/drafts")
-    public ResponseEntity<Draft> create(@PathVariable UUID id) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(drafts.createDraft(id));
+    public ResponseEntity<Draft> create(@PathVariable UUID id, HttpServletRequest request) {
+        // Only live drafts cost money, so only they count against the visitor's hourly allowance (plan §9.2).
+        boolean allowLive = !drafts.usesLiveModel() || limits.tryDraft(ClientIp.of(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(drafts.createDraft(id, allowLive));
     }
 
     @GetMapping("/api/disputes/{id}/drafts/latest")

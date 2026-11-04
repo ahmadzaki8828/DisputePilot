@@ -1,5 +1,6 @@
 package com.disputepilot.sync;
 
+import com.disputepilot.common.audit.AuditLogWriter;
 import com.disputepilot.api.DisputeRepository;
 import com.disputepilot.domain.DisputeChangedEvent;
 import com.disputepilot.paypal.PayPalDispute;
@@ -59,7 +60,7 @@ public class DisputeSyncService {
         details.put("reason", dispute.reason());
         details.put("simulated", dispute.simulated());
         details.put("allowedActions", dispute.allowedActions());
-        audit.system("DISPUTE_SYNCED", id, details);
+        audit.system(AuditLogWriter.DISPUTE_SYNCED, id, details);
 
         log.info("Synced dispute {} ({}): status={} simulated={} trigger={}", dispute.paypalDisputeId(), id,
                 dispute.status(), dispute.simulated(), changeType);

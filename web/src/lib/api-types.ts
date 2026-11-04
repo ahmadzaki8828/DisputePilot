@@ -463,6 +463,8 @@ export interface components {
             allowedActions: ("PROVIDE_EVIDENCE" | "ACCEPT_CLAIM" | "MAKE_OFFER" | "SEND_MESSAGE")[];
             messages: components["schemas"]["DisputeMessage"][];
             caseFile: components["schemas"]["CaseFile"];
+            /** @description The seller transaction PayPal says is disputed; used to find the order (or to link one). */
+            disputedTransactionId?: string | null;
         };
         Citation: {
             /** @example shipment:SHP-77 */
@@ -517,14 +519,21 @@ export interface components {
             citations: components["schemas"]["Citation"][];
             missingInfo?: string[];
             validation: components["schemas"]["ValidationResult"];
-            /** @enum {string} */
-            llmMode: "live" | "recorded";
+            /**
+             * @description live = the provider was called; recorded = a real provider response from evals/recordings was replayed; sample = a hand-written stand-in was replayed, so no model produced this draft.
+             * @enum {string}
+             */
+            llmMode: "live" | "recorded" | "sample";
+            /** @description Human-readable provider behind this draft, e.g. "Groq (OpenAI-compatible API)". */
+            provider?: string | null;
             model?: string | null;
             promptVersion?: string | null;
             inputTokens?: number | null;
             outputTokens?: number | null;
             latencyMs?: number | null;
             editedByHuman?: boolean;
+            /** @description True when the first draft failed validation and the agent was asked to repair it. */
+            repairAttempted?: boolean;
             /** Format: date-time */
             createdAt?: string;
         };
@@ -596,14 +605,18 @@ export interface components {
             meanInputTokens?: number;
             meanOutputTokens?: number;
             meanLatencyMs?: number;
-            estimatedCostPerDraftUsd?: number;
+            provider?: string | null;
+            /** @description Null unless token prices were supplied to the eval run */
+            estimatedCostPerDraftUsd?: number | null;
             results?: components["schemas"]["EvalCaseResult"][];
         };
         SystemInfo: {
             /** @enum {string} */
             paypalMode: "mock" | "sandbox";
             /** @enum {string} */
-            llmMode: "live" | "recorded";
+            llmMode: "live" | "recorded" | "sample";
+            /** @description Who is behind the AI: the provider of a live draft, or "Recorded: ..." / hand-written samples when a stored response is replayed */
+            provider?: string | null;
             model: string;
             simulatedEnabled: boolean;
         };
@@ -645,13 +658,21 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Event stored (or duplicate */
+            /** @description Event stored (or duplicate, ignored) */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status?: "stored" | "duplicate" | "rejected";
+                        /** @enum {string} */
+                        verification?: "VERIFIED" | "SKIPPED_SIMULATED" | "FAILED";
+                    };
+                };
             };
+            400: components["responses"]["Problem"];
             501: components["responses"]["Problem"];
         };
     };
@@ -726,7 +747,9 @@ export interface operations {
                     "application/json": components["schemas"]["DisputeDetail"];
                 };
             };
+            404: components["responses"]["Problem"];
             501: components["responses"]["Problem"];
+            502: components["responses"]["Problem"];
         };
     };
     runSync: {
@@ -746,6 +769,10 @@ export interface operations {
                 content: {
                     "application/json": {
                         synced?: number;
+                        listed?: number;
+                        failed?: number;
+                        /** Format: date-time */
+                        cursor?: string;
                     };
                 };
             };

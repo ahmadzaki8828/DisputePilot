@@ -1,0 +1,83 @@
+# Render Blueprint: Postgres + the backend (Docker) + the dashboard (Docker).
+# Deploy: Render dashboard -> New -> Blueprint -> pick this repo. Fill in the "sync: false" values when asked
+# (or leave them blank for a zero-key demo: simulated PayPal disputes and recorded AI responses still work).
+#
+# Plans: "starter" web services and a paid Postgres plan do not sleep (the hackathon's Render credit covers them).
+# Use "free" for a trial, accepting that free services spin down when idle and free Postgres expires.
+databases:
+  - name: disputepilot-db
+    databaseName: disputepilot
+    user: disputepilot
+    plan: basic-256mb
+
+services:
+  # ---- backend: Spring Boot API + PayPal webhook receiver ----
+  - type: web
+    name: disputepilot-api
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DP_DB_HOST
+        fromDatabase: { name: disputepilot-db, property: host }
+      - key: DP_DB_PORT
+        fromDatabase: { name: disputepilot-db, property: port }
+      - key: DP_DB_NAME
+        fromDatabase: { name: disputepilot-db, property: database }
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase: { name: disputepilot-db, property: user }
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase: { name: disputepilot-db, property: password }
+      # Shared secret between the dashboard and /api/**; generated once, shared with the web service below.
+      - key: DP_ADMIN_TOKEN
+        generateValue: true
+      # PayPal: "sandbox" uses the real sandbox for real disputes and the simulator for DEMO- disputes.
+      # There is no live mode; the app refuses to start against any non-sandbox host.
+      - key: PAYPAL_MODE
+        value: sandbox
+      - key: PAYPAL_BASE_URL
+        value: https://api-m.sandbox.paypal.com
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false
+      # From the PayPal developer dashboard after registering https://<this service>.onrender.com/webhooks/paypal
+      - key: PAYPAL_WEBHOOK_ID
+        sync: false
+      # AI: with a key the model is called live; without one the app replays recorded responses (labelled as such).
+      - key: DP_LLM_PROVIDER
+        value: openai-compatible
+      - key: DP_LLM_BASE_URL
+        value: https://api.groq.com/openai/v1
+      - key: DP_LLM_API_KEY
+        sync: false
+      - key: DP_LLM_MODEL
+        value: ""
+      # Public-demo guards: live drafts per visitor per hour, simulate/reset per visitor per hour, live calls per day.
+      - key: DP_DEMO_RATE_LIMIT
+        value: "6"
+      - key: DP_DEMO_ACTION_LIMIT
+        value: "30"
+      - key: DP_LLM_DAILY_CAP
+        value: "300"
+      - key: DP_DEMO_SEED_ON_START
+        value: "true"
+      # Lets the dispute page link a real sandbox transaction to a demo order. Sandbox data only.
+      - key: DP_DEV_ENDPOINTS
+        value: "true"
+
+  # ---- dashboard: Next.js; the browser only ever talks to this service ----
+  - type: web
+    name: disputepilot-web
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./web/Dockerfile
+    dockerContext: ./web
+    healthCheckPath: /about
+    envVars:
+      - key: DP_API_BASE_URL
+        fromService: { type: web, name: disputepilot-api, property: hostport }
+      - key: DP_ADMIN_TOKEN
+        fromService: { type: web, name: disputepilot-api, envVarKey: DP_ADMIN_TOKEN }

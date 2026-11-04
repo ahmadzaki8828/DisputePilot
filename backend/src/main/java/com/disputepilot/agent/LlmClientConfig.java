@@ -1,6 +1,8 @@
 package com.disputepilot.agent;
 
 import com.disputepilot.common.AppProperties;
+import com.disputepilot.common.limits.CappedLlmClient;
+import com.disputepilot.common.limits.LlmDailyCap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -23,8 +25,10 @@ public class LlmClientConfig {
     private static final Logger log = LoggerFactory.getLogger(LlmClientConfig.class);
 
     @Bean
-    LlmClient llmClient(AppProperties props, JsonMapper mapper) {
-        return create(props.llm(), mapper);
+    LlmClient llmClient(AppProperties props, JsonMapper mapper, LlmDailyCap dailyCap) {
+        LlmClient client = create(props.llm(), mapper);
+        // The daily cap (plan §9.2 step 7) guards every live call; recorded replays are free.
+        return client.isLive() ? new CappedLlmClient(client, dailyCap) : client;
     }
 
     /** Also used by the eval runner, which builds a client without a Spring context. */
@@ -40,14 +44,14 @@ public class LlmClientConfig {
         }
         RetryPolicy retry = new RetryPolicy(llm.maxAttempts(), llm.retryBaseDelayMs());
         LlmClient client = switch (llm.effectiveProvider()) {
-            case "anthropic" -> new AnthropicLlmClient(llm.apiKey(), blankToNull(llm.baseUrl()), llm.model(),
+            case "anthropic" -> new AnthropicLlmClient(llm.apiKey(), blankToNull(llm.baseUrl()), llm.effectiveModel(),
                     mapper, retry);
-            case "openai-compatible" -> new OpenAiCompatibleLlmClient(llm.baseUrl(), llm.apiKey(), llm.model(),
+            case "openai-compatible" -> new OpenAiCompatibleLlmClient(llm.baseUrl(), llm.apiKey(), llm.effectiveModel(),
                     mapper, retry);
             default -> throw new IllegalStateException("Unknown DP_LLM_PROVIDER '" + llm.provider()
                     + "'; expected 'openai-compatible' or 'anthropic'");
         };
-        log.info("LLM mode live: provider {}, model {}", client.providerName(), llm.model());
+        log.info("LLM mode live: provider {}, model {}", client.providerName(), llm.effectiveModel());
         return client;
     }
 
