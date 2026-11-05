@@ -31,6 +31,7 @@ dp:
     mode: ${DP_LLM_MODE:}                     # live | recorded; blank = recorded unless a key is set
     api-key: ${DP_LLM_API_KEY:}
     model: ${DP_LLM_MODEL:}                       # blank = provider default: openai/gpt-oss-120b (openai-compatible) or claude-haiku-5-5 (anthropic)
+    analytics-model: ${DP_ANALYTICS_LLM_MODEL:}   # dashboard agent's model; blank = DP_LLM_MODEL
     daily-cap: ${DP_LLM_DAILY_CAP:300}
     provider: ${DP_LLM_PROVIDER:openai-compatible}   # openai-compatible | anthropic
     base-url: ${DP_LLM_BASE_URL:}                    # e.g. https://api.groq.com/openai/v1

@@ -31,7 +31,13 @@ public record AppProperties(
             @DefaultValue("openai-compatible") String provider,
             @DefaultValue("") String baseUrl,
             @DefaultValue("4") int maxAttempts,
-            @DefaultValue("1000") long retryBaseDelayMs) {
+            @DefaultValue("1000") long retryBaseDelayMs,
+            @DefaultValue("") String analyticsModel) {
+
+        /** DP_ANALYTICS_LLM_MODEL for the dashboard agent; blank follows {@link #effectiveModel()}. */
+        public String effectiveAnalyticsModel() {
+            return analyticsModel != null && !analyticsModel.isBlank() ? analyticsModel.trim() : effectiveModel();
+        }
 
         /** "live" or "recorded". Defaults to recorded when no API key is set. */
         public String effectiveMode() {

@@ -94,7 +94,7 @@ public class AnalyticsAgentProxy {
         } else if (!anthropic && (llm.baseUrl() == null || llm.baseUrl().isBlank())) {
             reason = "DP_LLM_BASE_URL is not set, so the dashboard agent is off.";
         }
-        return new AgentInfo(reason == null, provider, llm.effectiveModel(), turnsPerHour, reason);
+        return new AgentInfo(reason == null, provider, llm.effectiveAnalyticsModel(), turnsPerHour, reason);
     }
 
     /** One agent turn: rate limits, then the provider. Returns a Chat Completions response. */
@@ -148,7 +148,7 @@ public class AnalyticsAgentProxy {
     }
 
     private JsonNode openAi(ObjectNode chat, int maxTokens) {
-        chat.put("model", llm.effectiveModel());
+        chat.put("model", llm.effectiveAnalyticsModel());
         chat.put("max_completion_tokens", maxTokens);
         chat.put("stream", false);
         String base = trimSlash(llm.baseUrl());
@@ -174,7 +174,7 @@ public class AnalyticsAgentProxy {
         Matcher m = FAILED_TOOL.matcher(error.path("message").asString(""));
         ObjectNode out = mapper.createObjectNode();
         out.put("id", "recovered-" + System.nanoTime());
-        out.put("model", llm.effectiveModel());
+        out.put("model", llm.effectiveAnalyticsModel());
         ObjectNode choice = out.putArray("choices").addObject();
         ObjectNode message = choice.putObject("message");
         message.put("role", "assistant");
@@ -218,7 +218,7 @@ public class AnalyticsAgentProxy {
     }
 
     private JsonNode anthropic(ObjectNode chat, int maxTokens) {
-        ObjectNode body = AnthropicChatTranslator.toMessages(chat, llm.effectiveModel(), maxTokens, mapper);
+        ObjectNode body = AnthropicChatTranslator.toMessages(chat, llm.effectiveAnalyticsModel(), maxTokens, mapper);
         String base = llm.baseUrl() == null || llm.baseUrl().isBlank() ? "https://api.anthropic.com"
                 : trimSlash(llm.baseUrl());
         JsonNode msg = withRetries(() -> post("Claude API", base + "/v1/messages", h -> {

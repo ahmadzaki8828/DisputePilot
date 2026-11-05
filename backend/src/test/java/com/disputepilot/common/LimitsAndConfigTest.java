@@ -20,7 +20,7 @@ import tools.jackson.databind.json.JsonMapper;
 class LimitsAndConfigTest {
 
     private static AppProperties.Llm llm(String provider, String model) {
-        return new AppProperties.Llm("", "", model, 300, provider, "", 4, 1000);
+        return new AppProperties.Llm("", "", model, 300, provider, "", 4, 1000, "");
     }
 
     @Test
