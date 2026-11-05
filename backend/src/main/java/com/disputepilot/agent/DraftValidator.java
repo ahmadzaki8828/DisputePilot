@@ -10,6 +10,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 
 /**
@@ -44,6 +46,14 @@ public class DraftValidator {
     public static final String NOTES_MISSING = "NOTES_MISSING";
     public static final String REFUND_ALREADY_ISSUED = "REFUND_ALREADY_ISSUED";
 
+    /** Something that looks like a carrier tracking number: 10+ letters and digits, at least one of each. */
+    private static final Pattern TRACKING_LIKE =
+            Pattern.compile("(?<![A-Za-z0-9])(?=[A-Za-z0-9]*[0-9])(?=[A-Za-z0-9]*[A-Za-z])[A-Za-z0-9]{10,}(?![A-Za-z0-9])");
+    /** A bare run of 12+ digits is also a tracking number. */
+    private static final Pattern LONG_DIGITS = Pattern.compile("(?<![0-9])[0-9]{12,}(?![0-9])");
+    /** Something that looks like one of the merchant's refund IDs (REF-6002) . */
+    private static final Pattern REFUND_LIKE = Pattern.compile("(?<![A-Za-z0-9])REF[-_][A-Za-z0-9]+");
+
     public static final int MAX_NOTES = 2000;
     public static final int MAX_RATIONALE = 600;
 
@@ -58,7 +68,7 @@ public class DraftValidator {
         checkShape(draft, issues);
         checkEvidence(draft, caseFile, playbook, issues);
         checkCitations(draft, caseFile, issues);
-        checkText(draft, redactor, issues);
+        checkText(draft, caseFile, redactor, issues);
         checkOffer(draft, caseFile, issues);
         checkNoDoubleRefund(draft, caseFile, issues);
 
@@ -187,12 +197,64 @@ public class DraftValidator {
         }
     }
 
-    private void checkText(DraftProposal d, PiiRedactor redactor, List<ValidationResult.Issue> issues) {
+    private void checkText(DraftProposal d, CaseFile caseFile, PiiRedactor redactor, List<ValidationResult.Issue> issues) {
+        checkIdentifiers(d, caseFile, issues);
         checkOneText(d.notes(), "$.notes", redactor, issues);
         checkOneText(d.rationale(), "$.rationale", redactor, issues);
         if (d.evidence() != null) {
             for (int i = 0; i < d.evidence().size(); i++) {
                 checkOneText(d.evidence().get(i).notes(), "$.evidence[" + i + "].notes", redactor, issues);
+            }
+        }
+    }
+
+    /**
+     * The note to PayPal and every evidence field may only name tracking numbers and refund IDs that are in the
+     * merchant's records. A buyer-supplied (or invented) identifier quoted in prose is as wrong as one in a field.
+     */
+    private void checkIdentifiers(DraftProposal d, CaseFile caseFile, List<ValidationResult.Issue> issues) {
+        scanIdentifiers(d.notes(), "$.notes", caseFile, issues);
+        if (d.evidence() == null) {
+            return;
+        }
+        for (int i = 0; i < d.evidence().size(); i++) {
+            EvidenceItem e = d.evidence().get(i);
+            String path = "$.evidence[" + i + "]";
+            scanIdentifiers(e.notes(), path + ".notes", caseFile, issues);
+            if (e.evidenceInfo() != null && e.evidenceInfo().trackingInfo() != null) {
+                for (EvidenceItem.TrackingInfo t : e.evidenceInfo().trackingInfo()) {
+                    scanIdentifiers(t.carrierName(), path + ".evidence_info.tracking_info", caseFile, issues);
+                }
+            }
+        }
+    }
+
+    private void scanIdentifiers(String text, String path, CaseFile caseFile, List<ValidationResult.Issue> issues) {
+        if (text == null || text.isBlank()) {
+            return;
+        }
+        Set<String> tracking = caseFile.knownTrackingNumbers();
+        Set<String> refunds = caseFile.knownRefundIds();
+        Set<String> reported = new java.util.LinkedHashSet<>();
+        Matcher refund = REFUND_LIKE.matcher(text);
+        while (refund.find()) {
+            String id = refund.group();
+            if (!refunds.contains(id) && reported.add(id)) {
+                issues.add(new ValidationResult.Issue(UNKNOWN_REFUND_ID, "Refund ID " + id
+                        + " is not in the merchant's records "
+                        + (refunds.isEmpty() ? "(no refund was issued)." : "(known: " + refunds + ")."), path));
+            }
+        }
+        for (Pattern p : List.of(TRACKING_LIKE, LONG_DIGITS)) {
+            Matcher m = p.matcher(text);
+            while (m.find()) {
+                String id = m.group();
+                if (tracking.contains(id) || refunds.contains(id) || id.startsWith("REF") || !reported.add(id)) {
+                    continue;
+                }
+                issues.add(new ValidationResult.Issue(UNKNOWN_TRACKING_NUMBER, id
+                        + " looks like a tracking number but is not in the merchant's records "
+                        + (tracking.isEmpty() ? "(there are no shipments)." : "(known: " + tracking + ")."), path));
             }
         }
     }
