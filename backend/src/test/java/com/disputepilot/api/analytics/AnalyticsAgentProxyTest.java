@@ -115,6 +115,39 @@ class AnalyticsAgentProxyTest {
     }
 
     @Test
+    void aToolCallTheProviderRejectedComesBackAsAToolCallSoStudioCanReportTheSchemaError() throws Exception {
+        PROVIDER.stubFor(WireMock.post("/openai/v1/chat/completions").willReturn(aResponse().withStatus(400)
+                .withHeader("Content-Type", "application/json")
+                .withBody("""
+                        {"error":{"message":"Tool call validation failed: tool call validation failed: parameters for \
+                        tool execute_query did not match schema: errors: [missing properties: 'query']",
+                        "type":"invalid_request_error","code":"tool_use_failed",
+                        "failed_generation":"{\\"name\\":\\"execute_query\\",\\"arguments\\":{\\"tableId\\":\\"disputes\\"}}"}}""")));
+        mvc.perform(post("/api/analytics/agent").header("X-Admin-Token", TOKEN)
+                        .header("X-Forwarded-For", "192.0.2.52")
+                        .contentType(MediaType.APPLICATION_JSON).content(TURN))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.choices[0].finish_reason").value("tool_calls"))
+                .andExpect(jsonPath("$.choices[0].message.tool_calls[0].function.name").value("execute_query"))
+                .andExpect(jsonPath("$.choices[0].message.tool_calls[0].function.arguments")
+                        .value("{\"tableId\":\"disputes\"}"));
+    }
+
+    @Test
+    void aRejectedTurnWithNoToolAttemptComesBackAsTheModelsText() throws Exception {
+        PROVIDER.stubFor(WireMock.post("/openai/v1/chat/completions").willReturn(aResponse().withStatus(400)
+                .withHeader("Content-Type", "application/json")
+                .withBody("""
+                        {"error":{"message":"Tool choice is required, but model did not call a tool",
+                        "code":"tool_use_failed","failed_generation":"I need a table name."}}""")));
+        mvc.perform(post("/api/analytics/agent").header("X-Admin-Token", TOKEN)
+                        .header("X-Forwarded-For", "192.0.2.53")
+                        .contentType(MediaType.APPLICATION_JSON).content(TURN))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.choices[0].message.content").value("I need a table name."));
+    }
+
+    @Test
     void rejectsARequestWithoutMessages() throws Exception {
         mvc.perform(post("/api/analytics/agent").header("X-Admin-Token", TOKEN)
                         .header("X-Forwarded-For", "192.0.2.51")

@@ -11,6 +11,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -151,8 +153,68 @@ public class AnalyticsAgentProxy {
         chat.put("stream", false);
         String base = trimSlash(llm.baseUrl());
         String provider = OpenAiCompatibleLlmClient.providerNameFor(base);
-        return retry.call(() -> post(provider, base + "/chat/completions",
-                h -> h.set(HttpHeaders.AUTHORIZATION, "Bearer " + llm.apiKey()), chat));
+        try {
+            return retry.call(() -> post(provider, base + "/chat/completions",
+                    h -> h.set(HttpHeaders.AUTHORIZATION, "Bearer " + llm.apiKey()), chat));
+        } catch (ToolUseFailed e) {
+            return recoverToolUse(e.error);
+        }
+    }
+
+    private static final Pattern FAILED_TOOL = Pattern.compile("parameters for tool (\\S+) did not match schema");
+
+    /**
+     * Groq checks tool-call arguments against the schema itself and rejects the whole turn (400 tool_use_failed)
+     * when the model gets them wrong. Rather than end the agent's run, hand the attempt back as an ordinary tool
+     * call: Studio validates it, returns the schema error as the tool result, and the model corrects itself on the
+     * next turn. When no tool was attempted, the model's text is returned as its answer.
+     */
+    JsonNode recoverToolUse(JsonNode error) {
+        String generation = error.path("failed_generation").asString("");
+        Matcher m = FAILED_TOOL.matcher(error.path("message").asString(""));
+        ObjectNode out = mapper.createObjectNode();
+        out.put("id", "recovered-" + System.nanoTime());
+        out.put("model", llm.effectiveModel());
+        ObjectNode choice = out.putArray("choices").addObject();
+        ObjectNode message = choice.putObject("message");
+        message.put("role", "assistant");
+        if (m.find()) {
+            JsonNode args = mapper.createObjectNode();
+            try {
+                JsonNode parsed = mapper.readTree(generation);
+                JsonNode candidate = parsed.has("arguments") ? parsed.get("arguments")
+                        : parsed.has("parameters") ? parsed.get("parameters") : parsed;
+                if (candidate.isString()) {
+                    candidate = mapper.readTree(candidate.asString());
+                }
+                if (candidate.isObject()) {
+                    args = candidate;
+                }
+            } catch (RuntimeException ignored) {
+                // Not JSON: the tool still runs with no arguments and reports what it needs.
+            }
+            message.put("content", "");
+            ObjectNode call = message.putArray("tool_calls").addObject();
+            call.put("id", "call_recovered_" + System.nanoTime());
+            call.put("type", "function");
+            call.putObject("function").put("name", m.group(1).replaceAll("[^A-Za-z0-9_.-]", ""))
+                    .put("arguments", args.toString());
+            choice.put("finish_reason", "tool_calls");
+        } else {
+            message.put("content", generation);
+            choice.put("finish_reason", "stop");
+        }
+        return out;
+    }
+
+    /** A 400 tool_use_failed from an OpenAI-compatible provider, with the provider's error object. */
+    static final class ToolUseFailed extends RuntimeException {
+        final transient JsonNode error;
+
+        ToolUseFailed(JsonNode error) {
+            super("tool_use_failed");
+            this.error = error;
+        }
     }
 
     private JsonNode anthropic(ObjectNode chat, int maxTokens) {
@@ -177,12 +239,18 @@ public class AnalyticsAgentProxy {
                             throw new RetryPolicy.RateLimitedException(provider, "rate limited",
                                     retryAfter(res.getHeaders()));
                         }
+                        if (status == 400 && text.contains("tool_use_failed")) {
+                            JsonNode error = mapper.readTree(text).path("error");
+                            if ("tool_use_failed".equals(error.path("code").asString(""))) {
+                                throw new ToolUseFailed(error);
+                            }
+                        }
                         if (status < 200 || status >= 300) {
                             throw new LlmException(provider, status, "HTTP " + status + ": " + summarise(text));
                         }
                         return mapper.readTree(text);
                     });
-        } catch (LlmException e) {
+        } catch (LlmException | ToolUseFailed e) {
             throw e;
         } catch (RuntimeException e) {
             throw new LlmException(provider, 0, "call failed: " + e.getMessage(), e);
