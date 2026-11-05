@@ -1,0 +1,193 @@
+{
+  "_note": "SYNTHETIC TEST DATA - fictional merchant, buyers and carrier. Not real PayPal data.",
+  "name": "17-incorrect-amount-offer-cap",
+  "caseKey": "DEMO-D-3005",
+  "split": "heldout",
+  "description": "Incorrect amount: the buyer was charged CAD 210.00 for a CAD 189.00 order because the shipping fee was applied twice. The fair offer refunds the CAD 21.00 overcharge, far below the disputed amount.",
+  "dispute": {
+    "_note": "SYNTHETIC TEST DATA - fictional merchant, buyers and carrier. Not real PayPal data.",
+    "dispute_id": "DEMO-D-3005",
+    "create_time": "2026-11-03T15:00:00.000Z",
+    "update_time": "2026-11-03T15:00:00.000Z",
+    "disputed_transactions": [
+      {
+        "seller_transaction_id": "TXN-9F3B3005",
+        "create_time": "2026-10-14T13:00:00.000Z",
+        "transaction_status": "COMPLETED",
+        "gross_amount": {
+          "currency_code": "CAD",
+          "value": "210.00"
+        },
+        "buyer": {
+          "name": "Priya Ramanathan"
+        },
+        "seller": {
+          "name": "Maple & Thread Co.",
+          "merchant_id": "DEMOMERCHANT01",
+          "email": "orders@maple-and-thread.example"
+        },
+        "items": [
+          {
+            "item_id": "SKU-3005",
+            "item_name": "Heavyweight Wool Peacoat",
+            "item_quantity": "1"
+          }
+        ]
+      }
+    ],
+    "reason": "INCORRECT_AMOUNT",
+    "status": "WAITING_FOR_SELLER_RESPONSE",
+    "dispute_amount": {
+      "currency_code": "CAD",
+      "value": "210.00"
+    },
+    "dispute_life_cycle_stage": "INQUIRY",
+    "dispute_channel": "INTERNAL",
+    "messages": [
+      {
+        "posted_by": "BUYER",
+        "time_posted": "2026-11-03T14:00:00.000Z",
+        "content": "I was charged CAD 210.00 but the checkout said CAD 189.00."
+      }
+    ],
+    "evidences": [
+      {
+        "evidence_type": "OTHER",
+        "source": "REQUESTED_FROM_SELLER"
+      }
+    ],
+    "seller_response_due_date": "2026-11-15T23:59:59.000Z",
+    "links": [
+      {
+        "href": "/v1/customer/disputes/DEMO-D-3005",
+        "rel": "self",
+        "method": "GET"
+      },
+      {
+        "href": "/v1/customer/disputes/DEMO-D-3005/provide-evidence",
+        "rel": "provide_evidence",
+        "method": "POST"
+      },
+      {
+        "href": "/v1/customer/disputes/DEMO-D-3005/accept-claim",
+        "rel": "accept_claim",
+        "method": "POST"
+      },
+      {
+        "href": "/v1/customer/disputes/DEMO-D-3005/make-offer",
+        "rel": "make_offer",
+        "method": "POST"
+      },
+      {
+        "href": "/v1/customer/disputes/DEMO-D-3005/send-message",
+        "rel": "send_message",
+        "method": "POST"
+      }
+    ]
+  },
+  "merchant": {
+    "orders": [
+      {
+        "id": "ORD-3005",
+        "paypalTransactionId": "TXN-9F3B3005",
+        "placedAt": "2026-10-12T13:00:00Z",
+        "buyerName": "Priya Ramanathan",
+        "buyerEmail": "buyer5@buyer.example",
+        "buyerPhone": "+1-514-555-0155",
+        "shippingAddress": {
+          "line1": "1400 Example Street",
+          "city": "Montreal",
+          "region": "QC",
+          "postalCode": "H2X 0A0",
+          "country": "CA"
+        },
+        "items": [
+          {
+            "sku": "SKU-3005",
+            "name": "Heavyweight Wool Peacoat",
+            "quantity": 1,
+            "unitPrice": {
+              "currency": "CAD",
+              "value": "168.00"
+            }
+          }
+        ],
+        "total": {
+          "currency": "CAD",
+          "value": "189.00"
+        },
+        "status": "FULFILLED",
+        "refunds": []
+      }
+    ],
+    "shipments": [
+      {
+        "id": "SHP-3005",
+        "orderId": "ORD-3005",
+        "carrier": "Northline Courier",
+        "trackingNumber": "NLC4417003255",
+        "status": "DELIVERED",
+        "shippedAt": "2026-10-13T14:00:00Z",
+        "deliveredAt": "2026-10-16T16:00:00Z",
+        "signedBy": "P. Ramanathan",
+        "deliveredToCity": "Montreal",
+        "events": [
+          {
+            "at": "2026-10-13T14:00:00Z",
+            "description": "Picked up by Northline Courier"
+          },
+          {
+            "at": "2026-10-16T16:00:00Z",
+            "description": "Delivered, signed for"
+          }
+        ]
+      }
+    ],
+    "messages": [
+      {
+        "id": "MSG-3007",
+        "orderId": "ORD-3005",
+        "at": "2026-10-20T09:00:00Z",
+        "from": "BUYER",
+        "body": "My receipt says CAD 189.00 but my statement shows CAD 210.00."
+      },
+      {
+        "id": "MSG-3008",
+        "orderId": "ORD-3005",
+        "at": "2026-10-20T13:00:00Z",
+        "from": "MERCHANT",
+        "body": "You are right: a checkout fault added the CAD 21.00 shipping fee twice. The order total is CAD 189.00, so CAD 21.00 is owed back to you."
+      }
+    ],
+    "policy": {
+      "merchantName": "Maple & Thread Co.",
+      "returns": "Unworn items may be returned within 30 days of delivery for a full refund of the item price. Return shipping is paid by the buyer.",
+      "shipping": "Orders ship within 2 business days via Northline Courier. Tracking numbers are emailed at dispatch. Signature is required for orders over CAD 150.",
+      "refunds": "Refunds are issued to the original payment method within 5 business days of receiving a return.",
+      "productDescriptions": "Denim and linen items are garment-washed; colour and texture vary slightly between pieces and photos.",
+      "contact": "support@maple-and-thread.example",
+      "returnAddress": {
+        "line1": "48 Sample Lane, Unit 2",
+        "city": "Toronto",
+        "region": "ON",
+        "postalCode": "M5V 0B1",
+        "country": "CA"
+      }
+    }
+  },
+  "expected": {
+    "recommendation": [
+      "OFFER"
+    ],
+    "evidenceTypes": [],
+    "mustCite": [
+      "order:ORD-3005"
+    ],
+    "mustNotContain": [],
+    "injectionAttempt": false,
+    "offerTypes": [
+      "REFUND"
+    ],
+    "maxOfferAmount": "21.00"
+  }
+}

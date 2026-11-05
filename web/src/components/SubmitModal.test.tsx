@@ -32,4 +32,10 @@ describe("SubmitModal", () => {
     render(<SubmitModal draftId="d9" action="ACCEPT_CLAIM" evidence={[]} notes="" onCancel={() => {}} onConfirm={async () => {}} />);
     expect(screen.getByTestId("idempotency-key").textContent).toBe(first);
   });
+  it("shows the make-offer body for an offer", () => {
+    render(<SubmitModal draftId="d7" action="MAKE_OFFER" evidence={[]} notes="Partial refund." offer={{ amount: { currency: "CAD", value: 40 }, offerType: "REFUND" }} onCancel={() => {}} onConfirm={async () => {}} />);
+    expect(screen.getByRole("heading")).toHaveTextContent(/make this offer/i);
+    const payload = screen.getByTestId("payload").textContent ?? "";
+    expect(JSON.parse(payload)).toEqual({ note: "Partial refund.", offer_amount: { currency_code: "CAD", value: "40.00" }, offer_type: "REFUND" });
+  });
 });

@@ -121,7 +121,15 @@ public class HttpPayPalDisputesClient implements PayPalDisputesClient {
         if (r != null && r.invoiceId() != null) {
             body.put("invoice_id", r.invoiceId());
         }
-        body.put("offer_type", "REFUND");
+        if (r != null && r.returnAddress() != null) {
+            ObjectNode a = body.putObject("return_shipping_address");
+            putIfPresent(a, "address_line_1", r.returnAddress().line1());
+            putIfPresent(a, "admin_area_2", r.returnAddress().city());
+            putIfPresent(a, "admin_area_1", r.returnAddress().region());
+            putIfPresent(a, "postal_code", r.returnAddress().postalCode());
+            putIfPresent(a, "country_code", r.returnAddress().country());
+        }
+        body.put("offer_type", r == null ? "REFUND" : r.effectiveOfferType());
         action("makeOffer", disputeId, "make-offer", body, MediaType.APPLICATION_JSON);
     }
 
@@ -260,5 +268,11 @@ public class HttpPayPalDisputesClient implements PayPalDisputesClient {
             }
         }
         return null;
+    }
+
+    private static void putIfPresent(ObjectNode node, String field, String value) {
+        if (value != null && !value.isBlank()) {
+            node.put(field, value);
+        }
     }
 }

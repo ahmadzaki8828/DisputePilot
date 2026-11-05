@@ -63,7 +63,7 @@ class DisputeAgentTest {
         assertThat(outcome.outputTokens()).isEqualTo(80);
         assertThat(outcome.llmMode()).isEqualTo(LlmMode.LIVE);
         assertThat(outcome.model()).isEqualTo("scripted-model");
-        assertThat(outcome.promptVersion()).isEqualTo("v2");
+        assertThat(outcome.promptVersion()).isEqualTo("v3");
 
         // The tool result for get_shipments was fed back as a tool message carrying the real shipment.
         LlmRequest second = llm.requests().get(1);
@@ -164,6 +164,22 @@ class DisputeAgentTest {
     }
 
     @Test
+    void parsesTheOfferObjectFromTheToolCall() {
+        DisputeAgent agent = agent(new ScriptedLlmClient());
+        DraftProposal p = agent.parse(JSON.readTree("""
+                {"recommendation":"OFFER","confidence":0.6,"rationale":"Return and refund.","evidence":[],
+                 "notes":"We offer a refund on return.","citations":[],
+                 "offer":{"amount":{"currency":"cad","value":"35.00"},"offer_type":"refund_with_return"}}"""));
+
+        assertThat(p.offer().amount().currency()).isEqualTo("CAD");
+        assertThat(p.offer().amount().value()).isEqualByComparingTo("35.00");
+        assertThat(p.offer().offerType()).isEqualTo("REFUND_WITH_RETURN");
+        assertThat(agent.parse(JSON.readTree("""
+                {"recommendation":"FIGHT","confidence":0.9,"rationale":"r","evidence":[],"notes":"n",
+                 "citations":[],"offer":null}""")).offer()).isNull();
+    }
+
+    @Test
     void parsesEvidenceCitationsAndOfferAmountFromTheToolCall() {
         DisputeAgent agent = agent(new ScriptedLlmClient());
         DraftProposal p = agent.parse(JSON.readTree("""
@@ -176,7 +192,8 @@ class DisputeAgentTest {
 
         assertThat(p.recommendation()).isEqualTo(Recommendation.OFFER);
         assertThat(p.confidence()).isEqualByComparingTo("0.55");
-        assertThat(p.offerAmount()).isEqualByComparingTo("40.5");
+        assertThat(p.offer().amount().value()).isEqualByComparingTo("40.5");
+        assertThat(p.offer().offerType()).isEqualTo("REFUND");
         assertThat(p.evidence()).singleElement().satisfies(e -> {
             assertThat(e.evidenceType()).isEqualTo("PROOF_OF_REFUND");
             assertThat(e.evidenceInfo().refundIds()).singleElement()

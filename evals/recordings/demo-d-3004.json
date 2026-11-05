@@ -1,0 +1,80 @@
+{
+  "_note" : "Recorded from a real provider call during a live eval run. Replayed when DP_LLM_MODE=recorded so the app runs with no API key.",
+  "caseKey" : "DEMO-D-3004",
+  "source" : "live",
+  "provider" : "Groq (OpenAI-compatible API)",
+  "model" : "openai/gpt-oss-120b",
+  "promptVersion" : "v3",
+  "recordedAt" : "2026-11-05T04:54:45.754169965Z",
+  "turns" : [ {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_9d5a2fb5-1bf0-4545-b330-3cade31d08d1",
+      "name" : "get_case_file",
+      "input" : { }
+    } ],
+    "inputTokens" : 2481,
+    "outputTokens" : 44,
+    "latencyMs" : 970
+  }, {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_e5218f6f-ce14-45d8-9eed-e240ed2ade48",
+      "name" : "submit_draft",
+      "input" : {
+        "citations" : [ {
+          "id" : "dispute:DEMO-D-3004",
+          "kind" : "dispute",
+          "label" : "Dispute"
+        }, {
+          "id" : "order:ORD-3004",
+          "kind" : "order",
+          "label" : "Order"
+        }, {
+          "id" : "shipment:SHP-3004",
+          "kind" : "shipment",
+          "label" : "Shipment"
+        }, {
+          "id" : "msg:MSG-3005",
+          "kind" : "msg",
+          "label" : "Buyer defect photo"
+        }, {
+          "id" : "msg:MSG-3006",
+          "kind" : "msg",
+          "label" : "Merchant partial refund offer"
+        }, {
+          "id" : "policy:returns",
+          "kind" : "policy",
+          "label" : "Returns policy"
+        }, {
+          "id" : "policy:refunds",
+          "kind" : "policy",
+          "label" : "Refunds policy"
+        }, {
+          "id" : "policy:descriptions",
+          "kind" : "policy",
+          "label" : "Product description policy"
+        } ],
+        "confidence" : 0.85,
+        "evidence" : [ {
+          "evidence_type" : "OTHER",
+          "notes" : "Buyer reported zip pull broke on first use (msg:MSG-3005). Merchant policy states final‑sale items cannot be returned but defective items are compensated with a partial refund (policy:returns). Refunds for defects are issued to the original payment method (policy:refunds). The item shipped as described; the issue is a defect, not mis‑description (policy:descriptions)."
+        } ],
+        "missing_info" : null,
+        "notes" : "Buyer reports a defective zip on the Quilted Liner Jacket. Store policy allows a partial refund for defective final‑sale items and does not require a return. Offering a CAD 30.00 partial refund resolves the defect issue while complying with policy.",
+        "offer" : {
+          "amount" : {
+            "currency" : "CAD",
+            "value" : 30
+          },
+          "offer_type" : "REFUND"
+        },
+        "rationale" : "The defect is covered by the store's returns policy, which permits a partial refund without a return. Providing a CAD 30 refund satisfies the buyer and aligns with policy, making an offer the most appropriate response.",
+        "recommendation" : "OFFER"
+      }
+    } ],
+    "inputTokens" : 3297,
+    "outputTokens" : 860,
+    "latencyMs" : 2141
+  } ]
+}

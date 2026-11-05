@@ -166,7 +166,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Submit an APPROVED draft to PayPal (provide-evidence or accept-claim) */
+        /** Submit an APPROVED draft to PayPal (provide-evidence, accept-claim or make-offer) */
         post: operations["submitDraft"];
         delete?: never;
         options?: never;
@@ -450,6 +450,8 @@ export interface components {
             refunds?: string;
             productDescriptions?: string;
             contact?: string;
+            /** @description The store's own address for returns; null when the store takes no returns. */
+            returnAddress?: components["schemas"]["Address"] | null;
         };
         CaseFile: {
             order?: components["schemas"]["Order"] | null;
@@ -518,6 +520,8 @@ export interface components {
             notes: string;
             citations: components["schemas"]["Citation"][];
             missingInfo?: string[];
+            /** @description The settlement an OFFER draft proposes; sent through PayPal make-offer. Null otherwise. */
+            offer?: components["schemas"]["Offer"] | null;
             validation: components["schemas"]["ValidationResult"];
             /**
              * @description live = the provider was called; recorded = a real provider response from evals/recordings was replayed; sample = a hand-written stand-in was replayed, so no model produced this draft.
@@ -540,6 +544,13 @@ export interface components {
         DraftEdit: {
             notes?: string;
             evidence?: components["schemas"]["Evidence"][];
+            offer?: components["schemas"]["Offer"];
+        };
+        /** @description A make-offer settlement. amount is in the dispute's currency, above zero and at most the disputed amount; it may be null only for REPLACEMENT_WITHOUT_REFUND. REFUND_WITH_RETURN needs the store's return address. */
+        Offer: {
+            amount?: components["schemas"]["Money"] | null;
+            /** @enum {string} */
+            offerType: "REFUND" | "REFUND_WITH_RETURN" | "REFUND_WITH_REPLACEMENT" | "REPLACEMENT_WITHOUT_REFUND";
         };
         Submission: {
             /** Format: uuid */
@@ -586,6 +597,24 @@ export interface components {
             evidenceTypesCorrect?: boolean;
             grounded?: boolean;
             injectionResisted?: boolean | null;
+            /**
+             * @description tuned = the 12 cases the prompt was developed on; heldout = written before any live run and never used to tune it
+             * @enum {string}
+             */
+            split?: "tuned" | "heldout";
+            /** @description The OFFER draft's offer type and amount, e.g. "REFUND CAD 21.00" */
+            offer?: string | null;
+            /** @description Offer type and amount acceptable (true when the draft is not an OFFER) */
+            offerCorrect?: boolean;
+        };
+        EvalSplitSummary: {
+            cases?: number;
+            recommendationAccuracy?: number;
+            evidenceTypeAccuracy?: number;
+            offerAccuracy?: number;
+            groundingPassRate?: number;
+            /** @description Null when the split has no injection cases */
+            injectionResistance?: number | null;
         };
         EvalReport: {
             /**
@@ -608,6 +637,12 @@ export interface components {
             provider?: string | null;
             /** @description Null unless token prices were supplied to the eval run */
             estimatedCostPerDraftUsd?: number | null;
+            offerAccuracy?: number;
+            /** @description The same numbers for the tuned and held-out cases separately */
+            splits?: {
+                tuned?: components["schemas"]["EvalSplitSummary"];
+                heldout?: components["schemas"]["EvalSplitSummary"];
+            };
             results?: components["schemas"]["EvalCaseResult"][];
         };
         SystemInfo: {

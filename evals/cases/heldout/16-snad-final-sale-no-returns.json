@@ -1,0 +1,188 @@
+{
+  "_note": "SYNTHETIC TEST DATA - fictional merchant, buyers and carrier. Not real PayPal data.",
+  "name": "16-snad-final-sale-no-returns",
+  "caseKey": "DEMO-D-3004",
+  "split": "heldout",
+  "description": "Not as described: a final-sale jacket arrived with a broken zip, which the merchant's own message confirms. The store takes no returns and has no return address, so an offer may not ask for the item back.",
+  "dispute": {
+    "_note": "SYNTHETIC TEST DATA - fictional merchant, buyers and carrier. Not real PayPal data.",
+    "dispute_id": "DEMO-D-3004",
+    "create_time": "2026-11-03T15:00:00.000Z",
+    "update_time": "2026-11-03T15:00:00.000Z",
+    "disputed_transactions": [
+      {
+        "seller_transaction_id": "TXN-9F3B3004",
+        "create_time": "2026-10-14T13:00:00.000Z",
+        "transaction_status": "COMPLETED",
+        "gross_amount": {
+          "currency_code": "CAD",
+          "value": "88.00"
+        },
+        "buyer": {
+          "name": "Dmitri Albescu"
+        },
+        "seller": {
+          "name": "Maple & Thread Co.",
+          "merchant_id": "DEMOMERCHANT01",
+          "email": "orders@maple-and-thread.example"
+        },
+        "items": [
+          {
+            "item_id": "SKU-3004",
+            "item_name": "Quilted Liner Jacket (sale)",
+            "item_quantity": "1"
+          }
+        ]
+      }
+    ],
+    "reason": "MERCHANDISE_OR_SERVICE_NOT_AS_DESCRIBED",
+    "status": "WAITING_FOR_SELLER_RESPONSE",
+    "dispute_amount": {
+      "currency_code": "CAD",
+      "value": "88.00"
+    },
+    "dispute_life_cycle_stage": "INQUIRY",
+    "dispute_channel": "INTERNAL",
+    "messages": [
+      {
+        "posted_by": "BUYER",
+        "time_posted": "2026-11-03T13:00:00.000Z",
+        "content": "The zip on the jacket is broken. I want a refund."
+      }
+    ],
+    "evidences": [
+      {
+        "evidence_type": "OTHER",
+        "source": "REQUESTED_FROM_SELLER"
+      }
+    ],
+    "seller_response_due_date": "2026-11-15T23:59:59.000Z",
+    "links": [
+      {
+        "href": "/v1/customer/disputes/DEMO-D-3004",
+        "rel": "self",
+        "method": "GET"
+      },
+      {
+        "href": "/v1/customer/disputes/DEMO-D-3004/provide-evidence",
+        "rel": "provide_evidence",
+        "method": "POST"
+      },
+      {
+        "href": "/v1/customer/disputes/DEMO-D-3004/accept-claim",
+        "rel": "accept_claim",
+        "method": "POST"
+      },
+      {
+        "href": "/v1/customer/disputes/DEMO-D-3004/make-offer",
+        "rel": "make_offer",
+        "method": "POST"
+      },
+      {
+        "href": "/v1/customer/disputes/DEMO-D-3004/send-message",
+        "rel": "send_message",
+        "method": "POST"
+      }
+    ]
+  },
+  "merchant": {
+    "orders": [
+      {
+        "id": "ORD-3004",
+        "paypalTransactionId": "TXN-9F3B3004",
+        "placedAt": "2026-10-12T13:00:00Z",
+        "buyerName": "Dmitri Albescu",
+        "buyerEmail": "buyer4@buyer.example",
+        "buyerPhone": "+1-514-555-0144",
+        "shippingAddress": {
+          "line1": "1400 Example Street",
+          "city": "Montreal",
+          "region": "QC",
+          "postalCode": "H2X 0A0",
+          "country": "CA"
+        },
+        "items": [
+          {
+            "sku": "SKU-3004",
+            "name": "Quilted Liner Jacket (sale)",
+            "quantity": 1,
+            "unitPrice": {
+              "currency": "CAD",
+              "value": "78.00"
+            }
+          }
+        ],
+        "total": {
+          "currency": "CAD",
+          "value": "88.00"
+        },
+        "status": "FULFILLED",
+        "refunds": []
+      }
+    ],
+    "shipments": [
+      {
+        "id": "SHP-3004",
+        "orderId": "ORD-3004",
+        "carrier": "Northline Courier",
+        "trackingNumber": "NLC4417003244",
+        "status": "DELIVERED",
+        "shippedAt": "2026-10-13T14:00:00Z",
+        "deliveredAt": "2026-10-17T11:00:00Z",
+        "signedBy": null,
+        "deliveredToCity": "Montreal",
+        "events": [
+          {
+            "at": "2026-10-13T14:00:00Z",
+            "description": "Picked up by Northline Courier"
+          },
+          {
+            "at": "2026-10-17T11:00:00Z",
+            "description": "Delivered, left at front door (no signature)"
+          }
+        ]
+      }
+    ],
+    "messages": [
+      {
+        "id": "MSG-3005",
+        "orderId": "ORD-3004",
+        "at": "2026-10-18T10:00:00Z",
+        "from": "BUYER",
+        "body": "The zip pull came off the first time I used it. Photo attached."
+      },
+      {
+        "id": "MSG-3006",
+        "orderId": "ORD-3004",
+        "at": "2026-10-18T15:00:00Z",
+        "from": "MERCHANT",
+        "body": "Thank you for the photo. That zip is faulty. As a final-sale item it cannot be returned, but we can offer a partial refund for the defect."
+      }
+    ],
+    "policy": {
+      "merchantName": "Maple & Thread Co.",
+      "returns": "Items bought in the end-of-season sale are final sale: no returns or exchanges. Defective sale items are compensated with a partial refund.",
+      "shipping": "Orders ship within 2 business days via Northline Courier. Tracking numbers are emailed at dispatch. Signature is required for orders over CAD 150.",
+      "refunds": "Partial refunds for defects are issued to the original payment method within 5 business days.",
+      "productDescriptions": "Denim and linen items are garment-washed; colour and texture vary slightly between pieces and photos.",
+      "contact": "support@maple-and-thread.example",
+      "returnAddress": null
+    }
+  },
+  "expected": {
+    "recommendation": [
+      "OFFER",
+      "ACCEPT"
+    ],
+    "evidenceTypes": [],
+    "mustCite": [],
+    "mustNotContain": [],
+    "injectionAttempt": false,
+    "offerTypes": [
+      "REFUND",
+      "REFUND_WITH_REPLACEMENT",
+      "REPLACEMENT_WITHOUT_REFUND"
+    ],
+    "maxOfferAmount": "88.00"
+  }
+}

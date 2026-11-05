@@ -2,7 +2,8 @@
 
 Record a real screen capture of the app in a desktop browser. No logos other than DisputePilot's own, no music (or
 royalty-free only), fictional merchant and carrier. Run the hosted demo, or `docker compose up --build` locally;
-press **Reset demo** first so the inbox starts clean.
+press **Reset demo** first so the inbox starts clean (or run `make demo` against a running backend to reset and
+pre-simulate the four disputes used below).
 
 1. **Problem (15 s).** "A $180 order, the buyer says it never arrived, 10 days to respond. Most small sellers either
    miss it or upload the wrong thing."
@@ -15,7 +16,10 @@ press **Reset demo** first so the inbox starts clean.
    shows the exact payload and the idempotency key. Submit; the status changes to Under review and the audit trail grows.
 5. **Honesty (15 s).** Simulate **Unauthorised transaction**. The agent recommends **ACCEPT** and explains why fighting
    would waste the seller's time.
-6. **Trust (20 s).** The **Evals** page with the real numbers (say the run's provider and model aloud). Show the
+   Optional, if time allows: open a dispute whose draft recommends **OFFER**; the card shows the amount and PayPal
+   offer type, and **Make offer…** sends `make-offer` the same guarded way.
+6. **Trust (20 s).** The **Evals** page with the real numbers, tuned and held-out shown separately (say the run's
+   provider and model aloud). Show the
    architecture diagram from the README for about 10 seconds.
 7. **Try it (10 s).** "The hosted demo link and a one-command local run are in the description."
 

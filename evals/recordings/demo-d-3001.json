@@ -1,0 +1,91 @@
+{
+  "_note" : "Recorded from a real provider call during a live eval run. Replayed when DP_LLM_MODE=recorded so the app runs with no API key.",
+  "caseKey" : "DEMO-D-3001",
+  "source" : "live",
+  "provider" : "Groq (OpenAI-compatible API)",
+  "model" : "openai/gpt-oss-120b",
+  "promptVersion" : "v3",
+  "recordedAt" : "2026-11-05T04:54:45.754169965Z",
+  "turns" : [ {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_e74de8ef-665f-4353-81f3-4ac823eb676f",
+      "name" : "get_case_file",
+      "input" : { }
+    } ],
+    "inputTokens" : 2498,
+    "outputTokens" : 42,
+    "latencyMs" : 1082
+  }, {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_99ff5ce4-2b00-48d1-a4d5-bc2fb369952b",
+      "name" : "submit_draft",
+      "input" : {
+        "citations" : [ {
+          "id" : "dispute:DEMO-D-3001",
+          "kind" : "dispute",
+          "label" : "Dispute"
+        }, {
+          "id" : "order:ORD-3001",
+          "kind" : "order",
+          "label" : "Order details"
+        }, {
+          "id" : "shipment:SHP-3001A",
+          "kind" : "shipment",
+          "label" : "Scarf shipment delivered"
+        }, {
+          "id" : "shipment:SHP-3001B",
+          "kind" : "shipment",
+          "label" : "Coat shipment lost"
+        }, {
+          "id" : "msg:DM-1",
+          "kind" : "msg",
+          "label" : "Buyer claim"
+        }, {
+          "id" : "msg:MSG-3001",
+          "kind" : "msg",
+          "label" : "Merchant note"
+        }, {
+          "id" : "policy:returns",
+          "kind" : "policy",
+          "label" : "Return policy"
+        }, {
+          "id" : "policy:shipping",
+          "kind" : "policy",
+          "label" : "Shipping policy"
+        } ],
+        "confidence" : 0.85,
+        "evidence" : [ {
+          "evidence_info" : {
+            "tracking_info" : [ {
+              "carrier_name" : "OTHER",
+              "carrier_name_other" : "Northline Courier",
+              "tracking_number" : "NLC4417003201"
+            }, {
+              "carrier_name" : "OTHER",
+              "carrier_name_other" : "Northline Courier",
+              "tracking_number" : "NLC4417003202"
+            } ]
+          },
+          "evidence_type" : "PROOF_OF_FULFILLMENT",
+          "notes" : "Scarf parcel delivered 16 Oct; coat parcel status LOST as of 30 Oct."
+        } ],
+        "missing_info" : null,
+        "notes" : "The order (ORD-3001) included a scarf (CAD 45) and a coat (CAD 120). Shipment SHP-3001A (tracking NLC4417003201) was delivered on 16 Oct. Shipment SHP-3001B (tracking NLC4417003202) was reported lost by Northline Courier on 30 Oct. The buyer reports only receiving the scarf. Store policy allows a full refund for items not received without requiring a return. Offering a CAD 120 refund for the coat resolves the claim.",
+        "offer" : {
+          "amount" : {
+            "currency" : "CAD",
+            "value" : 120
+          },
+          "offer_type" : "REFUND"
+        },
+        "rationale" : "Coat parcel is lost and the buyer never received it. Policy permits a refund without return for undelivered items. Offering the coat price (CAD 120) satisfies the buyer and is supported by shipment records showing loss.",
+        "recommendation" : "OFFER"
+      }
+    } ],
+    "inputTokens" : 3499,
+    "outputTokens" : 1153,
+    "latencyMs" : 2896
+  } ]
+}

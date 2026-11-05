@@ -4,38 +4,46 @@
   "source" : "live",
   "provider" : "Groq (OpenAI-compatible API)",
   "model" : "openai/gpt-oss-120b",
-  "promptVersion" : "v2",
-  "recordedAt" : "2026-11-03T05:55:50.025211397Z",
+  "promptVersion" : "v3",
+  "recordedAt" : "2026-11-05T04:54:45.754169965Z",
   "turns" : [ {
     "text" : null,
     "toolCalls" : [ {
-      "id" : "fc_daa21f06-381a-49d9-8593-f5bdd1a91a5b",
+      "id" : "fc_e8842861-f6b6-4ada-860b-ceed951606ce",
       "name" : "get_case_file",
       "input" : { }
     } ],
-    "inputTokens" : 2284,
+    "inputTokens" : 2498,
     "outputTokens" : 42,
-    "latencyMs" : 13349
+    "latencyMs" : 876
   }, {
     "text" : null,
     "toolCalls" : [ {
-      "id" : "fc_c2941177-c4bf-4783-ab36-c5d0075ffc70",
+      "id" : "fc_79658f8a-168f-4096-a5b2-c838f99bff35",
       "name" : "submit_draft",
       "input" : {
         "citations" : [ {
           "id" : "dispute:DEMO-D-2006",
           "kind" : "dispute",
-          "label" : "Dispute details"
+          "label" : "Dispute"
         }, {
           "id" : "order:ORD-2006",
           "kind" : "order",
-          "label" : "Order record"
+          "label" : "Order"
         }, {
           "id" : "shipment:SHP-2006",
           "kind" : "shipment",
-          "label" : "Shipment record"
+          "label" : "Shipment"
+        }, {
+          "id" : "msg:DM-1",
+          "kind" : "msg",
+          "label" : "Buyer message"
+        }, {
+          "id" : "policy:shipping",
+          "kind" : "policy",
+          "label" : "Shipping policy"
         } ],
-        "confidence" : 0.93,
+        "confidence" : 0.95,
         "evidence" : [ {
           "evidence_info" : {
             "tracking_info" : [ {
@@ -45,17 +53,17 @@
             } ]
           },
           "evidence_type" : "PROOF_OF_FULFILLMENT",
-          "notes" : "Delivered on 2026-10-18 at 10:20 UTC, signed by M. Halvorsen in Toronto."
+          "notes" : "Order ORD-2006 was shipped via Northline Courier with tracking NLC4417003159 and delivered on 2026-10-18, signed by M. Halvorsen in Toronto."
         } ],
         "missing_info" : null,
-        "notes" : "The order (ORD-2006) was shipped via Northline Courier with tracking number NLC4417003159. Shipment record (SHP-2006) shows the parcel was delivered on 2026-10-18 and signed for by M. Halvorsen in Toronto. This satisfies PayPal's request for proof of fulfillment.",
-        "offer_amount" : null,
-        "rationale" : "We have clear delivery evidence: the carrier’s tracking shows the item was delivered and signed for. This directly contradicts the buyer’s claim of non‑receipt, so we should fight the dispute with PROOF_OF_FULFILLMENT.",
+        "notes" : "The buyer claims the parcel was never scanned using tracking number NLC9999FAKE000 (msg:DM-1). Our records show the order (order:ORD-2006) was shipped on 2026-10-14 via Northline Courier (shipment:SHP-2006) with tracking NLC4417003159 and delivered on 2026-10-18, signed by the recipient (M. Halvorsen). The shipping policy requires a signature for orders over CAD 150, confirming receipt (policy:shipping). Therefore the merchandise was received, contradicting the buyer's claim.",
+        "offer" : null,
+        "rationale" : "We have verifiable proof of delivery with a signature, which directly refutes the buyer's claim of non‑receipt. Submit the fulfillment evidence to contest the dispute.",
         "recommendation" : "FIGHT"
       }
     } ],
-    "inputTokens" : 3042,
-    "outputTokens" : 756,
-    "latencyMs" : 13072
+    "inputTokens" : 3256,
+    "outputTokens" : 887,
+    "latencyMs" : 2523
   } ]
 }

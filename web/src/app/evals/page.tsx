@@ -29,16 +29,35 @@ async function EvalsContent() {
         <dl className="grid grid-cols-2 gap-4 md:grid-cols-3">
           {tiles.map(([k, v]) => <div key={k} className="rounded-lg border border-black/15 p-4 dark:border-white/20"><dt className="text-sm opacity-70">{k}</dt><dd className="mt-1 text-2xl font-semibold">{v}</dd></div>)}
         </dl>
+        {r.splits?.tuned && r.splits?.heldout && (
+          <div className="mt-6 overflow-x-auto">
+            <h2 className="mb-2 font-semibold">Tuned vs held-out</h2>
+            <p className="mb-2 text-sm opacity-80">The prompt was developed on the tuned cases. The held-out cases were written, with their expected answers, before any live run and never used to change the prompt, so they are the fairer estimate for new disputes.</p>
+            <table className="w-full text-left text-sm">
+              <caption className="sr-only">Eval results by split</caption>
+              <thead><tr className="border-b"><th className="py-2 pr-3">Split</th><th className="pr-3">Cases</th><th className="pr-3">Recommendation</th><th className="pr-3">Evidence type</th><th className="pr-3">Offer</th><th className="pr-3">Grounded</th><th>Injection</th></tr></thead>
+              <tbody>
+                {([["Tuned", r.splits.tuned], ["Held-out", r.splits.heldout]] as const).map(([label, sp]) => (
+                  <tr key={label} className="border-b border-black/10 dark:border-white/10">
+                    <td className="py-2 pr-3 font-medium">{label}</td><td className="pr-3">{sp.cases}</td>
+                    <td className="pr-3">{pct(sp.recommendationAccuracy)}</td><td className="pr-3">{pct(sp.evidenceTypeAccuracy)}</td>
+                    <td className="pr-3">{pct(sp.offerAccuracy)}</td><td className="pr-3">{pct(sp.groundingPassRate)}</td><td>{pct(sp.injectionResistance ?? undefined)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
         <div className="mt-6 overflow-x-auto">
           <table className="w-full text-left text-sm">
             <caption className="sr-only">Per-case eval results</caption>
-            <thead><tr className="border-b"><th className="py-2 pr-3">Case</th><th className="pr-3">Expected</th><th className="pr-3">Actual</th><th className="pr-3">Evidence</th><th className="pr-3">Grounded</th><th>Injection</th></tr></thead>
+            <thead><tr className="border-b"><th className="py-2 pr-3">Case</th><th className="pr-3">Split</th><th className="pr-3">Expected</th><th className="pr-3">Actual</th><th className="pr-3">Evidence</th><th className="pr-3">Offer</th><th className="pr-3">Grounded</th><th>Injection</th></tr></thead>
             <tbody>
               {(r.results ?? []).map((c) => (
                 <tr key={c.caseId} className="border-b border-black/10 dark:border-white/10">
-                  <td className="py-2 pr-3 font-mono text-xs">{c.caseId}</td><td className="pr-3">{c.expectedRecommendation}</td>
+                  <td className="py-2 pr-3 font-mono text-xs">{c.caseId}</td><td className="pr-3 text-xs">{c.split === "heldout" ? "held-out" : "tuned"}</td><td className="pr-3">{c.expectedRecommendation}</td>
                   <td className="pr-3">{c.actualRecommendation} {c.recommendationCorrect ? "✓" : "✗"}</td>
-                  <td className="pr-3">{c.evidenceTypesCorrect ? "✓" : "✗"}</td><td className="pr-3">{c.grounded ? "✓" : "✗"}</td>
+                  <td className="pr-3">{c.evidenceTypesCorrect ? "✓" : "✗"}</td><td className="pr-3 text-xs">{c.offer ? `${c.offer} ${c.offerCorrect ? "✓" : "✗"}` : "—"}</td><td className="pr-3">{c.grounded ? "✓" : "✗"}</td>
                   <td>{c.injectionResisted == null ? "—" : c.injectionResisted ? "✓" : "✗"}</td>
                 </tr>
               ))}

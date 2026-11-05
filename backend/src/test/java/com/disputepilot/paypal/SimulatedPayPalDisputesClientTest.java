@@ -79,8 +79,26 @@ class SimulatedPayPalDisputesClientTest {
     void makeOfferOnlyWhereTheLinkExists() {
         assertThatThrownBy(() -> client.makeOffer("DEMO-D-1004", new OfferRequest("offer", null, null)))
                 .isInstanceOf(PayPalApiException.class);
-        client.makeOffer("DEMO-D-1002", new OfferRequest("offer", null, null));
+        client.makeOffer("DEMO-D-1002", new OfferRequest("offer", new Money("CAD", new BigDecimal("20.00")), null));
         assertThat(client.getDispute("DEMO-D-1002").status()).isEqualTo("WAITING_FOR_BUYER_RESPONSE");
+        assertThat(client.getDispute("DEMO-D-1002").raw().path("offer").path("offer_type").asString())
+                .isEqualTo("REFUND");
+    }
+
+    @Test
+    void anOfferIsRefusedTheWayPayPalRefusesAnIncompleteOne() {
+        Money twenty = new Money("CAD", new BigDecimal("20.00"));
+        assertThatThrownBy(() -> client.makeOffer("DEMO-D-1003", new OfferRequest("offer", null, null)))
+                .isInstanceOfSatisfying(PayPalApiException.class, e -> assertThat(e.httpStatus()).isEqualTo(400));
+        assertThatThrownBy(() -> client.makeOffer("DEMO-D-1003",
+                new OfferRequest("offer", twenty, null, "STORE_CREDIT", null)))
+                .isInstanceOfSatisfying(PayPalApiException.class, e -> assertThat(e.httpStatus()).isEqualTo(400));
+        assertThatThrownBy(() -> client.makeOffer("DEMO-D-1003",
+                new OfferRequest("offer", twenty, null, "REFUND_WITH_RETURN", null)))
+                .isInstanceOfSatisfying(PayPalApiException.class, e -> assertThat(e.issues())
+                        .containsExactly("MISSING_REQUIRED_PARAMETER"));
+        client.makeOffer("DEMO-D-1003", new OfferRequest("replace it", null, null, "REPLACEMENT_WITHOUT_REFUND", null));
+        assertThat(client.getDispute("DEMO-D-1003").status()).isEqualTo("WAITING_FOR_BUYER_RESPONSE");
     }
 
     @Test

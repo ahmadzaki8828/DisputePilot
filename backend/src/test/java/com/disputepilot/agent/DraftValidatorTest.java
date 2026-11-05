@@ -3,7 +3,14 @@ package com.disputepilot.agent;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.disputepilot.domain.Citation;
+import com.disputepilot.domain.CustomerMessage;
 import com.disputepilot.domain.EvidenceItem;
+import com.disputepilot.domain.Money;
+import com.disputepilot.domain.Offer;
+import com.disputepilot.domain.Order;
+import com.disputepilot.domain.Shipment;
+import com.disputepilot.domain.StorePolicy;
+import com.disputepilot.merchant.MerchantDataPort;
 import com.disputepilot.domain.Recommendation;
 import com.disputepilot.domain.ValidationResult;
 import com.disputepilot.merchant.SeededMerchantData;
@@ -146,7 +153,7 @@ class DraftValidatorTest {
         DraftProposal d = new DraftProposal(Recommendation.OFFER, new BigDecimal("0.6"), "Settle it.",
                 List.of(), "We will refund the buyer in full.",
                 List.of(new Citation("order:ORD-1044", "order", "Order ORD-1044")), List.of(),
-                new BigDecimal("500.00"));
+                refund("CAD", "500.00"));
         codes(d, "DEMO-D-1003").contains(DraftValidator.OFFER_EXCEEDS_DISPUTED_AMOUNT);
     }
 
@@ -154,7 +161,8 @@ class DraftValidatorTest {
     void anOfferWithNoAmountFails() {
         DraftProposal d = new DraftProposal(Recommendation.OFFER, new BigDecimal("0.6"), "Settle it.",
                 List.of(), "We will refund part of the order.",
-                List.of(new Citation("order:ORD-1044", "order", "Order ORD-1044")), List.of(), null);
+                List.of(new Citation("order:ORD-1044", "order", "Order ORD-1044")), List.of(),
+                new Offer(null, Offer.REFUND));
         codes(d, "DEMO-D-1003").contains(DraftValidator.OFFER_WITHOUT_AMOUNT);
     }
 
@@ -164,7 +172,7 @@ class DraftValidatorTest {
                 "A partial refund settles a colour-variation claim.", List.of(),
                 "We offer a partial refund of CAD 40.00 for the colour variation.",
                 List.of(new Citation("policy:descriptions", "policy", "Product descriptions")), List.of(),
-                new BigDecimal("40.00"));
+                refund("CAD", "40.00"));
         codes(d, "DEMO-D-1003").isEmpty();
     }
 
@@ -196,6 +204,77 @@ class DraftValidatorTest {
         DraftProposal bad = new DraftProposal(d.recommendation(), new BigDecimal("1.4"), d.rationale(),
                 d.evidence(), d.notes(), d.citations(), d.missingInfo(), null);
         codes(bad, "DEMO-D-1001").contains(DraftValidator.CONFIDENCE_OUT_OF_RANGE);
+    }
+
+    private static Offer refund(String currency, String value) {
+        return new Offer(new Money(currency, new BigDecimal(value)), Offer.REFUND);
+    }
+
+    private static DraftProposal offer(Offer offer) {
+        return new DraftProposal(Recommendation.OFFER, new BigDecimal("0.6"), "Settle it.", List.of(),
+                "We offer a partial refund for the colour variation.",
+                List.of(new Citation("policy:descriptions", "policy", "Product descriptions")), List.of(), offer);
+    }
+
+    @Test
+    void anOfferRecommendationWithNoOfferFails() {
+        codes(offer(null), "DEMO-D-1003").containsExactly(DraftValidator.OFFER_MISSING);
+    }
+
+    @Test
+    void anOfferOfZeroFails() {
+        codes(offer(refund("CAD", "0.00")), "DEMO-D-1003").containsExactly(DraftValidator.OFFER_WITHOUT_AMOUNT);
+    }
+
+    @Test
+    void anOfferTypePayPalDoesNotKnowFails() {
+        codes(offer(new Offer(new Money("CAD", new BigDecimal("20.00")), "STORE_CREDIT")), "DEMO-D-1003")
+                .containsExactly(DraftValidator.OFFER_TYPE_INVALID);
+    }
+
+    @Test
+    void anOfferInAnotherCurrencyFails() {
+        codes(offer(refund("USD", "20.00")), "DEMO-D-1003").containsExactly(DraftValidator.OFFER_CURRENCY_MISMATCH);
+    }
+
+    @Test
+    void aReplacementWithoutRefundNeedsNoAmount() {
+        codes(offer(new Offer(null, Offer.REPLACEMENT_WITHOUT_REFUND)), "DEMO-D-1003").isEmpty();
+    }
+
+    @Test
+    void aRefundWithReturnPassesWhenTheStoreHasAReturnAddress() {
+        codes(offer(new Offer(new Money("CAD", new BigDecimal("40.00")), Offer.REFUND_WITH_RETURN)), "DEMO-D-1003")
+                .isEmpty();
+    }
+
+    @Test
+    void aRefundWithReturnFailsWhenTheStoreHasNoReturnAddress() {
+        SeededMerchantData seeded = new SeededMerchantData();
+        StorePolicy p = seeded.policy();
+        MerchantDataPort noReturns = new MerchantDataPort() {
+            public java.util.Optional<Order> findOrderByPaypalTransactionId(String txnId) {
+                return seeded.findOrderByPaypalTransactionId(txnId);
+            }
+            public List<Shipment> shipmentsForOrder(String orderId) {
+                return seeded.shipmentsForOrder(orderId);
+            }
+            public List<CustomerMessage> messagesForOrder(String orderId) {
+                return seeded.messagesForOrder(orderId);
+            }
+            public StorePolicy policy() {
+                return new StorePolicy(p.merchantName(), "All sales are final; no returns.", p.shipping(),
+                        p.refunds(), p.productDescriptions(), p.contact(), null);
+            }
+        };
+        EvidenceAssembler.Assembled a = new EvidenceAssembler(noReturns).assemble(
+                paypal.listDisputes(DisputeQuery.all()).items().stream()
+                        .filter(d -> d.paypalDisputeId().equals("DEMO-D-1003")).findFirst().orElseThrow());
+        DraftProposal d = offer(new Offer(new Money("CAD", new BigDecimal("40.00")), Offer.REFUND_WITH_RETURN));
+        ValidationResult result = validator.validate(d, a.caseFile(),
+                Playbook.forReason(a.caseFile().dispute().reason()), a.redactor());
+        assertThat(result.issues()).extracting(ValidationResult.Issue::code)
+                .containsExactly(DraftValidator.OFFER_NEEDS_RETURN_ADDRESS);
     }
 
     @Test

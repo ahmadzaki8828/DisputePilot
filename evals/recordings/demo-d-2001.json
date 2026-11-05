@@ -4,46 +4,38 @@
   "source" : "live",
   "provider" : "Groq (OpenAI-compatible API)",
   "model" : "openai/gpt-oss-120b",
-  "promptVersion" : "v2",
-  "recordedAt" : "2026-11-03T05:55:50.025211397Z",
+  "promptVersion" : "v3",
+  "recordedAt" : "2026-11-05T04:54:45.754169965Z",
   "turns" : [ {
     "text" : null,
     "toolCalls" : [ {
-      "id" : "fc_433a330c-03f9-46f0-9e19-2a7a3200b58c",
+      "id" : "fc_4d95f3b0-197a-40d3-9fae-95cab6fd56f4",
       "name" : "get_case_file",
       "input" : { }
     } ],
-    "inputTokens" : 2289,
+    "inputTokens" : 2503,
     "outputTokens" : 42,
-    "latencyMs" : 16560
+    "latencyMs" : 795
   }, {
     "text" : null,
     "toolCalls" : [ {
-      "id" : "fc_f39f9b39-7ab7-4cda-882b-ded89e53116e",
+      "id" : "fc_2ce4b839-a81b-45a5-9ad1-71a1d3007c8f",
       "name" : "submit_draft",
       "input" : {
         "citations" : [ {
-          "id" : "dispute:DEMO-D-2001",
-          "kind" : "dispute",
-          "label" : "Dispute"
-        }, {
           "id" : "order:ORD-2001",
           "kind" : "order",
-          "label" : "Order"
+          "label" : "Order ORD-2001"
         }, {
           "id" : "shipment:SHP-2001",
           "kind" : "shipment",
-          "label" : "Shipment"
+          "label" : "Shipment SHP-2001"
         }, {
-          "id" : "msg:MSG-2001",
-          "kind" : "msg",
-          "label" : "Buyer message"
-        }, {
-          "id" : "msg:DM-1",
-          "kind" : "msg",
-          "label" : "Buyer dispute message"
+          "id" : "dispute:DEMO-D-2001",
+          "kind" : "dispute",
+          "label" : "Dispute DEMO-D-2001"
         } ],
-        "confidence" : 0.85,
+        "confidence" : 0.9,
         "evidence" : [ {
           "evidence_info" : {
             "tracking_info" : [ {
@@ -55,18 +47,25 @@
           "evidence_type" : "PROOF_OF_FULFILLMENT",
           "notes" : null
         }, {
+          "evidence_info" : null,
           "evidence_type" : "OTHER",
-          "notes" : "Shipment is still IN_TRANSIT and has not updated since the estimated delivery date of 2026-10-22; no delivery confirmation is available."
+          "notes" : "Shipment is still IN_TRANSIT and has not been delivered, exceeding the estimated delivery date of 2026-10-22. Buyer reports no tracking updates."
         } ],
         "missing_info" : null,
-        "notes" : "Order ORD-2001 for CAD 112.00 was shipped on 2026-10-17 via Northline Courier (tracking NLC4417003104). The carrier status is IN_TRANSIT; estimated delivery was 2026-10-22. As of the buyer’s inquiry on 2026-11-01 the tracking has not moved.",
-        "offer_amount" : 112,
-        "rationale" : "The parcel is still in transit past its estimated delivery date and we have no proof of delivery. For a MERCHANDISE_OR_SERVICE_NOT_RECEIVED claim, PayPal requires proof of receipt, which we cannot provide. Offering a full refund resolves the dispute promptly and aligns with the store’s policy.",
+        "notes" : "The order ORD-2001 for a Wool Scarf Set (CAD 102) plus shipping (CAD 10) was shipped on 2026-10-17 via Northline Courier, tracking NLC4417003104. The shipment remains IN_TRANSIT and has not been delivered as of the dispute date, exceeding the estimated delivery date of 2026-10-22. The buyer reports no tracking updates.",
+        "offer" : {
+          "amount" : {
+            "currency" : "CAD",
+            "value" : 112
+          },
+          "offer_type" : "REFUND"
+        },
+        "rationale" : "The item has not been received and the shipment is delayed beyond its estimated delivery date. No proof of delivery exists, so fighting is unlikely to succeed. Offering a full refund resolves the dispute fairly.",
         "recommendation" : "OFFER"
       }
     } ],
-    "inputTokens" : 3071,
-    "outputTokens" : 1153,
-    "latencyMs" : 24907
+    "inputTokens" : 3285,
+    "outputTokens" : 1051,
+    "latencyMs" : 2763
   } ]
 }

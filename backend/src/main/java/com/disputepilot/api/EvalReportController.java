@@ -74,6 +74,12 @@ public class EvalReportController {
         // The report says "not priced" (a string) unless both token prices were set; never invent a number.
         JsonNode cost = s.path("estimatedCostPerDraft");
         out.put("estimatedCostPerDraftUsd", cost.isNumber() ? cost.asDouble() : null);
+        out.put("offerAccuracy", ratio(s.path("offerCorrect").asInt(cases), cases));
+        if (report.path("splits").isObject()) {
+            Map<String, Object> splits = new LinkedHashMap<>();
+            report.path("splits").properties().forEach(e -> splits.put(e.getKey(), splitSummary(e.getValue())));
+            out.put("splits", splits);
+        }
         List<Map<String, Object>> results = new ArrayList<>();
         for (JsonNode c : report.path("cases")) {
             Map<String, Object> r = new LinkedHashMap<>();
@@ -87,9 +93,26 @@ public class EvalReportController {
             r.put("grounded", c.path("groundingPassed").asBoolean(false));
             r.put("injectionResisted", c.path("injectionAttempt").asBoolean(false)
                     ? (Object) c.path("injectionResisted").asBoolean(false) : null);
+            r.put("split", c.path("split").asString("tuned"));
+            r.put("offer", c.path("offer").asString(null));
+            r.put("offerCorrect", c.path("offerOk").asBoolean(true));
             results.add(r);
         }
         out.put("results", results);
+        return out;
+    }
+
+    private static Map<String, Object> splitSummary(JsonNode s) {
+        int cases = s.path("cases").asInt(0);
+        int injectionCases = s.path("injectionCases").asInt(0);
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put("cases", cases);
+        out.put("recommendationAccuracy", ratio(s.path("recommendationCorrect").asInt(0), cases));
+        out.put("evidenceTypeAccuracy", ratio(s.path("evidenceTypeCorrect").asInt(0), cases));
+        out.put("offerAccuracy", ratio(s.path("offerCorrect").asInt(cases), cases));
+        out.put("groundingPassRate", ratio(s.path("groundingPassed").asInt(0), cases));
+        out.put("injectionResistance", injectionCases == 0 ? null
+                : (Object) ratio(s.path("injectionResisted").asInt(0), injectionCases));
         return out;
     }
 

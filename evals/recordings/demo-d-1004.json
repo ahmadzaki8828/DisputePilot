@@ -4,32 +4,28 @@
   "source" : "live",
   "provider" : "Groq (OpenAI-compatible API)",
   "model" : "openai/gpt-oss-120b",
-  "promptVersion" : "v2",
-  "recordedAt" : "2026-11-03T05:55:50.025211397Z",
+  "promptVersion" : "v3",
+  "recordedAt" : "2026-11-05T04:54:45.754169965Z",
   "turns" : [ {
     "text" : null,
     "toolCalls" : [ {
-      "id" : "fc_859e4d2f-bae0-4f87-9d52-f984fa04ee9c",
+      "id" : "fc_2c250283-2bc9-4a35-8afa-5b910833dbb3",
       "name" : "get_case_file",
       "input" : { }
     } ],
-    "inputTokens" : 2271,
-    "outputTokens" : 40,
-    "latencyMs" : 15985
+    "inputTokens" : 2490,
+    "outputTokens" : 33,
+    "latencyMs" : 1396
   }, {
     "text" : null,
     "toolCalls" : [ {
-      "id" : "fc_9c7256b8-571d-44b6-ab4b-135698c82766",
+      "id" : "fc_ab814f62-441c-4c74-b6f3-64e6fef0e569",
       "name" : "submit_draft",
       "input" : {
         "citations" : [ {
-          "id" : "dispute:DEMO-D-1004",
-          "kind" : "dispute",
-          "label" : "Dispute details"
-        }, {
           "id" : "order:ORD-1045",
           "kind" : "order",
-          "label" : "Order record"
+          "label" : "Order details"
         }, {
           "id" : "shipment:SHP-79",
           "kind" : "shipment",
@@ -37,19 +33,22 @@
         }, {
           "id" : "msg:DM-1",
           "kind" : "msg",
-          "label" : "Buyer claim"
+          "label" : "Buyer claim of unauthorized charge"
         } ],
-        "confidence" : 0.9,
-        "evidence" : [ ],
+        "confidence" : 0.92,
+        "evidence" : [ {
+          "evidence_type" : "OTHER",
+          "notes" : "Order ORD-1045 was fulfilled and delivered on 2026-10-21 to Toronto, ON, signed by S. Okonkwo (shipment:SHP-79)."
+        } ],
         "missing_info" : null,
-        "notes" : "The buyer states they did not make this purchase and do not recognize the charge (msg:DM-1). No communication from the buyer indicates they authorized or were aware of the order. The merchant's records show the order was fulfilled and delivered (order:ORD-1045, shipment:SHP-79), but delivery proof does not address authorization. Under PayPal policy, unauthorized‑transaction claims are decided by the card issuer, and the seller must accept unless the buyer acknowledges the purchase. Therefore we accept the claim.",
-        "offer_amount" : null,
-        "rationale" : "Buyer denies authorizing the payment and provides no evidence of awareness. Delivery proof cannot refute an unauthorized claim, so the default guidance is to accept.",
+        "notes" : "The buyer states they did not authorize this purchase (msg:DM-1). The merchant’s records show the order was fulfilled and delivered, signed for by the buyer’s name (order:ORD-1045, shipment:SHP-79). For unauthorized‑transaction claims, PayPal relies on the card issuer’s fraud investigation; delivery proof does not refute the buyer’s claim. Therefore the dispute should be accepted.",
+        "offer" : null,
+        "rationale" : "Unauthorized claims are decided by the card issuer. The buyer denies authorisation and provides no evidence of prior consent. Seller’s delivery proof cannot overturn this, so accepting the claim is the appropriate outcome.",
         "recommendation" : "ACCEPT"
       }
     } ],
-    "inputTokens" : 2999,
-    "outputTokens" : 763,
-    "latencyMs" : 24066
+    "inputTokens" : 3265,
+    "outputTokens" : 702,
+    "latencyMs" : 10093
   } ]
 }

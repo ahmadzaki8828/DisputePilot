@@ -4,34 +4,34 @@
   "source" : "live",
   "provider" : "Groq (OpenAI-compatible API)",
   "model" : "openai/gpt-oss-120b",
-  "promptVersion" : "v2",
-  "recordedAt" : "2026-11-03T05:55:50.025211397Z",
+  "promptVersion" : "v3",
+  "recordedAt" : "2026-11-05T04:54:45.754169965Z",
   "turns" : [ {
     "text" : null,
     "toolCalls" : [ {
-      "id" : "fc_0fd5e50d-1eee-4db2-b400-cdadf3f36ef3",
+      "id" : "fc_0d436136-5786-4058-b31f-7edb25e5888f",
       "name" : "get_case_file",
       "input" : { }
     } ],
-    "inputTokens" : 2250,
+    "inputTokens" : 2469,
     "outputTokens" : 42,
-    "latencyMs" : 15743
+    "latencyMs" : 14815
   }, {
     "text" : null,
     "toolCalls" : [ {
-      "id" : "fc_78381e9f-dd8c-42f6-8ba0-1c64a9b2afe5",
+      "id" : "fc_1fb8f106-ffc3-489c-866a-e8dc1cc43385",
       "name" : "submit_draft",
       "input" : {
         "citations" : [ {
           "id" : "order:ORD-1046",
           "kind" : "order",
-          "label" : "Order with refund"
+          "label" : "Order record showing refund"
         }, {
           "id" : "dispute:DEMO-D-1005",
           "kind" : "dispute",
           "label" : "Dispute details"
         } ],
-        "confidence" : 0.95,
+        "confidence" : 0.9,
         "evidence" : [ {
           "evidence_info" : {
             "refund_ids" : [ {
@@ -39,17 +39,17 @@
             } ]
           },
           "evidence_type" : "PROOF_OF_REFUND",
-          "notes" : "Refund of CAD 78.00 issued on 2026-10-20 (refund ID REF-5001) for the returned overshirt."
+          "notes" : "Refund of CAD 78.00 issued on 2026-10-20 for order ORD-1046 (full amount)."
         } ],
         "missing_info" : null,
-        "notes" : "Refund of CAD 78.00 was issued on 2026-10-20 (refund ID REF-5001) for the returned overshirt, satisfying the buyer’s request for a credit.",
-        "offer_amount" : null,
-        "rationale" : "Store records show a full refund was processed after the return, matching PayPal’s requested evidence. Submit PROOF_OF_REFUND to contest the claim.",
+        "notes" : "The merchant issued a full refund (CAD 78.00) on 2026-10-20, as recorded in the order (refund ID REF-5001). This satisfies the buyer's claim that the credit was not processed. Providing the refund proof addresses the dispute.",
+        "offer" : null,
+        "rationale" : "Store records show a full refund was issued after the return, matching the disputed amount. PayPal requested PROOF_OF_REFUND, which we can supply. The buyer's claim is contradicted by this evidence, so we should fight the dispute.",
         "recommendation" : "FIGHT"
       }
     } ],
-    "inputTokens" : 3078,
-    "outputTokens" : 670,
-    "latencyMs" : 24812
+    "inputTokens" : 3344,
+    "outputTokens" : 616,
+    "latencyMs" : 6709
   } ]
 }

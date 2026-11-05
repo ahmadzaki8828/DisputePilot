@@ -18,6 +18,7 @@ public record Draft(
         String notes,
         List<Citation> citations,
         List<String> missingInfo,
+        Offer offer,
         ValidationResult validation,
         LlmMode llmMode,
         String provider,

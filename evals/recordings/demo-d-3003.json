@@ -1,0 +1,61 @@
+{
+  "_note" : "Recorded from a real provider call during a live eval run. Replayed when DP_LLM_MODE=recorded so the app runs with no API key.",
+  "caseKey" : "DEMO-D-3003",
+  "source" : "live",
+  "provider" : "Groq (OpenAI-compatible API)",
+  "model" : "openai/gpt-oss-120b",
+  "promptVersion" : "v3",
+  "recordedAt" : "2026-11-05T04:54:45.754169965Z",
+  "turns" : [ {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_bd810ad6-8981-4380-9532-fcfd55275c7f",
+      "name" : "get_case_file",
+      "input" : { }
+    } ],
+    "inputTokens" : 2499,
+    "outputTokens" : 42,
+    "latencyMs" : 694
+  }, {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_e2470153-4eee-481e-8065-d592cf1482df",
+      "name" : "submit_draft",
+      "input" : {
+        "citations" : [ {
+          "id" : "shipment:SHP-3003",
+          "kind" : "shipment",
+          "label" : "Shipment delivered"
+        }, {
+          "id" : "order:ORD-3003",
+          "kind" : "order",
+          "label" : "Order details"
+        }, {
+          "id" : "msg:MSG-3003",
+          "kind" : "msg",
+          "label" : "Buyer acknowledges receipt"
+        } ],
+        "confidence" : 0.93,
+        "evidence" : [ {
+          "evidence_info" : {
+            "tracking_info" : [ {
+              "carrier_name" : "OTHER",
+              "carrier_name_other" : "Northline Courier",
+              "tracking_number" : "NLC4417003233"
+            } ]
+          },
+          "evidence_type" : "PROOF_OF_FULFILLMENT",
+          "notes" : "Delivered to resident in Montreal on 2026-10-16 per carrier records."
+        } ],
+        "missing_info" : null,
+        "notes" : "The order (ORD-3003) was shipped via Northline Courier (tracking NLC4417003233) and delivered on 2026-10-16 to the buyer's address in Montreal. The buyer later confirmed receipt in a message dated 2026-10-20, yet now claims non‑receipt. This delivery proof contradicts the dispute claim.",
+        "offer" : null,
+        "rationale" : "Shipment records and the buyer's own acknowledgment show the item was delivered, so the claim of non‑receipt is unsupported. Submit proof of fulfillment to contest the dispute.",
+        "recommendation" : "FIGHT"
+      }
+    } ],
+    "inputTokens" : 3387,
+    "outputTokens" : 803,
+    "latencyMs" : 2193
+  } ]
+}

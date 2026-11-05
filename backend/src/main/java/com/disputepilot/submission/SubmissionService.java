@@ -6,11 +6,17 @@ import com.disputepilot.common.audit.AuditLogWriter;
 import com.disputepilot.domain.Draft;
 import com.disputepilot.domain.DraftStatus;
 import com.disputepilot.domain.EvidenceItem;
+import com.disputepilot.domain.Money;
+import com.disputepilot.domain.Offer;
+import com.disputepilot.domain.Order;
+import com.disputepilot.domain.StorePolicy;
 import com.disputepilot.domain.Recommendation;
 import com.disputepilot.domain.SubmissionAction;
 import com.disputepilot.drafts.DraftRepository;
 import com.disputepilot.paypal.AcceptClaimRequest;
+import com.disputepilot.merchant.MerchantDataPort;
 import com.disputepilot.paypal.EvidenceSubmission;
+import com.disputepilot.paypal.OfferRequest;
 import com.disputepilot.paypal.PayPalApiException;
 import com.disputepilot.paypal.PayPalDispute;
 import com.disputepilot.paypal.PayPalDisputesClient;
@@ -54,10 +60,11 @@ public class SubmissionService {
     private final DisputeSyncService sync;
     private final AuditLogWriter audit;
     private final JsonMapper json;
+    private final MerchantDataPort merchant;
 
     public SubmissionService(DraftRepository drafts, DisputeRepository disputes, SubmissionRepository submissions,
                              PayPalDisputesClient paypal, DisputeSyncService sync, AuditLogWriter audit,
-                             JsonMapper json) {
+                             JsonMapper json, MerchantDataPort merchant) {
         this.drafts = drafts;
         this.disputes = disputes;
         this.submissions = submissions;
@@ -65,6 +72,7 @@ public class SubmissionService {
         this.sync = sync;
         this.audit = audit;
         this.json = json;
+        this.merchant = merchant;
     }
 
     /** The stored or fresh result, and whether it was served from an earlier call with the same key. */
@@ -120,7 +128,11 @@ public class SubmissionService {
                             + ", allowed: " + fresh.allowedActions() + "). It may already have been answered.");
         }
 
-        Map<String, Object> request = requestPayload(action, draft);
+        Order.Address returnAddress = null;
+        if (action == SubmissionAction.MAKE_OFFER) {
+            returnAddress = checkOffer(draft.offer(), fresh);
+        }
+        Map<String, Object> request = requestPayload(action, draft, returnAddress);
         String requestJson = json.writeValueAsString(request);
         UUID submissionId;
         if (retryOf != null) {
@@ -145,7 +157,7 @@ public class SubmissionService {
                 "action", action.name(), "paypalDisputeId", paypalId));
 
         try {
-            send(paypalId, action, draft);
+            send(paypalId, action, draft, returnAddress);
         } catch (PayPalApiException e) {
             log.warn("Submission {} for {} failed at PayPal: {} {} debug_id={}", submissionId, paypalId,
                     e.httpStatus(), e.name(), e.debugId());
@@ -179,7 +191,7 @@ public class SubmissionService {
         return new Result(submissions.find(submissionId).orElseThrow(), false);
     }
 
-    /** FIGHT answers with evidence, ACCEPT accepts the claim. OFFER and NEEDS_INFO have no PayPal call here. */
+    /** FIGHT answers with evidence, ACCEPT accepts the claim, OFFER makes an offer. NEEDS_INFO has no call. */
     static SubmissionAction actionFor(Draft draft) {
         Recommendation r = draft.recommendation();
         if (r == Recommendation.ACCEPT) {
@@ -192,17 +204,68 @@ public class SubmissionService {
             }
             return SubmissionAction.PROVIDE_EVIDENCE;
         }
-        throw new ApiException(HttpStatus.CONFLICT, "Recommendation cannot be submitted here",
-                "This draft recommends " + r + ". DisputePilot submits evidence (FIGHT) or accepts a claim "
-                        + "(ACCEPT); an offer needs an amount the merchant sets in PayPal.");
+        if (r == Recommendation.OFFER) {
+            if (draft.offer() == null) {
+                throw new ApiException(HttpStatus.CONFLICT, "No offer to make",
+                        "This draft recommends an offer but carries no offer amount and type.");
+            }
+            return SubmissionAction.MAKE_OFFER;
+        }
+        throw new ApiException(HttpStatus.CONFLICT, "Recommendation cannot be submitted",
+                "This draft recommends " + r + ": the merchant has to supply the missing information first.");
     }
 
-    private void send(String paypalId, SubmissionAction action, Draft draft) {
+    /**
+     * Checks an offer against the dispute PayPal just returned, even when the merchant approved over validation
+     * issues: a known type, an amount above zero and at most the disputed amount, and a return address when the
+     * buyer is to send the item back. Returns that address (or null).
+     */
+    private Order.Address checkOffer(Offer offer, PayPalDispute fresh) {
+        if (!Offer.isKnownType(offer.offerType())) {
+            throw offerProblem("offer type " + offer.offerType() + " is not one of " + Offer.TYPES + ".");
+        }
+        Money amount = offer.amount();
+        if (offer.refundsMoney() && (amount == null || amount.value() == null)) {
+            throw offerProblem("a " + offer.offerType() + " offer needs an amount.");
+        }
+        if (amount != null && amount.value() != null) {
+            if (amount.value().signum() <= 0) {
+                throw offerProblem("the offer amount must be above zero.");
+            }
+            Money disputed = fresh.amount();
+            if (disputed != null && disputed.value() != null && amount.value().compareTo(disputed.value()) > 0) {
+                throw offerProblem("the offer of " + amount.value() + " exceeds the disputed amount of "
+                        + disputed.value() + ".");
+            }
+            if (disputed != null && disputed.currency() != null && amount.currency() != null
+                    && !disputed.currency().equalsIgnoreCase(amount.currency())) {
+                throw offerProblem("the offer is in " + amount.currency() + " but the dispute is in "
+                        + disputed.currency() + ".");
+            }
+        }
+        if (!offer.needsReturnAddress()) {
+            return null;
+        }
+        StorePolicy policy = merchant.policy();
+        if (policy == null || policy.returnAddress() == null) {
+            throw offerProblem("a REFUND_WITH_RETURN offer needs the store's return address, and the store "
+                    + "policy has none.");
+        }
+        return policy.returnAddress();
+    }
+
+    private static ApiException offerProblem(String detail) {
+        return new ApiException(HttpStatus.CONFLICT, "Offer cannot be sent", "PayPal would refuse this offer: "
+                + detail + " Edit the offer and approve again.");
+    }
+
+    private void send(String paypalId, SubmissionAction action, Draft draft, Order.Address returnAddress) {
         switch (action) {
             case PROVIDE_EVIDENCE -> paypal.provideEvidence(paypalId, new EvidenceSubmission(evidences(draft)));
             case ACCEPT_CLAIM -> paypal.acceptClaim(paypalId,
                     new AcceptClaimRequest(truncate(draft.notes()), "REASON_NOT_SET"));
-            default -> throw new IllegalStateException("Unsupported action " + action);
+            case MAKE_OFFER -> paypal.makeOffer(paypalId, new OfferRequest(truncate(draft.notes()),
+                    draft.offer().amount(), null, draft.offer().offerType(), returnAddress));
         }
     }
 
@@ -216,11 +279,29 @@ public class SubmissionService {
         return out;
     }
 
-    private Map<String, Object> requestPayload(SubmissionAction action, Draft draft) {
+    /** What PayPal is sent, in PayPal's field names; stored on the submission and shown in the confirm modal. */
+    private Map<String, Object> requestPayload(SubmissionAction action, Draft draft, Order.Address returnAddress) {
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("action", action.name());
         if (action == SubmissionAction.PROVIDE_EVIDENCE) {
             payload.put("evidences", evidences(draft));
+        } else if (action == SubmissionAction.MAKE_OFFER) {
+            payload.put("note", truncate(draft.notes()));
+            Money amount = draft.offer().amount();
+            if (amount != null && amount.value() != null) {
+                payload.put("offer_amount", Map.of("currency_code", String.valueOf(amount.currency()),
+                        "value", amount.value().toPlainString()));
+            }
+            payload.put("offer_type", draft.offer().offerType());
+            if (returnAddress != null) {
+                Map<String, Object> a = new LinkedHashMap<>();
+                a.put("address_line_1", returnAddress.line1());
+                a.put("admin_area_2", returnAddress.city());
+                a.put("admin_area_1", returnAddress.region());
+                a.put("postal_code", returnAddress.postalCode());
+                a.put("country_code", returnAddress.country());
+                payload.put("return_shipping_address", a);
+            }
         } else {
             payload.put("note", truncate(draft.notes()));
             payload.put("accept_claim_reason", "REASON_NOT_SET");

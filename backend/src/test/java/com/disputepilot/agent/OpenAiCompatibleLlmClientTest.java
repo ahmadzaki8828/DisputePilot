@@ -135,6 +135,24 @@ class OpenAiCompatibleLlmClientTest {
     }
 
     @Test
+    void aToolCallTheProviderRejectedIsSampledAgain() {
+        wiremock.stubFor(post(urlEqualTo(PATH)).inScenario("tool_use_failed")
+                .whenScenarioStateIs(Scenario.STARTED)
+                .willReturn(aResponse().withStatus(400).withBody("""
+                        {"error":{"message":"Tool call validation failed: parameters for tool submit_draft did not \
+                        match schema","type":"invalid_request_error","code":"tool_use_failed"}}"""))
+                .willSetStateTo("second"));
+        wiremock.stubFor(post(urlEqualTo(PATH)).inScenario("tool_use_failed")
+                .whenScenarioStateIs("second")
+                .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(toolCallResponse())));
+
+        LlmResult result = client().run(request("submit_draft", List.of()));
+
+        assertThat(result.toolCalls()).hasSize(1);
+        assertThat(wiremock.findAll(postRequestedFor(urlEqualTo(PATH)))).hasSize(2);
+    }
+
+    @Test
     void retriesOnServerErrorsButNotOnClientErrors() {
         wiremock.stubFor(post(urlEqualTo(PATH)).willReturn(aResponse().withStatus(400)
                 .withBody("{\"error\":{\"message\":\"model_not_found\"}}")));

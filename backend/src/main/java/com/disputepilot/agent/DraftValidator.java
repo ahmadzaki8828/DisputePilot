@@ -2,6 +2,8 @@ package com.disputepilot.agent;
 
 import com.disputepilot.domain.Citation;
 import com.disputepilot.domain.EvidenceItem;
+import com.disputepilot.domain.Money;
+import com.disputepilot.domain.Offer;
 import com.disputepilot.domain.Recommendation;
 import com.disputepilot.domain.ValidationResult;
 import java.math.BigDecimal;
@@ -31,6 +33,10 @@ public class DraftValidator {
     public static final String PII_IN_TEXT = "PII_IN_TEXT";
     public static final String OFFER_EXCEEDS_DISPUTED_AMOUNT = "OFFER_EXCEEDS_DISPUTED_AMOUNT";
     public static final String OFFER_WITHOUT_AMOUNT = "OFFER_WITHOUT_AMOUNT";
+    public static final String OFFER_MISSING = "OFFER_MISSING";
+    public static final String OFFER_TYPE_INVALID = "OFFER_TYPE_INVALID";
+    public static final String OFFER_CURRENCY_MISMATCH = "OFFER_CURRENCY_MISMATCH";
+    public static final String OFFER_NEEDS_RETURN_ADDRESS = "OFFER_NEEDS_RETURN_ADDRESS";
     public static final String FIGHT_WITHOUT_EVIDENCE = "FIGHT_WITHOUT_EVIDENCE";
     public static final String NOTES_TOO_LONG = "NOTES_TOO_LONG";
     public static final String RATIONALE_TOO_LONG = "RATIONALE_TOO_LONG";
@@ -210,17 +216,46 @@ public class DraftValidator {
         if (d.recommendation() != Recommendation.OFFER) {
             return;
         }
-        BigDecimal offer = d.offerAmount();
-        if (offer == null || offer.compareTo(BigDecimal.ZERO) <= 0) {
-            issues.add(new ValidationResult.Issue(OFFER_WITHOUT_AMOUNT,
-                    "An OFFER needs an offer_amount above zero.", "$.offer_amount"));
+        Offer offer = d.offer();
+        if (offer == null) {
+            issues.add(new ValidationResult.Issue(OFFER_MISSING,
+                    "An OFFER needs an offer: an amount and one of PayPal's offer types " + Offer.TYPES + ".",
+                    "$.offer"));
             return;
         }
-        BigDecimal disputed = caseFile.dispute().amount() == null ? null : caseFile.dispute().amount().value();
-        if (disputed != null && offer.compareTo(disputed) > 0) {
+        if (!Offer.isKnownType(offer.offerType())) {
+            issues.add(new ValidationResult.Issue(OFFER_TYPE_INVALID,
+                    "offer_type " + offer.offerType() + " is not one of PayPal's offer types " + Offer.TYPES + ".",
+                    "$.offer.offer_type"));
+        }
+        if (offer.needsReturnAddress() && !caseFile.hasReturnAddress()) {
+            issues.add(new ValidationResult.Issue(OFFER_NEEDS_RETURN_ADDRESS,
+                    "A REFUND_WITH_RETURN offer needs the store's return address, and the store policy has none "
+                            + "(it may not take returns). Offer a plain REFUND instead.", "$.offer.offer_type"));
+        }
+        Money amount = offer.amount();
+        if (amount == null || amount.value() == null) {
+            if (offer.refundsMoney()) {
+                issues.add(new ValidationResult.Issue(OFFER_WITHOUT_AMOUNT,
+                        "A " + offer.offerType() + " offer needs an amount above zero.", "$.offer.amount"));
+            }
+            return;
+        }
+        if (amount.value().compareTo(BigDecimal.ZERO) <= 0) {
+            issues.add(new ValidationResult.Issue(OFFER_WITHOUT_AMOUNT,
+                    "The offer amount must be above zero.", "$.offer.amount.value"));
+        }
+        Money disputed = caseFile.dispute().amount();
+        if (disputed != null && disputed.value() != null && amount.value().compareTo(disputed.value()) > 0) {
             issues.add(new ValidationResult.Issue(OFFER_EXCEEDS_DISPUTED_AMOUNT,
-                    "The offer of " + offer + " exceeds the disputed amount of " + disputed + ".",
-                    "$.offer_amount"));
+                    "The offer of " + amount.value() + " exceeds the disputed amount of " + disputed.value() + ".",
+                    "$.offer.amount.value"));
+        }
+        if (disputed != null && disputed.currency() != null && amount.currency() != null
+                && !disputed.currency().equalsIgnoreCase(amount.currency())) {
+            issues.add(new ValidationResult.Issue(OFFER_CURRENCY_MISMATCH,
+                    "The offer is in " + amount.currency() + " but the dispute is in " + disputed.currency() + ".",
+                    "$.offer.amount.currency"));
         }
     }
 

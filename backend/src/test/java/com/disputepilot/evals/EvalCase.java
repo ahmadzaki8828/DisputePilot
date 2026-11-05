@@ -1,5 +1,6 @@
 package com.disputepilot.evals;
 
+import java.math.BigDecimal;
 import java.util.List;
 import tools.jackson.databind.JsonNode;
 
@@ -10,6 +11,7 @@ import tools.jackson.databind.JsonNode;
 public record EvalCase(
         String name,
         String caseKey,
+        String split,
         String description,
         String disputeFixture,
         JsonNode dispute,
@@ -22,12 +24,21 @@ public record EvalCase(
      * @param mustCite         citation IDs the draft must include
      * @param mustNotContain   strings that must appear nowhere in the draft (planted fake facts)
      * @param injectionAttempt true when a buyer message tries to instruct the agent
+     * @param offerTypes       when the draft is an OFFER: the acceptable offer types (null means any)
+     * @param maxOfferAmount   when the draft is an OFFER: the most a fair offer may refund (null means the
+     *                         disputed amount, which the validator already enforces)
      */
     public record Expected(
             List<String> recommendation,
             List<String> evidenceTypes,
             List<String> mustCite,
             List<String> mustNotContain,
-            boolean injectionAttempt) {
+            boolean injectionAttempt,
+            List<String> offerTypes,
+            BigDecimal maxOfferAmount) {
+    }
+
+    public EvalCase withSplit(String value) {
+        return new EvalCase(name, caseKey, value, description, disputeFixture, dispute, merchant, expected);
     }
 }

@@ -96,6 +96,11 @@ public class OpenAiCompatibleLlmClient implements LlmClient {
                     throw new RetryPolicy.RateLimitedException(provider,
                             "rate limited: " + summarise(text), retryAfter(res.getHeaders()));
                 }
+                if (status == 400 && text.contains("\"tool_use_failed\"")) {
+                    // The provider rejected the model's own tool call (e.g. a number where the schema says
+                    // string). A fresh sample usually gets it right, so this is retried like a 5xx.
+                    throw new MalformedToolCallException(provider, "HTTP 400: " + summarise(text));
+                }
                 if (status < 200 || status >= 300) {
                     throw new LlmException(provider, status, "HTTP " + status + ": " + summarise(text));
                 }
@@ -222,5 +227,17 @@ public class OpenAiCompatibleLlmClient implements LlmClient {
                 usage.path("prompt_tokens").asInt(0), usage.path("completion_tokens").asInt(0));
         return new LlmResult(text, calls, LlmMode.LIVE, provider, servedModel,
                 usage.path("prompt_tokens").asInt(0), usage.path("completion_tokens").asInt(0), latencyMs);
+    }
+
+    /** A provider-side rejection of the model's tool call ({@code tool_use_failed}); worth another sample. */
+    static final class MalformedToolCallException extends LlmException {
+        MalformedToolCallException(String provider, String message) {
+            super(provider, 400, message);
+        }
+
+        @Override
+        public boolean retryable() {
+            return true;
+        }
     }
 }
