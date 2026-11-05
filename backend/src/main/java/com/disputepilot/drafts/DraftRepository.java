@@ -5,6 +5,7 @@ import com.disputepilot.domain.Draft;
 import com.disputepilot.domain.DraftStatus;
 import com.disputepilot.domain.EvidenceItem;
 import com.disputepilot.domain.LlmMode;
+import com.disputepilot.domain.Offer;
 import com.disputepilot.domain.Recommendation;
 import com.disputepilot.domain.ValidationResult;
 import java.sql.ResultSet;
@@ -26,7 +27,7 @@ public class DraftRepository {
     private static final String SELECT = """
             select id, dispute_id, version, status, recommendation, confidence, rationale,
                    evidence::text as evidence, notes, citations::text as citations,
-                   missing_info::text as missing_info, validation::text as validation, llm_mode, provider, model,
+                   missing_info::text as missing_info, offer::text as offer, validation::text as validation, llm_mode, provider, model,
                    prompt_version, input_tokens, output_tokens, latency_ms, edited_by_human, repair_attempted,
                    created_at
             from drafts
@@ -56,11 +57,11 @@ public class DraftRepository {
     public Draft insert(Draft draft) {
         jdbc.sql("""
                 insert into drafts (id, dispute_id, version, status, recommendation, confidence, rationale,
-                    evidence, notes, citations, missing_info, validation, llm_mode, provider, model,
+                    evidence, notes, citations, missing_info, offer, validation, llm_mode, provider, model,
                     prompt_version, input_tokens, output_tokens, latency_ms, edited_by_human, repair_attempted)
                 values (:id, :disputeId, :version, :status, :recommendation, :confidence, :rationale,
                     cast(:evidence as jsonb), :notes, cast(:citations as jsonb), cast(:missingInfo as jsonb),
-                    cast(:validation as jsonb), :llmMode, :provider, :model, :promptVersion, :inputTokens,
+                    cast(:offer as jsonb), cast(:validation as jsonb), :llmMode, :provider, :model, :promptVersion, :inputTokens,
                     :outputTokens, :latencyMs, :editedByHuman, :repairAttempted)
                 """)
                 .param("id", draft.id())
@@ -75,6 +76,7 @@ public class DraftRepository {
                 .param("notes", draft.notes() == null ? "" : draft.notes())
                 .param("citations", json.writeValueAsString(draft.citations()))
                 .param("missingInfo", json.writeValueAsString(draft.missingInfo()))
+                .param("offer", draft.offer() == null ? null : json.writeValueAsString(draft.offer()))
                 .param("validation", json.writeValueAsString(draft.validation()))
                 .param("llmMode", draft.llmMode() == null ? LlmMode.RECORDED.dbValue() : draft.llmMode().dbValue())
                 .param("provider", draft.provider())
@@ -109,17 +111,18 @@ public class DraftRepository {
                 """).param("disputeId", disputeId).query(Integer.class).single() > 0;
     }
 
-    /** Saves a human edit: notes, evidence and the re-run validation. */
-    public Draft updateEdited(UUID id, String notes, List<EvidenceItem> evidence, ValidationResult validation,
-                              DraftStatus status) {
+    /** Saves a human edit: notes, evidence, offer and the re-run validation. */
+    public Draft updateEdited(UUID id, String notes, List<EvidenceItem> evidence, Offer offer,
+                              ValidationResult validation, DraftStatus status) {
         jdbc.sql("""
                 update drafts set notes = :notes, evidence = cast(:evidence as jsonb),
-                    validation = cast(:validation as jsonb), status = :status, edited_by_human = true
+                    offer = cast(:offer as jsonb), validation = cast(:validation as jsonb), status = :status, edited_by_human = true
                 where id = :id
                 """)
                 .param("id", id)
                 .param("notes", notes)
                 .param("evidence", json.writeValueAsString(evidence))
+                .param("offer", offer == null ? null : json.writeValueAsString(offer))
                 .param("validation", json.writeValueAsString(validation))
                 .param("status", status.name())
                 .update();
@@ -145,6 +148,7 @@ public class DraftRepository {
                 rs.getString("notes"),
                 json.readValue(rs.getString("citations"), new TypeReference<List<Citation>>() { }),
                 strings(rs.getString("missing_info")),
+                rs.getString("offer") == null ? null : json.readValue(rs.getString("offer"), Offer.class),
                 json.readValue(rs.getString("validation"), ValidationResult.class),
                 LlmMode.valueOf(rs.getString("llm_mode").toUpperCase()),
                 rs.getString("provider"),

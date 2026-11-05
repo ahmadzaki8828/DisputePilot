@@ -85,6 +85,15 @@ public record CaseFile(
     public record PolicySection(String citationId, String name, String text) {
     }
 
+    /** Citation ID of the policy section that says the store has a return address on file. */
+    public static final String RETURN_ADDRESS_CITATION = "policy:return-address";
+
+    /** True when the store has a return address, which a {@code REFUND_WITH_RETURN} offer needs. */
+    public boolean hasReturnAddress() {
+        return policy != null && policy.sections().stream()
+                .anyMatch(s -> RETURN_ADDRESS_CITATION.equals(s.citationId()));
+    }
+
     /** Every citation ID the model is allowed to use. */
     public Set<String> citationIds() {
         Set<String> ids = new LinkedHashSet<>();

@@ -139,6 +139,19 @@ page_size=2&next_page_token=TOK-42","method":"GET"}]}"""
     }
 
     @Test
+    void aRefundWithReturnOfferCarriesItsTypeAndTheReturnAddress() {
+        server.stubFor(post(urlPathEqualTo(DISPUTE + "/make-offer")).willReturn(okJson("{}")));
+        client.makeOffer("PP-D-77001", new OfferRequest("Refund on return.", new Money("CAD", new BigDecimal("50.00")),
+                null, "REFUND_WITH_RETURN", new com.disputepilot.domain.Order.Address("48 Sample Lane", "Toronto", "ON",
+                "M5V 0B1", "CA")));
+        server.verify(postRequestedFor(urlPathEqualTo(DISPUTE + "/make-offer")).withRequestBody(equalToJson("""
+                {"note":"Refund on return.","offer_amount":{"currency_code":"CAD","value":"50.00"},
+                 "return_shipping_address":{"address_line_1":"48 Sample Lane","admin_area_2":"Toronto",
+                   "admin_area_1":"ON","postal_code":"M5V 0B1","country_code":"CA"},
+                 "offer_type":"REFUND_WITH_RETURN"}""")));
+    }
+
+    @Test
     void acceptClaimAndOfferAndMessageSendPayPalShapedBodies() {
         server.stubFor(post(urlPathEqualTo(DISPUTE + "/accept-claim")).willReturn(okJson("{}")));
         server.stubFor(post(urlPathEqualTo(DISPUTE + "/make-offer")).willReturn(okJson("{}")));

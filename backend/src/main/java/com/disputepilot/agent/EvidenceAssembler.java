@@ -155,6 +155,16 @@ public class EvidenceAssembler {
         section(sections, "policy:shipping", "shipping", p.shipping(), redactor);
         section(sections, "policy:refunds", "refunds", p.refunds(), redactor);
         section(sections, "policy:descriptions", "productDescriptions", p.productDescriptions(), redactor);
+        if (p.returnAddress() != null && p.returnAddress().city() != null) {
+            // Only the city reaches the model: DisputePilot adds the full address to a return offer itself.
+            var a = p.returnAddress();
+            section(sections, CaseFile.RETURN_ADDRESS_CITATION, "returnAddress",
+                    "The store has a return address on file in " + a.city()
+                            + (a.region() == null ? "" : ", " + a.region())
+                            + (a.country() == null ? "" : ", " + a.country())
+                            + ". A REFUND_WITH_RETURN offer can ask the buyer to send the item back there.",
+                    redactor);
+        }
         return new CaseFile.PolicyFacts(p.merchantName(), sections);
     }
 }

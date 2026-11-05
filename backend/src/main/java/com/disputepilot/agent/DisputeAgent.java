@@ -2,6 +2,8 @@ package com.disputepilot.agent;
 
 import com.disputepilot.domain.Citation;
 import com.disputepilot.domain.EvidenceItem;
+import com.disputepilot.domain.Money;
+import com.disputepilot.domain.Offer;
 import com.disputepilot.domain.LlmMode;
 import com.disputepilot.domain.Recommendation;
 import com.disputepilot.domain.ValidationResult;
@@ -122,7 +124,9 @@ public class DisputeAgent {
             LlmRequest.ToolCall submit = result.toolCalls().stream()
                     .filter(c -> AgentTools.SUBMIT_DRAFT.equals(c.name())).findFirst().orElse(null);
             if (submit != null) {
-                return parse(submit.input());
+                DraftProposal parsed = parse(submit.input());
+                return parsed == null || caseFile.dispute().amount() == null ? parsed
+                        : parsed.withOfferCurrency(caseFile.dispute().amount().currency());
             }
 
             messages.add(new LlmRequest.Message("assistant", result.text(), result.toolCalls(), List.of()));
@@ -217,7 +221,32 @@ public class DisputeAgent {
                 text(input, "notes"),
                 List.copyOf(citations),
                 List.copyOf(missing),
-                decimal(input.path("offer_amount")));
+                offer(input));
+    }
+
+    /** The {@code offer} object; a bare legacy {@code offer_amount} number reads as a REFUND of that amount. */
+    private static Offer offer(JsonNode input) {
+        JsonNode o = input.path("offer");
+        if (o.isObject()) {
+            JsonNode a = o.path("amount");
+            Money amount = null;
+            if (a.isObject() && decimal(a.path("value")) != null) {
+                amount = new Money(upper(text(a, "currency")), decimal(a.path("value")));
+            } else if (a.isNumber() || a.isString()) {
+                amount = new Money(null, decimal(a));
+            }
+            String type = text(o, "offer_type");
+            if (type == null) {
+                type = text(o, "offerType");
+            }
+            return new Offer(amount, upper(type));
+        }
+        BigDecimal legacy = decimal(input.path("offer_amount"));
+        return legacy == null ? null : new Offer(new Money(null, legacy), Offer.REFUND);
+    }
+
+    private static String upper(String value) {
+        return value == null || value.isBlank() ? null : value.trim().toUpperCase();
     }
 
     private EvidenceItem evidenceItem(JsonNode e) {

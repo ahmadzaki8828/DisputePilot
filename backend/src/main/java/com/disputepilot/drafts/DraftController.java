@@ -6,6 +6,7 @@ import com.disputepilot.common.limits.DemoLimits;
 import jakarta.servlet.http.HttpServletRequest;
 import com.disputepilot.domain.Draft;
 import com.disputepilot.domain.EvidenceItem;
+import com.disputepilot.domain.Offer;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
@@ -30,7 +31,7 @@ public class DraftController {
     }
 
     /** What a human may change on a draft. */
-    public record DraftEdit(String notes, List<EvidenceItem> evidence) {
+    public record DraftEdit(String notes, List<EvidenceItem> evidence, Offer offer) {
     }
 
     public record ApproveRequest(Boolean overrideValidation) {
@@ -51,8 +52,8 @@ public class DraftController {
 
     @PatchMapping("/api/drafts/{id}")
     public Draft edit(@PathVariable UUID id, @RequestBody(required = false) DraftEdit edit) {
-        DraftEdit body = edit == null ? new DraftEdit(null, null) : edit;
-        return drafts.edit(id, body.notes(), body.evidence());
+        DraftEdit body = edit == null ? new DraftEdit(null, null, null) : edit;
+        return drafts.edit(id, body.notes(), body.evidence(), body.offer());
     }
 
     @PostMapping("/api/drafts/{id}/approve")

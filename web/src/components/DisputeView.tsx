@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { bff } from "@/lib/client";
 import { aiModeLabel } from "@/lib/labels";
+import { formatMoney, offerTypeLabel } from "@/lib/offer";
 import type { AuditEntry, DisputeDetail, Draft, SubmitAction } from "@/lib/types";
 import { CitationChip, CitationHighlightProvider, SourceBlock } from "./CitationChips";
 import { DraftingNotice, awaitingAutoDraft } from "./DraftingNotice";
@@ -17,12 +18,15 @@ import { SimulatedTag, errMessage } from "./ui";
 const fmt = (iso?: string | null) => (iso ? new Date(iso).toLocaleString("en-CA", { dateStyle: "medium", timeStyle: "short" }) : "—");
 const card = "rounded-lg border border-black/15 p-4 dark:border-white/20";
 
-/** FIGHT answers with evidence and ACCEPT accepts the claim. An offer needs an amount only PayPal can take. */
-function submitActionFor(d: Draft): SubmitAction | null {
+/** FIGHT answers with evidence, ACCEPT accepts the claim, OFFER makes the draft's offer. NEEDS_INFO has no action. */
+export function submitActionFor(d: Draft): SubmitAction | null {
   if (d.recommendation === "ACCEPT") return "ACCEPT_CLAIM";
   if (d.recommendation === "FIGHT") return "PROVIDE_EVIDENCE";
+  if (d.recommendation === "OFFER" && d.offer) return "MAKE_OFFER";
   return null;
 }
+
+const ACTION_BUTTON: Record<SubmitAction, string> = { ACCEPT_CLAIM: "Accept claim…", PROVIDE_EVIDENCE: "Submit evidence…", MAKE_OFFER: "Make offer…" };
 
 export function DisputeView({ dispute, initialDraft, audit }: { dispute: DisputeDetail; initialDraft: Draft | null; audit: AuditEntry[] }) {
   const router = useRouter();
@@ -170,6 +174,19 @@ export function DisputeView({ dispute, initialDraft, audit }: { dispute: Dispute
                 )}
               </div>
 
+              {draft.recommendation === "OFFER" && (
+                <div data-testid="offer">
+                  <h3 className="text-sm font-medium">Offer to the buyer</h3>
+                  {draft.offer ? (
+                    <div className="mt-1 rounded bg-black/5 p-2 text-sm dark:bg-white/10">
+                      <p><span className="text-base font-semibold">{draft.offer.amount ? formatMoney(draft.offer.amount) : "No refund"}</span> <span className="opacity-70">of {formatMoney(dispute.amount)} disputed</span></p>
+                      <p>{offerTypeLabel(draft.offer.offerType)} <span className="font-mono text-xs opacity-70">{draft.offer.offerType}</span></p>
+                      {draft.offer.offerType === "REFUND_WITH_RETURN" && caseFile.policy?.returnAddress && <p className="text-xs opacity-70">Returns go to the store&apos;s address in {caseFile.policy.returnAddress.city}.</p>}
+                    </div>
+                  ) : <p className="text-sm opacity-70">No offer amount yet: regenerate the draft.</p>}
+                </div>
+              )}
+
               <NotesEditor value={notes} onChange={setNotes} disabled={draft.status === "APPROVED" || draft.status === "SUBMITTED"} />
 
               {draft.missingInfo && draft.missingInfo.length > 0 && (
@@ -202,11 +219,11 @@ export function DisputeView({ dispute, initialDraft, audit }: { dispute: Dispute
                 </button>
                 {action && (
                   <button type="button" disabled={busy !== null || !canSubmit} className="rounded bg-indigo-600 px-3 py-1.5 text-sm text-white disabled:opacity-50" onClick={() => setConfirming(true)}>
-                    {action === "ACCEPT_CLAIM" ? "Accept claim…" : "Submit evidence…"}
+                    {ACTION_BUTTON[action]}
                   </button>
                 )}
               </div>
-              {!action && <p className="text-xs opacity-70">This draft recommends {draft.recommendation.replace("_", " ")}. DisputePilot submits evidence or accepts a claim; an offer needs an amount you set in PayPal.</p>}
+              {!action && <p className="text-xs opacity-70">This draft recommends {draft.recommendation.replace("_", " ")}{draft.recommendation === "OFFER" ? " but carries no offer amount, so there is nothing to send yet" : ": supply the missing information, then regenerate"}.</p>}
               {draft.status === "APPROVED" && !allowedByPayPal && <p className="text-xs opacity-70">PayPal does not currently allow this action on the dispute.</p>}
             </div>
           )}
@@ -228,6 +245,8 @@ export function DisputeView({ dispute, initialDraft, audit }: { dispute: Dispute
           action={action}
           evidence={draft.evidence}
           notes={notes}
+          offer={draft.offer}
+          returnAddress={caseFile.policy?.returnAddress}
           onCancel={() => setConfirming(false)}
           onConfirm={async (key) => {
             await bff("POST", `/api/drafts/${draft.id}/submit`, undefined, { "Idempotency-Key": key });

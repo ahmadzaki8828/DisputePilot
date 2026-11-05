@@ -183,7 +183,7 @@ paths:
   /api/drafts/{id}/submit:
     post:
       tags: [Submissions]
-      summary: Submit an APPROVED draft to PayPal (provide-evidence or accept-claim)
+      summary: Submit an APPROVED draft to PayPal (provide-evidence, accept-claim or make-offer)
       operationId: submitDraft
       parameters:
         - { $ref: '#/components/parameters/DraftId' }
@@ -502,6 +502,10 @@ components:
         refunds: { type: string }
         productDescriptions: { type: string }
         contact: { type: string }
+        returnAddress:
+          allOf: [{ $ref: '#/components/schemas/Address' }]
+          nullable: true
+          description: The store's own address for returns; null when the store takes no returns.
 
     CaseFile:
       type: object
@@ -594,6 +598,10 @@ components:
         notes: { type: string, maxLength: 2000, description: Text sent to PayPal }
         citations: { type: array, items: { $ref: '#/components/schemas/Citation' } }
         missingInfo: { type: array, items: { type: string } }
+        offer:
+          allOf: [{ $ref: '#/components/schemas/Offer' }]
+          nullable: true
+          description: The settlement an OFFER draft proposes; sent through PayPal make-offer. Null otherwise.
         validation: { $ref: '#/components/schemas/ValidationResult' }
         llmMode:
           type: string
@@ -621,6 +629,21 @@ components:
       properties:
         notes: { type: string, maxLength: 2000 }
         evidence: { type: array, items: { $ref: '#/components/schemas/Evidence' } }
+        offer: { $ref: '#/components/schemas/Offer' }
+
+    Offer:
+      type: object
+      required: [offerType]
+      description: >-
+        A make-offer settlement. amount is in the dispute's currency, above zero and at most the disputed amount;
+        it may be null only for REPLACEMENT_WITHOUT_REFUND. REFUND_WITH_RETURN needs the store's return address.
+      properties:
+        amount:
+          allOf: [{ $ref: '#/components/schemas/Money' }]
+          nullable: true
+        offerType:
+          type: string
+          enum: [REFUND, REFUND_WITH_RETURN, REFUND_WITH_REPLACEMENT, REPLACEMENT_WITHOUT_REFUND]
 
     Submission:
       type: object

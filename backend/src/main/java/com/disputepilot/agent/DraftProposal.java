@@ -2,6 +2,7 @@ package com.disputepilot.agent;
 
 import com.disputepilot.domain.Citation;
 import com.disputepilot.domain.EvidenceItem;
+import com.disputepilot.domain.Offer;
 import com.disputepilot.domain.Recommendation;
 import java.math.BigDecimal;
 import java.util.List;
@@ -15,10 +16,19 @@ public record DraftProposal(
         String notes,
         List<Citation> citations,
         List<String> missingInfo,
-        BigDecimal offerAmount) {
+        Offer offer) {
 
     public DraftProposal withEvidenceAndNotes(List<EvidenceItem> newEvidence, String newNotes) {
         return new DraftProposal(recommendation, confidence, rationale, newEvidence, newNotes, citations,
-                missingInfo, offerAmount);
+                missingInfo, offer);
+    }
+
+    /** An offer amount written without a currency is in the dispute's currency. */
+    public DraftProposal withOfferCurrency(String currency) {
+        if (offer == null) {
+            return this;
+        }
+        return new DraftProposal(recommendation, confidence, rationale, evidence, notes, citations, missingInfo,
+                offer.withCurrencyIfMissing(currency));
     }
 }

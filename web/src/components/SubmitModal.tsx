@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { type Address, type Offer, offerPayload } from "@/lib/offer";
 import type { Evidence, SubmitAction } from "@/lib/types";
 
 const keys = new Map<string, string>();
@@ -29,6 +30,8 @@ export function SubmitModal(props: {
   action: SubmitAction;
   evidence: Evidence[];
   notes: string;
+  offer?: Offer | null;
+  returnAddress?: Address | null;
   onCancel: () => void;
   onConfirm: (idempotencyKey: string) => Promise<void>;
 }) {
@@ -38,7 +41,10 @@ export function SubmitModal(props: {
   const payload =
     props.action === "PROVIDE_EVIDENCE"
       ? { evidences: props.evidence.map((e) => ({ ...e, notes: e.notes ?? props.notes })) }
-      : { note: props.notes };
+      : props.action === "MAKE_OFFER" && props.offer
+        ? offerPayload(props.notes, props.offer, props.returnAddress)
+        : { note: props.notes, accept_claim_reason: "REASON_NOT_SET" };
+  const title = props.action === "ACCEPT_CLAIM" ? "Accept the claim?" : props.action === "MAKE_OFFER" ? "Make this offer to the buyer?" : "Submit evidence to PayPal?";
 
   async function confirm() {
     setBusy(true);
@@ -56,7 +62,7 @@ export function SubmitModal(props: {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div role="dialog" aria-modal="true" aria-labelledby="submit-title" className="max-h-[90vh] w-full max-w-2xl overflow-auto rounded-lg bg-white p-5 text-neutral-900 shadow-xl dark:bg-neutral-900 dark:text-neutral-100">
         <h2 id="submit-title" className="text-lg font-semibold">
-          {props.action === "ACCEPT_CLAIM" ? "Accept the claim?" : "Submit evidence to PayPal?"}
+          {title}
         </h2>
         <p className="mt-1 text-sm opacity-80">This sends exactly the payload below to PayPal ({props.action}). It cannot be undone.</p>
         <pre data-testid="payload" className="mt-3 max-h-64 overflow-auto rounded bg-black/5 p-3 text-xs dark:bg-white/10">{JSON.stringify(payload, null, 2)}</pre>

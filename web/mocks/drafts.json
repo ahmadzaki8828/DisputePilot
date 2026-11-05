@@ -67,6 +67,13 @@
     "missingInfo": [
       "Tracking number or proof of shipment"
     ],
+    "offer": {
+      "amount": {
+        "currency": "CAD",
+        "value": 32.25
+      },
+      "offerType": "REFUND"
+    },
     "validation": {
       "passed": false,
       "issues": [

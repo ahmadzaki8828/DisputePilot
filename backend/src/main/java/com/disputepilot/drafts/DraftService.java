@@ -13,6 +13,7 @@ import com.disputepilot.domain.Draft;
 import com.disputepilot.domain.DraftStatus;
 import com.disputepilot.domain.EvidenceItem;
 import com.disputepilot.domain.Money;
+import com.disputepilot.domain.Offer;
 import com.disputepilot.domain.Recommendation;
 import com.disputepilot.domain.ValidationResult;
 import com.disputepilot.paypal.PayPalDispute;
@@ -103,6 +104,7 @@ public class DraftService {
                 p.notes() == null ? "" : p.notes(),
                 p.citations(),
                 p.missingInfo(),
+                p.recommendation() == Recommendation.OFFER ? p.offer() : null,
                 outcome.validation(),
                 outcome.llmMode(),
                 outcome.provider(),
@@ -180,6 +182,12 @@ public class DraftService {
     /** A human edit to notes and/or evidence. Re-validates and marks the draft as human-edited. */
     @Transactional
     public Draft edit(UUID draftId, String notes, List<EvidenceItem> evidence) {
+        return edit(draftId, notes, evidence, null);
+    }
+
+    /** A human edit to notes, evidence and/or the offer. Re-validates and marks the draft as human-edited. */
+    @Transactional
+    public Draft edit(UUID draftId, String notes, List<EvidenceItem> evidence, Offer offer) {
         Draft existing = require(draftId);
         if (existing.status() == DraftStatus.SUBMITTED || existing.status() == DraftStatus.SUPERSEDED) {
             throw new ApiException(HttpStatus.CONFLICT, "Draft is not editable",
@@ -187,15 +195,19 @@ public class DraftService {
         }
         String newNotes = notes == null ? existing.notes() : notes;
         List<EvidenceItem> newEvidence = evidence == null ? existing.evidence() : evidence;
+        Offer newOffer = offer == null ? existing.offer()
+                : offer.withCurrencyIfMissing(existing.offer() == null || existing.offer().amount() == null
+                        ? null : existing.offer().amount().currency());
 
-        ValidationResult validation = revalidate(existing, newNotes, newEvidence);
+        ValidationResult validation = revalidate(existing, newNotes, newEvidence, newOffer);
         DraftStatus status = validation.passed() ? DraftStatus.DRAFT : DraftStatus.NEEDS_REVIEW;
-        Draft saved = drafts.updateEdited(draftId, newNotes, newEvidence, validation, status);
+        Draft saved = drafts.updateEdited(draftId, newNotes, newEvidence, newOffer, validation, status);
 
         audit.user(AuditLogWriter.DRAFT_EDITED, existing.disputeId(), Map.of(
                 "draftId", draftId,
                 "notesChanged", notes != null,
                 "evidenceChanged", evidence != null,
+                "offerChanged", offer != null,
                 "validationPassed", validation.passed()));
         return saved;
     }
@@ -222,12 +234,14 @@ public class DraftService {
     }
 
     /** Re-runs the grounding checks against the live case file after a human edit. */
-    private ValidationResult revalidate(Draft draft, String notes, List<EvidenceItem> evidence) {
+    private ValidationResult revalidate(Draft draft, String notes, List<EvidenceItem> evidence, Offer offer) {
         return disputes.find(draft.disputeId())
                 .map(stored -> {
                     EvidenceAssembler.Assembled a = assembler.assemble(toPayPalDispute(stored));
+                    String currency = stored.summary().amount() == null ? null : stored.summary().amount().currency();
                     DraftProposal proposal = new DraftProposal(draft.recommendation(), draft.confidence(),
-                            draft.rationale(), evidence, notes, draft.citations(), draft.missingInfo(), null);
+                            draft.rationale(), evidence, notes, draft.citations(), draft.missingInfo(),
+                            offer == null ? null : offer.withCurrencyIfMissing(currency));
                     return validator.validate(proposal, a.caseFile(),
                             Playbook.forReason(a.caseFile().dispute().reason()), a.redactor());
                 })

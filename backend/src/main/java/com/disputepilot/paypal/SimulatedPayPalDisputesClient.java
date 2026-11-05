@@ -1,5 +1,6 @@
 package com.disputepilot.paypal;
 
+import com.disputepilot.domain.Offer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -195,12 +196,37 @@ public class SimulatedPayPalDisputesClient implements PayPalDisputesClient {
     @Override
     public synchronized void makeOffer(String disputeId, OfferRequest r) {
         ObjectNode d = requireAction(disputeId, "make_offer");
-        if (r != null && r.offerAmount() != null) {
+        String type = r == null ? Offer.REFUND : r.effectiveOfferType();
+        if (!Offer.isKnownType(type)) {
+            throw error(400, "INVALID_REQUEST", "offer_type must be one of " + Offer.TYPES + ".",
+                    "INVALID_PARAMETER_VALUE");
+        }
+        boolean refundsMoney = !Offer.REPLACEMENT_WITHOUT_REFUND.equals(type);
+        if (refundsMoney && (r == null || r.offerAmount() == null || r.offerAmount().value() == null)) {
+            throw error(400, "INVALID_REQUEST", "offer_amount is required for a " + type + " offer.",
+                    "MISSING_REQUIRED_PARAMETER");
+        }
+        if (Offer.REFUND_WITH_RETURN.equals(type) && r.returnAddress() == null) {
+            throw error(400, "INVALID_REQUEST", "return_shipping_address is required for REFUND_WITH_RETURN.",
+                    "MISSING_REQUIRED_PARAMETER");
+        }
+        if (r != null && r.offerAmount() != null && r.offerAmount().value() != null) {
             BigDecimal disputed = new BigDecimal(d.path("dispute_amount").path("value").asString());
             if (r.offerAmount().value().compareTo(disputed) > 0) {
                 throw error(422, "UNPROCESSABLE_ENTITY", "The offer amount exceeds the disputed amount.",
                         "OFFER_AMOUNT_EXCEEDS_DISPUTE_AMOUNT");
             }
+            if (r.offerAmount().value().signum() <= 0) {
+                throw error(400, "INVALID_REQUEST", "offer_amount must be above zero.", "INVALID_PARAMETER_VALUE");
+            }
+        }
+        // Record the offer the way PayPal's dispute details show it.
+        ObjectNode offer = d.putObject("offer");
+        offer.put("offer_type", type);
+        if (r != null && r.offerAmount() != null && r.offerAmount().value() != null) {
+            ObjectNode amount = offer.putObject("seller_offered_amount");
+            amount.put("currency_code", r.offerAmount().currency());
+            amount.put("value", r.offerAmount().value().toPlainString());
         }
         transition(d, "WAITING_FOR_BUYER_RESPONSE");
     }

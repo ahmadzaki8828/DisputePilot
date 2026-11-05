@@ -158,9 +158,27 @@ public final class AgentTools {
                       "items": {"type": "string"},
                       "description": "What the merchant would have to supply to do better. Empty when nothing."
                     },
-                    "offer_amount": {
-                      "type": ["number", "null"],
-                      "description": "Only for OFFER: the refund to offer, never more than the disputed amount."
+                    "offer": {
+                      "type": ["object", "null"],
+                      "description": "Required for OFFER, null otherwise: the settlement to propose through PayPal.",
+                      "properties": {
+                        "amount": {
+                          "type": ["object", "null"],
+                          "description": "Refund in the dispute's currency, above zero, at most the disputed amount. Null only for REPLACEMENT_WITHOUT_REFUND.",
+                          "properties": {
+                            "currency": {"type": "string", "description": "ISO currency, e.g. CAD."},
+                            "value": {"type": "string", "description": "Decimal amount as a string, e.g. 40.00."}
+                          },
+                          "required": ["currency", "value"]
+                        },
+                        "offer_type": {
+                          "type": "string",
+                          "enum": ["REFUND", "REFUND_WITH_RETURN", "REFUND_WITH_REPLACEMENT",
+                                   "REPLACEMENT_WITHOUT_REFUND"],
+                          "description": "REFUND_WITH_RETURN only when the store policy has a return address."
+                        }
+                      },
+                      "required": ["offer_type"]
                     }
                   },
                   "required": ["recommendation", "confidence", "rationale", "evidence", "notes", "citations"]
