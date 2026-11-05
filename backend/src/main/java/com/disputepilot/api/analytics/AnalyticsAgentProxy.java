@@ -67,7 +67,8 @@ public class AnalyticsAgentProxy {
     private final AppProperties.Llm llm;
     private final LlmDailyCap dailyCap;
     private final JsonMapper mapper;
-    private final RetryPolicy retry;
+    static final Duration MAX_RETRY_WAIT = Duration.ofSeconds(30);
+    private final RetryPolicy.Sleeper sleeper = Thread::sleep;
     private final int turnsPerHour;
     private final ConcurrentHashMap<String, Bucket> buckets = new ConcurrentHashMap<>();
     private final RestClient http;
@@ -77,7 +78,6 @@ public class AnalyticsAgentProxy {
         this.llm = props.llm();
         this.dailyCap = dailyCap;
         this.mapper = mapper;
-        this.retry = new RetryPolicy(llm.maxAttempts(), llm.retryBaseDelayMs());
         this.turnsPerHour = turnsPerHour > 0 ? turnsPerHour : Math.max(1, props.demo().rateLimit()) * 10;
         this.http = RestClient.builder().build();
     }
@@ -154,7 +154,7 @@ public class AnalyticsAgentProxy {
         String base = trimSlash(llm.baseUrl());
         String provider = OpenAiCompatibleLlmClient.providerNameFor(base);
         try {
-            return retry.call(() -> post(provider, base + "/chat/completions",
+            return withRetries(() -> post(provider, base + "/chat/completions",
                     h -> h.set(HttpHeaders.AUTHORIZATION, "Bearer " + llm.apiKey()), chat));
         } catch (ToolUseFailed e) {
             return recoverToolUse(e.error);
@@ -221,11 +221,44 @@ public class AnalyticsAgentProxy {
         ObjectNode body = AnthropicChatTranslator.toMessages(chat, llm.effectiveModel(), maxTokens, mapper);
         String base = llm.baseUrl() == null || llm.baseUrl().isBlank() ? "https://api.anthropic.com"
                 : trimSlash(llm.baseUrl());
-        JsonNode msg = retry.call(() -> post("Claude API", base + "/v1/messages", h -> {
+        JsonNode msg = withRetries(() -> post("Claude API", base + "/v1/messages", h -> {
             h.set("x-api-key", llm.apiKey());
             h.set("anthropic-version", "2023-06-01");
         }, body));
         return AnthropicChatTranslator.toChatCompletion(msg, mapper);
+    }
+
+    /**
+     * Retries 429 / 5xx / connection errors like drafts do, but never waits more than {@link #MAX_RETRY_WAIT}
+     * for one retry: a person is watching the chat, and a provider asking for minutes (a daily quota) gets a
+     * prompt 429 that says when to come back instead of a request that hangs.
+     */
+    private JsonNode withRetries(java.util.function.Supplier<JsonNode> call) {
+        for (int attempt = 1; ; attempt++) {
+            try {
+                return call.get();
+            } catch (LlmException e) {
+                Duration hint = e instanceof RetryPolicy.RateLimitedException r ? r.retryAfter() : null;
+                if (hint != null && hint.compareTo(MAX_RETRY_WAIT) > 0) {
+                    long minutes = Math.max(1, (hint.toSeconds() + 59) / 60);
+                    throw new AgentException(429, "The model provider's usage limit is reached. Try again in about "
+                            + minutes + (minutes == 1 ? " minute." : " minutes."));
+                }
+                if (!e.retryable() || attempt >= llm.maxAttempts()) {
+                    throw e;
+                }
+                long waitMs = hint != null ? hint.toMillis()
+                        : Math.min(MAX_RETRY_WAIT.toMillis(), llm.retryBaseDelayMs() * (1L << (attempt - 1)));
+                log.info("Dashboard agent call failed (attempt {}/{}, status {}); retrying in {} ms", attempt,
+                        llm.maxAttempts(), e.httpStatus(), waitMs);
+                try {
+                    sleeper.sleep(waitMs);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw e;
+                }
+            }
+        }
     }
 
     private JsonNode post(String provider, String url, java.util.function.Consumer<HttpHeaders> auth,

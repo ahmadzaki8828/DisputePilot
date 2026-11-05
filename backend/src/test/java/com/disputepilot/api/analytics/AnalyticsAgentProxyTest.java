@@ -148,6 +148,17 @@ class AnalyticsAgentProxyTest {
     }
 
     @Test
+    void aProviderAskingToWaitMinutesGetsAPromptFriendly429() throws Exception {
+        PROVIDER.stubFor(WireMock.post("/openai/v1/chat/completions")
+                .willReturn(aResponse().withStatus(429).withHeader("retry-after", "711").withBody("{}")));
+        mvc.perform(post("/api/analytics/agent").header("X-Admin-Token", TOKEN)
+                        .header("X-Forwarded-For", "192.0.2.54")
+                        .contentType(MediaType.APPLICATION_JSON).content(TURN))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(jsonPath("$.detail").value(org.hamcrest.Matchers.containsString("about 12 minutes")));
+    }
+
+    @Test
     void rejectsARequestWithoutMessages() throws Exception {
         mvc.perform(post("/api/analytics/agent").header("X-Admin-Token", TOKEN)
                         .header("X-Forwarded-For", "192.0.2.51")
