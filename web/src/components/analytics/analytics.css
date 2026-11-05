@@ -1,0 +1,59 @@
+/* Design tokens for the AG Studio analytics page, matching the app's light and dark look (indigo accent). */
+.dpa-root {
+  --dpa-font: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  --dpa-ink: #171717;
+  --dpa-muted: #5b5b66;
+  --dpa-surface: #ffffff;
+  --dpa-canvas: #f6f6f9;
+  --dpa-border: #e2e2ea;
+  --dpa-gridline: #efeff4;
+  --dpa-highlight: #eef0ff;
+  --dpa-accent: #4f46e5;
+  --dpa-red: #dc2626;
+  --dpa-amber: #d97706;
+  --dpa-green: #15803d;
+  --dpa-chart-1: #4f46e5;
+  --dpa-chart-2: #0891b2;
+  --dpa-chart-3: #d97706;
+  --dpa-chart-4: #db2777;
+  --dpa-chart-5: #15803d;
+  --dpa-chart-6: #7c3aed;
+  --dpa-chart-7: #64748b;
+  --dpa-chart-8: #ca8a04;
+}
+@media (prefers-color-scheme: dark) {
+  .dpa-root {
+    --dpa-ink: #ededed;
+    --dpa-muted: #a1a1aa;
+    --dpa-surface: #141418;
+    --dpa-canvas: #0a0a0a;
+    --dpa-border: #2c2c35;
+    --dpa-gridline: #1f1f26;
+    --dpa-highlight: #1e1b4b;
+    --dpa-accent: #818cf8;
+    --dpa-red: #f87171;
+    --dpa-amber: #fbbf24;
+    --dpa-green: #4ade80;
+    --dpa-chart-1: #818cf8;
+    --dpa-chart-2: #22d3ee;
+    --dpa-chart-3: #fbbf24;
+    --dpa-chart-4: #f472b6;
+    --dpa-chart-5: #4ade80;
+    --dpa-chart-6: #a78bfa;
+    --dpa-chart-7: #94a3b8;
+    --dpa-chart-8: #facc15;
+  }
+}
+
+/* Deadline radar (custom widget) */
+.dpa-radar { list-style: none; margin: 0; padding: 4px 2px; display: flex; flex-direction: column; gap: 6px; height: 100%; overflow: auto; font-family: var(--dpa-font); color: var(--dpa-ink); font-size: 13px; }
+.dpa-radar-row { display: grid; grid-template-columns: minmax(80px, 1.2fr) 2fr auto minmax(64px, auto); align-items: center; gap: 8px; }
+.dpa-radar-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-geist-mono), monospace; font-size: 12px; }
+.dpa-radar-track { height: 8px; border-radius: 4px; background: var(--dpa-gridline); overflow: hidden; }
+.dpa-radar-bar { display: block; height: 100%; border-radius: 4px; background: var(--dpa-accent); }
+.dpa-radar-bar.dpa-overdue, .dpa-radar-bar.dpa-urgent { background: var(--dpa-red); }
+.dpa-radar-bar.dpa-soon { background: var(--dpa-amber); }
+.dpa-radar-pill { font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--dpa-border); white-space: nowrap; }
+.dpa-radar-pill.dpa-overdue, .dpa-radar-pill.dpa-urgent { color: var(--dpa-red); border-color: var(--dpa-red); }
+.dpa-radar-pill.dpa-soon { color: var(--dpa-amber); border-color: var(--dpa-amber); }
+.dpa-radar-amount { text-align: right; font-variant-numeric: tabular-nums; }
