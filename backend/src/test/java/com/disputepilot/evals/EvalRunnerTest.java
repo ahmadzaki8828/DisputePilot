@@ -236,7 +236,7 @@ class EvalRunnerTest {
     // ---- loading ----
 
     /** {@code evals/cases/*.json} are the tuned suite; {@code evals/cases/heldout/*.json} the held-out one. */
-    private List<EvalCase> loadCases() throws IOException {
+    List<EvalCase> loadCases() throws IOException {
         List<EvalCase> cases = new ArrayList<>(loadDir(EVALS.resolve("cases"), TUNED));
         Path heldout = EVALS.resolve("cases").resolve(HELDOUT);
         if (Files.isDirectory(heldout)) {
@@ -257,7 +257,7 @@ class EvalRunnerTest {
     }
 
     /** A case carries its dispute inline, or points at one of the six starter fixtures. */
-    private PayPalDispute disputeOf(EvalCase c) throws IOException {
+    PayPalDispute disputeOf(EvalCase c) throws IOException {
         JsonNode raw = c.dispute() != null && !c.dispute().isNull()
                 ? c.dispute()
                 : JSON.readTree(Files.readString(REPO.resolve(c.disputeFixture())));

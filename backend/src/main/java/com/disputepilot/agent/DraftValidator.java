@@ -42,6 +42,7 @@ public class DraftValidator {
     public static final String RATIONALE_TOO_LONG = "RATIONALE_TOO_LONG";
     public static final String CONFIDENCE_OUT_OF_RANGE = "CONFIDENCE_OUT_OF_RANGE";
     public static final String NOTES_MISSING = "NOTES_MISSING";
+    public static final String REFUND_ALREADY_ISSUED = "REFUND_ALREADY_ISSUED";
 
     public static final int MAX_NOTES = 2000;
     public static final int MAX_RATIONALE = 600;
@@ -59,6 +60,7 @@ public class DraftValidator {
         checkCitations(draft, caseFile, issues);
         checkText(draft, redactor, issues);
         checkOffer(draft, caseFile, issues);
+        checkNoDoubleRefund(draft, caseFile, issues);
 
         return new ValidationResult(issues.isEmpty(), List.copyOf(issues));
     }
@@ -256,6 +258,27 @@ public class DraftValidator {
             issues.add(new ValidationResult.Issue(OFFER_CURRENCY_MISMATCH,
                     "The offer is in " + amount.currency() + " but the dispute is in " + disputed.currency() + ".",
                     "$.offer.amount.currency"));
+        }
+    }
+
+    /**
+     * The case file shows the disputed transaction already refunded: accepting the claim or offering a refund
+     * would pay the buyer twice. The right answer is to prove the refund (PROOF_OF_REFUND).
+     */
+    private void checkNoDoubleRefund(DraftProposal d, CaseFile caseFile, List<ValidationResult.Issue> issues) {
+        Set<String> refunds = caseFile.knownRefundIds();
+        if (refunds.isEmpty()) {
+            return;
+        }
+        boolean accepts = d.recommendation() == Recommendation.ACCEPT;
+        boolean refundOffer = d.recommendation() == Recommendation.OFFER
+                && (d.offer() == null || d.offer().refundsMoney());
+        if (accepts || refundOffer) {
+            issues.add(new ValidationResult.Issue(REFUND_ALREADY_ISSUED,
+                    "This transaction was already refunded (" + refunds + "). "
+                            + (accepts ? "Accepting the claim" : "A refund offer") + " would refund the buyer twice. "
+                            + "Answer with " + Playbook.PROOF_OF_REFUND + " citing the refund instead.",
+                    accepts ? "$.recommendation" : "$.offer"));
         }
     }
 
