@@ -20,6 +20,10 @@ services:
     dockerContext: .
     healthCheckPath: /actuator/health
     envVars:
+      - key: PORT
+        value: "8080"
+      - key: DP_LLM_MODE
+        value: live
       - key: DP_DB_HOST
         fromDatabase: { name: disputepilot-db, property: host }
       - key: DP_DB_PORT
@@ -81,3 +85,5 @@ services:
         fromService: { type: web, name: disputepilot-api, property: hostport }
       - key: DP_ADMIN_TOKEN
         fromService: { type: web, name: disputepilot-api, envVarKey: DP_ADMIN_TOKEN }
+      - key: AG_STUDIO_LICENSE_KEY
+        sync: false
