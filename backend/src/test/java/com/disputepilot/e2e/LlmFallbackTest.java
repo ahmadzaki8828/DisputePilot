@@ -134,7 +134,7 @@ class LlmFallbackTest {
     }
 
     @Test
-    void withNoRecordingTheCallerGetsAFriendly429() throws Exception {
+    void withNoRecordingTheDisputeGetsASavedAiBusyState() throws Exception {
         PROVIDER_RATE_LIMITED.set(true);
         jdbc.sql("""
                 insert into disputes (id, paypal_dispute_id, simulated, reason, status, life_cycle_stage, amount_value,
@@ -146,10 +146,12 @@ class LlmFallbackTest {
 
         mvc.perform(post("/api/disputes/{id}/drafts", id("PP-NO-RECORDING")).header("X-Admin-Token", TOKEN)
                         .header("X-Forwarded-For", "203.0.113.70"))
-                .andExpect(status().isTooManyRequests())
-                .andExpect(jsonPath("$.title").value("The AI is busy right now"))
-                .andExpect(jsonPath("$.detail").value(org.hamcrest.Matchers.containsString("try again")));
-        assertThat(jdbc.sql("select count(*) from drafts").query(Integer.class).single()).isZero();
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.status").value("NEEDS_REVIEW"))
+                .andExpect(jsonPath("$.rationale").value(org.hamcrest.Matchers.containsString("AI is busy, try again")))
+                .andExpect(jsonPath("$.validation.issues[0].code").value("AI_BUSY"));
+        assertThat(jdbc.sql("select count(*) from drafts where status = 'NEEDS_REVIEW'").query(Integer.class).single())
+                .isEqualTo(1);
     }
 
     @Test
