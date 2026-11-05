@@ -156,6 +156,11 @@ public class DraftService {
                 "provider", String.valueOf(saved.provider()),
                 "model", String.valueOf(saved.model()),
                 "turns", outcome.turns()));
+        outcome.validation().issues().stream()
+                .filter(i -> DraftValidator.MANIPULATION_WARNING.equals(i.code())).findFirst()
+                .ifPresent(i -> audit.agent(AuditLogWriter.MANIPULATION_FLAGGED, disputeId, Map.of(
+                        "draftId", saved.id(), "recommendation", saved.recommendation().name(),
+                        "detail", i.message())));
         log.info("Draft v{} for {}: {} (validation {}, {} turn(s), {} in / {} out tokens)",
                 saved.version(), dispute.paypalDisputeId(), saved.recommendation(),
                 outcome.validation().passed() ? "passed" : "failed", outcome.turns(),
