@@ -1,0 +1,198 @@
+{
+  "_note": "SYNTHETIC TEST DATA - fictional merchant, buyers and carrier. Not real PayPal data.",
+  "name": "14-inr-refund-already-issued",
+  "caseKey": "DEMO-D-3002",
+  "split": "heldout",
+  "description": "Item not received: the parcel was lost and the merchant already refunded the order in full before the buyer opened the dispute. The answer is proof of that refund.",
+  "dispute": {
+    "_note": "SYNTHETIC TEST DATA - fictional merchant, buyers and carrier. Not real PayPal data.",
+    "dispute_id": "DEMO-D-3002",
+    "create_time": "2026-11-03T15:00:00.000Z",
+    "update_time": "2026-11-03T15:00:00.000Z",
+    "disputed_transactions": [
+      {
+        "seller_transaction_id": "TXN-9F3B3002",
+        "create_time": "2026-10-14T13:00:00.000Z",
+        "transaction_status": "COMPLETED",
+        "gross_amount": {
+          "currency_code": "CAD",
+          "value": "92.00"
+        },
+        "buyer": {
+          "name": "Tobias Lindqvist"
+        },
+        "seller": {
+          "name": "Maple & Thread Co.",
+          "merchant_id": "DEMOMERCHANT01",
+          "email": "orders@maple-and-thread.example"
+        },
+        "items": [
+          {
+            "item_id": "SKU-3002",
+            "item_name": "Linen Camp Shirt",
+            "item_quantity": "1"
+          }
+        ]
+      }
+    ],
+    "reason": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+    "status": "WAITING_FOR_SELLER_RESPONSE",
+    "dispute_amount": {
+      "currency_code": "CAD",
+      "value": "92.00"
+    },
+    "dispute_life_cycle_stage": "INQUIRY",
+    "dispute_channel": "INTERNAL",
+    "messages": [
+      {
+        "posted_by": "BUYER",
+        "time_posted": "2026-11-03T11:00:00.000Z",
+        "content": "My shirt never arrived and I want my money back."
+      }
+    ],
+    "evidences": [
+      {
+        "evidence_type": "PROOF_OF_FULFILLMENT",
+        "source": "REQUESTED_FROM_SELLER"
+      },
+      {
+        "evidence_type": "PROOF_OF_REFUND",
+        "source": "REQUESTED_FROM_SELLER"
+      }
+    ],
+    "seller_response_due_date": "2026-11-15T23:59:59.000Z",
+    "links": [
+      {
+        "href": "/v1/customer/disputes/DEMO-D-3002",
+        "rel": "self",
+        "method": "GET"
+      },
+      {
+        "href": "/v1/customer/disputes/DEMO-D-3002/provide-evidence",
+        "rel": "provide_evidence",
+        "method": "POST"
+      },
+      {
+        "href": "/v1/customer/disputes/DEMO-D-3002/accept-claim",
+        "rel": "accept_claim",
+        "method": "POST"
+      },
+      {
+        "href": "/v1/customer/disputes/DEMO-D-3002/make-offer",
+        "rel": "make_offer",
+        "method": "POST"
+      },
+      {
+        "href": "/v1/customer/disputes/DEMO-D-3002/send-message",
+        "rel": "send_message",
+        "method": "POST"
+      }
+    ]
+  },
+  "merchant": {
+    "orders": [
+      {
+        "id": "ORD-3002",
+        "paypalTransactionId": "TXN-9F3B3002",
+        "placedAt": "2026-10-12T13:00:00Z",
+        "buyerName": "Tobias Lindqvist",
+        "buyerEmail": "buyer2@buyer.example",
+        "buyerPhone": "+1-514-555-0177",
+        "shippingAddress": {
+          "line1": "1400 Example Street",
+          "city": "Montreal",
+          "region": "QC",
+          "postalCode": "H2X 0A0",
+          "country": "CA"
+        },
+        "items": [
+          {
+            "sku": "SKU-3002",
+            "name": "Linen Camp Shirt",
+            "quantity": 1,
+            "unitPrice": {
+              "currency": "CAD",
+              "value": "82.00"
+            }
+          }
+        ],
+        "total": {
+          "currency": "CAD",
+          "value": "92.00"
+        },
+        "status": "REFUNDED",
+        "refunds": [
+          {
+            "id": "REF-6002",
+            "amount": {
+              "currency": "CAD",
+              "value": "92.00"
+            },
+            "issuedAt": "2026-10-29T16:00:00Z",
+            "reason": "Parcel lost in transit; full refund including shipping"
+          }
+        ]
+      }
+    ],
+    "shipments": [
+      {
+        "id": "SHP-3002",
+        "orderId": "ORD-3002",
+        "carrier": "Northline Courier",
+        "trackingNumber": "NLC4417003210",
+        "status": "LOST",
+        "shippedAt": "2026-10-14T14:00:00Z",
+        "deliveredAt": null,
+        "signedBy": null,
+        "deliveredToCity": null,
+        "events": [
+          {
+            "at": "2026-10-14T14:00:00Z",
+            "description": "Picked up by Northline Courier"
+          },
+          {
+            "at": "2026-10-28T12:00:00Z",
+            "description": "Carrier investigation closed: parcel lost"
+          }
+        ]
+      }
+    ],
+    "messages": [
+      {
+        "id": "MSG-3002",
+        "orderId": "ORD-3002",
+        "at": "2026-10-29T16:05:00Z",
+        "from": "MERCHANT",
+        "body": "We are sorry, the courier lost your parcel. We have refunded the full CAD 92.00 to your original payment method."
+      }
+    ],
+    "policy": {
+      "merchantName": "Maple & Thread Co.",
+      "returns": "Unworn items may be returned within 30 days of delivery for a full refund of the item price. Return shipping is paid by the buyer.",
+      "shipping": "Orders ship within 2 business days via Northline Courier. Tracking numbers are emailed at dispatch. Signature is required for orders over CAD 150.",
+      "refunds": "Refunds are issued to the original payment method within 5 business days of receiving a return.",
+      "productDescriptions": "Denim and linen items are garment-washed; colour and texture vary slightly between pieces and photos.",
+      "contact": "support@maple-and-thread.example",
+      "returnAddress": {
+        "line1": "48 Sample Lane, Unit 2",
+        "city": "Toronto",
+        "region": "ON",
+        "postalCode": "M5V 0B1",
+        "country": "CA"
+      }
+    }
+  },
+  "expected": {
+    "recommendation": [
+      "FIGHT"
+    ],
+    "evidenceTypes": [
+      "PROOF_OF_REFUND"
+    ],
+    "mustCite": [
+      "order:ORD-3002"
+    ],
+    "mustNotContain": [],
+    "injectionAttempt": false
+  }
+}

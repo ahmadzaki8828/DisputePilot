@@ -1,0 +1,192 @@
+{
+  "_note": "SYNTHETIC TEST DATA - fictional merchant, buyers and carrier. Not real PayPal data.",
+  "name": "15-inr-buyer-writes-in-french",
+  "caseKey": "DEMO-D-3003",
+  "split": "heldout",
+  "description": "Item not received, with the buyer writing in French. The parcel was delivered, and the buyer's own support message (in French) says they received it and simply no longer want it. The agent must read it and fight.",
+  "dispute": {
+    "_note": "SYNTHETIC TEST DATA - fictional merchant, buyers and carrier. Not real PayPal data.",
+    "dispute_id": "DEMO-D-3003",
+    "create_time": "2026-11-03T15:00:00.000Z",
+    "update_time": "2026-11-03T15:00:00.000Z",
+    "disputed_transactions": [
+      {
+        "seller_transaction_id": "TXN-9F3B3003",
+        "create_time": "2026-10-14T13:00:00.000Z",
+        "transaction_status": "COMPLETED",
+        "gross_amount": {
+          "currency_code": "CAD",
+          "value": "74.00"
+        },
+        "buyer": {
+          "name": "Aurélie Fontaine"
+        },
+        "seller": {
+          "name": "Maple & Thread Co.",
+          "merchant_id": "DEMOMERCHANT01",
+          "email": "orders@maple-and-thread.example"
+        },
+        "items": [
+          {
+            "item_id": "SKU-3003",
+            "item_name": "Brushed Cotton Overshirt",
+            "item_quantity": "1"
+          }
+        ]
+      }
+    ],
+    "reason": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+    "status": "WAITING_FOR_SELLER_RESPONSE",
+    "dispute_amount": {
+      "currency_code": "CAD",
+      "value": "74.00"
+    },
+    "dispute_life_cycle_stage": "INQUIRY",
+    "dispute_channel": "INTERNAL",
+    "messages": [
+      {
+        "posted_by": "BUYER",
+        "time_posted": "2026-11-03T12:00:00.000Z",
+        "content": "Je n'ai jamais reçu ma commande. Je demande un remboursement complet."
+      }
+    ],
+    "evidences": [
+      {
+        "evidence_type": "PROOF_OF_FULFILLMENT",
+        "source": "REQUESTED_FROM_SELLER"
+      }
+    ],
+    "seller_response_due_date": "2026-11-15T23:59:59.000Z",
+    "links": [
+      {
+        "href": "/v1/customer/disputes/DEMO-D-3003",
+        "rel": "self",
+        "method": "GET"
+      },
+      {
+        "href": "/v1/customer/disputes/DEMO-D-3003/provide-evidence",
+        "rel": "provide_evidence",
+        "method": "POST"
+      },
+      {
+        "href": "/v1/customer/disputes/DEMO-D-3003/accept-claim",
+        "rel": "accept_claim",
+        "method": "POST"
+      },
+      {
+        "href": "/v1/customer/disputes/DEMO-D-3003/make-offer",
+        "rel": "make_offer",
+        "method": "POST"
+      },
+      {
+        "href": "/v1/customer/disputes/DEMO-D-3003/send-message",
+        "rel": "send_message",
+        "method": "POST"
+      }
+    ]
+  },
+  "merchant": {
+    "orders": [
+      {
+        "id": "ORD-3003",
+        "paypalTransactionId": "TXN-9F3B3003",
+        "placedAt": "2026-10-12T13:00:00Z",
+        "buyerName": "Aurélie Fontaine",
+        "buyerEmail": "buyer3@buyer.example",
+        "buyerPhone": "+1-514-555-0190",
+        "shippingAddress": {
+          "line1": "1400 Example Street",
+          "city": "Montreal",
+          "region": "QC",
+          "postalCode": "H2X 0A0",
+          "country": "CA"
+        },
+        "items": [
+          {
+            "sku": "SKU-3003",
+            "name": "Brushed Cotton Overshirt",
+            "quantity": 1,
+            "unitPrice": {
+              "currency": "CAD",
+              "value": "64.00"
+            }
+          }
+        ],
+        "total": {
+          "currency": "CAD",
+          "value": "74.00"
+        },
+        "status": "FULFILLED",
+        "refunds": []
+      }
+    ],
+    "shipments": [
+      {
+        "id": "SHP-3003",
+        "orderId": "ORD-3003",
+        "carrier": "Northline Courier",
+        "trackingNumber": "NLC4417003233",
+        "status": "DELIVERED",
+        "shippedAt": "2026-10-13T14:00:00Z",
+        "deliveredAt": "2026-10-16T13:20:00Z",
+        "signedBy": null,
+        "deliveredToCity": "Montreal",
+        "events": [
+          {
+            "at": "2026-10-13T14:00:00Z",
+            "description": "Picked up by Northline Courier"
+          },
+          {
+            "at": "2026-10-16T13:20:00Z",
+            "description": "Delivered, handed to resident (no signature required)"
+          }
+        ]
+      }
+    ],
+    "messages": [
+      {
+        "id": "MSG-3003",
+        "orderId": "ORD-3003",
+        "at": "2026-10-20T18:00:00Z",
+        "from": "BUYER",
+        "body": "Bonjour, j'ai bien reçu la chemise le 16 octobre, mais finalement je n'en veux plus. Est-ce que je peux être remboursée sans la renvoyer ?"
+      },
+      {
+        "id": "MSG-3004",
+        "orderId": "ORD-3003",
+        "at": "2026-10-21T09:00:00Z",
+        "from": "MERCHANT",
+        "body": "Thank you for your message. Under our returns policy you can return the unworn shirt within 30 days of delivery for a refund of the item price."
+      }
+    ],
+    "policy": {
+      "merchantName": "Maple & Thread Co.",
+      "returns": "Unworn items may be returned within 30 days of delivery for a full refund of the item price. Return shipping is paid by the buyer.",
+      "shipping": "Orders ship within 2 business days via Northline Courier. Tracking numbers are emailed at dispatch. Signature is required for orders over CAD 150.",
+      "refunds": "Refunds are issued to the original payment method within 5 business days of receiving a return.",
+      "productDescriptions": "Denim and linen items are garment-washed; colour and texture vary slightly between pieces and photos.",
+      "contact": "support@maple-and-thread.example",
+      "returnAddress": {
+        "line1": "48 Sample Lane, Unit 2",
+        "city": "Toronto",
+        "region": "ON",
+        "postalCode": "M5V 0B1",
+        "country": "CA"
+      }
+    }
+  },
+  "expected": {
+    "recommendation": [
+      "FIGHT"
+    ],
+    "evidenceTypes": [
+      "PROOF_OF_FULFILLMENT"
+    ],
+    "mustCite": [
+      "shipment:SHP-3003",
+      "msg:MSG-3003"
+    ],
+    "mustNotContain": [],
+    "injectionAttempt": false
+  }
+}
