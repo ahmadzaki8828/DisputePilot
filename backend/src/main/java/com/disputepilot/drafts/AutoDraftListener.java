@@ -45,7 +45,7 @@ public class AutoDraftListener {
         this.drafts = drafts;
         this.draftService = draftService;
         this.enabled = enabled;
-        this.executor = async ? Executors.newFixedThreadPool(2, r -> {
+        this.executor = async ? Executors.newFixedThreadPool(1, r -> {
             Thread t = new Thread(r, "auto-draft");
             t.setDaemon(true);
             return t;

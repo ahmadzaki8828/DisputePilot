@@ -42,7 +42,8 @@ public class LlmClientConfig {
             log.warn("DP_LLM_MODE=live but DP_LLM_API_KEY is empty - falling back to recorded responses");
             return new RecordedLlmClient();
         }
-        RetryPolicy retry = new RetryPolicy(llm.maxAttempts(), llm.retryBaseDelayMs());
+        RetryPolicy retry = new RetryPolicy(llm.maxAttempts(), llm.retryBaseDelayMs(), Thread::sleep,
+                RetryPolicy.MAX_RETRY_WAIT);
         LlmClient client = switch (llm.effectiveProvider()) {
             case "anthropic" -> new AnthropicLlmClient(llm.apiKey(), blankToNull(llm.baseUrl()), llm.effectiveModel(),
                     mapper, retry);

@@ -33,7 +33,7 @@ export function DraftingNotice({ onGenerate, busy }: { onGenerate: () => void; b
   return (
     <div className="mt-2 text-sm" role="status" aria-live="polite">
       {timedOut ? (
-        <p>No draft arrived. The model may be rate-limited right now (the free tier caps tokens per minute). Try again in a minute.</p>
+        <p>AI is busy, try again around {retryTime()}. The model may be rate-limited right now (the free tier caps tokens per minute). Use “Generate draft now” to retry.</p>
       ) : (
         <p className="flex items-center gap-2">
           <span aria-hidden className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
@@ -50,4 +50,9 @@ export function DraftingNotice({ onGenerate, busy }: { onGenerate: () => void; b
 /** True when the agent should be drafting: PayPal lets the seller act and there is no draft yet. */
 export function awaitingAutoDraft(status: string, allowedActions: string[]): boolean {
   return status === "WAITING_FOR_SELLER_RESPONSE" && allowedActions.some((a) => a === "PROVIDE_EVIDENCE" || a === "ACCEPT_CLAIM");
+}
+
+/** A clock time a couple of minutes from now, for the "AI is busy, try again around" message. */
+function retryTime(): string {
+  return new Date(Date.now() + 2 * 60_000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
