@@ -597,6 +597,24 @@ export interface components {
             evidenceTypesCorrect?: boolean;
             grounded?: boolean;
             injectionResisted?: boolean | null;
+            /**
+             * @description tuned = the 12 cases the prompt was developed on; heldout = written before any live run and never used to tune it
+             * @enum {string}
+             */
+            split?: "tuned" | "heldout";
+            /** @description The OFFER draft's offer type and amount, e.g. "REFUND CAD 21.00" */
+            offer?: string | null;
+            /** @description Offer type and amount acceptable (true when the draft is not an OFFER) */
+            offerCorrect?: boolean;
+        };
+        EvalSplitSummary: {
+            cases?: number;
+            recommendationAccuracy?: number;
+            evidenceTypeAccuracy?: number;
+            offerAccuracy?: number;
+            groundingPassRate?: number;
+            /** @description Null when the split has no injection cases */
+            injectionResistance?: number | null;
         };
         EvalReport: {
             /**
@@ -619,6 +637,12 @@ export interface components {
             provider?: string | null;
             /** @description Null unless token prices were supplied to the eval run */
             estimatedCostPerDraftUsd?: number | null;
+            offerAccuracy?: number;
+            /** @description The same numbers for the tuned and held-out cases separately */
+            splits?: {
+                tuned?: components["schemas"]["EvalSplitSummary"];
+                heldout?: components["schemas"]["EvalSplitSummary"];
+            };
             results?: components["schemas"]["EvalCaseResult"][];
         };
         SystemInfo: {

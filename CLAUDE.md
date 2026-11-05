@@ -30,7 +30,7 @@ Web (`web/`):
 
 Repo root:
 - Judges' path (no keys needed): `docker compose up --build` → http://localhost:3000
-- `make dev` (db + backend in mock mode + web), `make test`, `make seed` exist now; `make demo` arrives with Session E
+- `make dev` (db + backend in mock mode + web), `make app` (same without the db container, for a local Postgres), `make test`, `make seed`, `make demo` (reset + simulate the four demo-path disputes against a running backend)
 
 ## Environment variables
 

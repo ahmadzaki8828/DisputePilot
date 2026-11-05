@@ -167,7 +167,7 @@ public final class AgentTools {
                           "description": "Refund in the dispute's currency, above zero, at most the disputed amount. Null only for REPLACEMENT_WITHOUT_REFUND.",
                           "properties": {
                             "currency": {"type": "string", "description": "ISO currency, e.g. CAD."},
-                            "value": {"type": "string", "description": "Decimal amount as a string, e.g. 40.00."}
+                            "value": {"type": ["string", "number"], "description": "Decimal amount, e.g. 40.00."}
                           },
                           "required": ["currency", "value"]
                         },

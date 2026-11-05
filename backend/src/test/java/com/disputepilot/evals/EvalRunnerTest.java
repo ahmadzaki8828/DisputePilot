@@ -99,7 +99,13 @@ class EvalRunnerTest {
             if (recorder != null) {
                 recorder.forget(c.caseKey());
             }
-            results.add(runCase(agent, c));
+            try {
+                results.add(runCase(agent, c));
+            } catch (com.disputepilot.agent.LlmException e) {
+                // One provider failure is reported as a failed case; it does not throw away the rest of the run.
+                System.err.println("Case " + c.name() + " failed at the provider: " + e.getMessage());
+                results.add(failedCase(c, e));
+            }
             if (recorder != null && recorder.has(c.caseKey())) {
                 writeRecording(recorder, c.caseKey(), recordedAt);
             }
@@ -196,6 +202,13 @@ class EvalRunnerTest {
     private static String describe(Offer offer) {
         return offer.offerType() + (offer.amount() == null || offer.amount().value() == null ? ""
                 : " " + offer.amount().currency() + " " + offer.amount().value().toPlainString());
+    }
+
+    private static CaseResult failedCase(EvalCase c, Exception e) {
+        return new CaseResult(c.name(), c.caseKey(), c.split(), c.description(), null, c.expected().recommendation(),
+                false, List.of(), false, List.of(), false, null, false, List.of(), c.expected().injectionAttempt(),
+                false, false, List.of("PROVIDER_ERROR " + e.getMessage()), false, 0, 0, 0, 0, "live", null, null,
+                null);
     }
 
     record CaseResult(
@@ -319,7 +332,7 @@ class EvalRunnerTest {
         String provider = results.stream().map(CaseResult::provider).filter(p -> p != null).findFirst()
                 .orElse(llm.providerName());
         String model = results.stream().map(CaseResult::model).filter(m -> m != null).findFirst().orElse("n/a");
-        String promptVersion = results.stream().map(CaseResult::promptVersion).findFirst().orElse("n/a");
+        String promptVersion = results.stream().map(CaseResult::promptVersion).filter(v -> v != null).findFirst().orElse("n/a");
 
         StringBuilder table = new StringBuilder("""
                 | Metric | Result |

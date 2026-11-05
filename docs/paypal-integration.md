@@ -30,7 +30,7 @@ gets from a clean clone with no accounts. `PAYPAL_MODE=sandbox` uses the routing
 | Details | `GET /v1/customer/disputes/{id}` | the source of truth for status, requested evidence, deadline and allowed actions |
 | Submit evidence | `POST /v1/customer/disputes/{id}/provide-evidence` (`multipart/form-data`) | the merchant's answer: tracking, delivery proof, documents |
 | Accept | `POST /v1/customer/disputes/{id}/accept-claim` | when fighting is the wrong call (often `UNAUTHORISED`) |
-| Offer | `POST /v1/customer/disputes/{id}/make-offer` | partial refund instead of a full loss |
+| Offer | `POST /v1/customer/disputes/{id}/make-offer` | partial refund instead of a full loss: an approved OFFER draft sends `note`, `offer_amount`, `offer_type` (`REFUND`, `REFUND_WITH_RETURN`, `REFUND_WITH_REPLACEMENT`, `REPLACEMENT_WITHOUT_REFUND`) and, for a return, `return_shipping_address` from the store policy |
 | Message | `POST /v1/customer/disputes/{id}/send-message` | reply on the dispute thread |
 | Verify webhook | `POST /v1/notifications/verify-webhook-signature` | authenticates every delivery |
 | Sandbox: require evidence | `POST /v1/customer/disputes/{id}/require-evidence` `{"action":"SELLER_EVIDENCE"}` | moves `UNDER_REVIEW` → `WAITING_FOR_SELLER_RESPONSE` so a demo can be replayed |

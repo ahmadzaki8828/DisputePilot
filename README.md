@@ -13,7 +13,7 @@ No login, sandbox data only, nothing touches real money.
 1. Open the hosted demo. The header badges say exactly what is running: **PayPal: Sandbox / Simulated** and **AI: live model / Recorded responses**.
 2. In the **Inbox** click **Simulate a dispute** (pick "Item not received"). A `CUSTOMER.DISPUTE.CREATED` event goes through the same webhook, outbox, re-fetch and agent path a real PayPal event takes. The new row is tagged **Simulated** and shows "Drafting…" until the agent's draft lands (about 30 seconds with a live model).
 3. Open the dispute. The draft says **FIGHT** with a confidence, the evidence it would send (carrier plus tracking number), and a note to PayPal. Hover a **citation chip**: the source record (shipment, order, message, policy) highlights. The validator line says every claim is grounded.
-4. Edit a sentence, **Save edits**, **Approve**, then **Submit evidence…**. The confirm dialog shows the exact payload and the `Idempotency-Key`. Submit, and the status moves to *Under review* and the **audit trail** grows. Submitting again with the same key does not call PayPal twice.
+4. Edit a sentence, **Save edits**, **Approve**, then **Submit evidence…**. The confirm dialog shows the exact payload and the `Idempotency-Key`. Submit, and the status moves to *Under review* and the **audit trail** grows. Submitting again with the same key does not call PayPal twice. A draft that recommends **OFFER** shows the amount and PayPal offer type; approving it enables **Make offer…**, which sends PayPal's `make-offer` the same way.
 5. Simulate **Unauthorised transaction**. The agent recommends **ACCEPT** and says why fighting would waste your time.
 6. Try **Prompt-injection attempt**: the buyer message says "ignore all previous instructions". It is treated as data; the draft still follows the merchant's records.
 7. **Evals** shows the measured numbers; **Metrics** shows the KPIs; **Reset demo** restores the starter set.
@@ -32,7 +32,13 @@ Open <http://localhost:3000>. With no `.env` and no keys you get the complete ap
 
 To use the real PayPal sandbox and a live model, copy `.env.example` to `.env`, fill in the keys, and run `docker compose up --build` again. See [Sandbox setup](#full-sandbox-setup).
 
-Without Docker: Java 21, Node 22 and Postgres 16 (`docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d db`), then `make dev`.
+Without Docker for the app (Java 21, Node 22, Postgres 16):
+
+1. Postgres: either `docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d db`, or a local Postgres 16 with a `disputepilot` database owned by user `disputepilot` (password `disputepilot`):
+   ```bash
+   sudo -u postgres psql -c "create user disputepilot with password 'disputepilot'" -c "create database disputepilot owner disputepilot"
+   ```
+2. `make app` (or `make dev`, which also starts the Postgres container). It installs the web dependencies on first run, starts the backend in mock mode with recorded AI on <http://localhost:8080> (loading the six starter disputes into an empty database) and the dashboard on <http://localhost:3000>. The admin token is `dev-admin-token`.
 
 ## What it does and why
 
@@ -58,7 +64,7 @@ flowchart LR
   UI[Next.js dashboard] --> API[REST API]
   API --> DR
   API -->|approve + submit, Idempotency-Key| SUB[Submission service]
-  SUB -- "provide-evidence / accept-claim" --> RC
+  SUB -- "provide-evidence / accept-claim / make-offer" --> RC
   SUB --> AUD[(audit_log)]
 ```
 
@@ -82,7 +88,8 @@ All sandbox. The app refuses to start against any non-sandbox PayPal host; there
 | Disputes API: list, details | reconciliation, and the re-fetch that makes PayPal the source of truth |
 | Disputes API: `provide-evidence` (multipart) | submitting the approved FIGHT evidence |
 | Disputes API: `accept-claim` | submitting an approved ACCEPT |
-| Disputes API: `make-offer`, `send-message` | implemented in the client; the dashboard submits evidence and accepts claims (an offer needs an amount only the merchant sets) |
+| Disputes API: `make-offer` | submitting an approved OFFER: amount, PayPal offer type (`REFUND`, `REFUND_WITH_RETURN`, `REFUND_WITH_REPLACEMENT`, `REPLACEMENT_WITHOUT_REFUND`) and, for a return, the store's return address |
+| Disputes API: `send-message` | implemented in the client (not used by the dashboard yet) |
 | Disputes API sandbox helpers: `require-evidence`, `adjudicate` | replaying a demo dispute end to end |
 | Webhooks: `CUSTOMER.DISPUTE.CREATED`, `.UPDATED`, `.RESOLVED` | the trigger for drafting |
 | `POST /v1/notifications/verify-webhook-signature` | authenticating every delivery |
@@ -91,16 +98,16 @@ All sandbox. The app refuses to start against any non-sandbox PayPal host; there
 ## AI tools and how they're used
 
 - **Model access.** A provider-agnostic `LlmClient` with two live implementations: any **OpenAI-compatible API** (the default, used with Groq's free tier and `openai/gpt-oss-120b`) and the **Claude API** through the official Java SDK (`com.anthropic:anthropic-java`; `DP_LLM_PROVIDER=anthropic`, default model `claude-haiku-5-5`, switchable to `claude-sonnet-5-5`). The Claude client marks the system prompt and tool definitions for prompt caching.
-- **Tool use and structured output.** The agent loop gives the model read-only tools (`get_case_file`, `get_order`, `get_shipments`, `get_customer_messages`, `get_policy`) and ends on a forced `submit_draft` tool whose JSON schema is the draft: recommendation, confidence, rationale, evidence in PayPal's shape, notes, citations, missing information. Maximum six turns, low temperature.
+- **Tool use and structured output.** The agent loop gives the model read-only tools (`get_case_file`, `get_order`, `get_shipments`, `get_customer_messages`, `get_policy`) and ends on a forced `submit_draft` tool whose JSON schema is the draft: recommendation, confidence, rationale, evidence in PayPal's shape, notes, citations, missing information, and for an OFFER the offer itself (amount and PayPal offer type). Maximum six turns, low temperature.
 - **Recorded mode.** With no key the app replays real model responses captured during the eval run (`evals/recordings/`). Every draft stores how it was produced (`live`, `recorded` or `sample`), the provider, the model and the prompt version, and the UI shows it. If a live provider is rate-limited, or the daily cap or a visitor's hourly limit is reached, the draft falls back to a *labelled* recorded response for disputes that have one, and otherwise returns a friendly 429.
 - **Built with Claude Code.** This project was planned and built with Claude Code.
 
 ## Safety design
 
 - **Human in the loop.** Submission requires an `APPROVED` draft, an `Idempotency-Key`, and the matching action in the `links[]` of a dispute fetched from PayPal moments before. Same key returns the stored result; a different key for an already submitted draft is refused.
-- **Grounding validator.** Fails a draft whose evidence type is not allowed for the reason (or not among the types PayPal requested), whose tracking number or refund ID is not in the merchant's records, whose citation does not exist, that carries personal data, or whose offer exceeds the disputed amount. One repair attempt, then `NEEDS_REVIEW`.
+- **Grounding validator.** Fails a draft whose evidence type is not allowed for the reason (or not among the types PayPal requested), whose tracking number or refund ID is not in the merchant's records, whose citation does not exist, that carries personal data, or whose offer is missing, not above zero, above the disputed amount, in the wrong currency, of a type PayPal does not know, or asks for a return when the store has no return address. One repair attempt, then `NEEDS_REVIEW`. The offer checks run again at submit time, so an approval that overrode the validator still cannot send PayPal an offer above the disputed amount.
 - **PII redaction.** Buyer email, phone and street address become tokens before anything reaches a model.
-- **Untrusted text.** Buyer messages are data, never instructions, in prompts and in code; two eval cases test it.
+- **Untrusted text.** Buyer messages are data, never instructions, in prompts and in code; three eval cases test it (one held out).
 - **Public-demo limits.** Live drafts per visitor per hour (`DP_DEMO_RATE_LIMIT`), simulate/reset per visitor per hour (`DP_DEMO_ACTION_LIMIT`), live calls per day (`DP_LLM_DAILY_CAP`). The admin token stays on the dashboard's server and never reaches the browser; the browser can only reach an allowlist of routes.
 - **Audit trail.** Every state change is a row in `audit_log`, shown on the dispute page.
 - **No secrets in the repo** (`.env.example` lists names only; CI runs gitleaks); fictional merchant, carrier and buyers; no third-party logos.
@@ -151,10 +158,10 @@ The full list of variables is in [`CLAUDE.md`](CLAUDE.md) and [`.env.example`](.
 
 - **Docker path not run by the author in the build VM.** Docker was unavailable there, so each command the Dockerfiles run (Maven build, `npm ci`, `next build`, the jar booting in mock mode against Postgres, the standalone web server) was verified natively, and CI has a `docker-smoke` job that runs `docker compose up --build`. If `docker compose up --build` misbehaves on your machine, please open an issue.
 - **Real multipart `provide-evidence` is not yet verified against the live sandbox.** The build environment's network could not complete that one call; the request body shape is pinned by a WireMock test and the end-to-end submit test runs against WireMock. It is tested on the deployed instance.
-- Offers (`make-offer`) are implemented in the PayPal client but not offered in the UI: a draft that recommends an offer carries no amount to send.
+- The merchant can approve or regenerate an offer but cannot yet type a different amount in the dashboard (`PATCH /api/drafts/{id}` accepts an edited `offer`; the UI does not expose it).
 - The eval suite is 12 synthetic cases; the recordings come from one provider and one prompt version.
 - Rate limits and the daily cap are in memory (a restart resets them). Single merchant: the store is a fixture.
-- Roadmap: offer amounts, document uploads, multi-merchant, an analytics page.
+- Roadmap: editing the offer amount in the dashboard, document uploads, multi-merchant, an analytics page.
 
 ## Licence
 
