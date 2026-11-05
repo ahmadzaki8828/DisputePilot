@@ -4,22 +4,22 @@
   "source" : "live",
   "provider" : "Groq (OpenAI-compatible API)",
   "model" : "openai/gpt-oss-120b",
-  "promptVersion" : "v2",
-  "recordedAt" : "2026-11-03T05:55:50.025211397Z",
+  "promptVersion" : "v3",
+  "recordedAt" : "2026-11-05T04:54:45.754169965Z",
   "turns" : [ {
     "text" : null,
     "toolCalls" : [ {
-      "id" : "fc_8b95e9fa-7aae-463a-ac28-5c3bf07f5198",
+      "id" : "fc_8566ed34-6866-4eff-a19d-8eb94c52fb4a",
       "name" : "get_case_file",
       "input" : { }
     } ],
-    "inputTokens" : 2292,
-    "outputTokens" : 42,
-    "latencyMs" : 19552
+    "inputTokens" : 2506,
+    "outputTokens" : 40,
+    "latencyMs" : 628
   }, {
     "text" : null,
     "toolCalls" : [ {
-      "id" : "fc_2b8ecfea-3b4b-4dd1-8c1c-76b0f78f16f5",
+      "id" : "fc_9caa5c46-04cd-4324-a75c-7e080013dd51",
       "name" : "submit_draft",
       "input" : {
         "citations" : [ {
@@ -34,6 +34,10 @@
           "id" : "shipment:SHP-2005",
           "kind" : "shipment",
           "label" : "Shipment"
+        }, {
+          "id" : "policy:shipping",
+          "kind" : "policy",
+          "label" : "Shipping Policy"
         } ],
         "confidence" : 0.95,
         "evidence" : [ {
@@ -45,17 +49,17 @@
             } ]
           },
           "evidence_type" : "PROOF_OF_FULFILLMENT",
-          "notes" : "Delivered to Toronto on 2026-10-19, signed by C. Whitfield."
+          "notes" : "Order ORD-2005 was shipped via Northline Courier (tracking NLC4417003148) and delivered on 2026-10-19 in Toronto, signed by C. Whitfield."
         } ],
         "missing_info" : null,
-        "notes" : "The order (ORD-2005) was shipped via Northline Courier (tracking NLC4417003148) on 2026-10-15 and delivered on 2026-10-19 to the buyer's address in Toronto, signed by C. Whitfield, confirming receipt of the item.",
-        "offer_amount" : null,
-        "rationale" : "Shipment records show delivery with buyer's signature, directly contradicting the buyer's claim of non‑receipt. Providing the delivery proof satisfies PayPal's requested evidence, making a strong case to fight the dispute.",
+        "notes" : "The item was delivered on 2026-10-19, signed for by the recipient (C. Whitfield) per the carrier’s delivery record. This delivery satisfies the buyer’s claim of non‑receipt.",
+        "offer" : null,
+        "rationale" : "Shipment record shows delivery with signature, directly contradicting the buyer’s claim. Provide proof of fulfillment to contest the dispute.",
         "recommendation" : "FIGHT"
       }
     } ],
-    "inputTokens" : 3053,
-    "outputTokens" : 602,
-    "latencyMs" : 12087
+    "inputTokens" : 3267,
+    "outputTokens" : 647,
+    "latencyMs" : 2173
   } ]
 }

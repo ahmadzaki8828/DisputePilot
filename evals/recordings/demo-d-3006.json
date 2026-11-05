@@ -1,0 +1,63 @@
+{
+  "_note" : "Recorded from a real provider call during a live eval run. Replayed when DP_LLM_MODE=recorded so the app runs with no API key.",
+  "caseKey" : "DEMO-D-3006",
+  "source" : "live",
+  "provider" : "Groq (OpenAI-compatible API)",
+  "model" : "openai/gpt-oss-120b",
+  "promptVersion" : "v3",
+  "recordedAt" : "2026-11-05T04:54:45.754169965Z",
+  "turns" : [ {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_1cfe768d-1bd5-4836-9683-99bdf9aae895",
+      "name" : "get_case_file",
+      "input" : { }
+    } ],
+    "inputTokens" : 2544,
+    "outputTokens" : 33,
+    "latencyMs" : 16176
+  }, {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_7aebd93e-fff3-434d-b638-8502162f28c8",
+      "name" : "submit_draft",
+      "input" : {
+        "citations" : [ {
+          "id" : "order:ORD-3006",
+          "kind" : "order",
+          "label" : "Order record shows no refunds"
+        }, {
+          "id" : "shipment:SHP-3006",
+          "kind" : "shipment",
+          "label" : "Original order delivered"
+        }, {
+          "id" : "msg:MSG-3009",
+          "kind" : "msg",
+          "label" : "Buyer requested return"
+        }, {
+          "id" : "msg:MSG-3010",
+          "kind" : "msg",
+          "label" : "Merchant asked for return with tracking"
+        }, {
+          "id" : "msg:MSG-3011",
+          "kind" : "msg",
+          "label" : "Merchant reports no return received"
+        }, {
+          "id" : "msg:DM-1",
+          "kind" : "msg",
+          "label" : "Buyer claims return sent, no refund"
+        } ],
+        "confidence" : 0.92,
+        "evidence" : [ ],
+        "missing_info" : null,
+        "notes" : "The order (ORD-3006) shows no refund has been issued. The original shipment (SHP-3006) was delivered on 2026-10-09. The buyer requested a return on 2026-10-12 (msg:MSG-3009) and the merchant instructed the buyer to return the item with a tracking number (msg:MSG-3010). The merchant later noted no return or tracking information was received (msg:MSG-3011). The buyer now states the jacket was sent back weeks ago and no refund has been processed (msg:DM-1). No refund record exists in the merchant's system, and the requested evidence type is OTHER. Therefore we accept the claim and will issue the refund.",
+        "offer" : null,
+        "rationale" : "No refund has been recorded and the buyer reports not receiving it. Without proof of a refund or return receipt, the safest outcome is to accept the claim and issue the refund.",
+        "recommendation" : "ACCEPT"
+      }
+    } ],
+    "inputTokens" : 3521,
+    "outputTokens" : 979,
+    "latencyMs" : 15768
+  } ]
+}

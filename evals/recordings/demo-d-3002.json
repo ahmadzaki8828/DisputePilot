@@ -1,0 +1,51 @@
+{
+  "_note" : "Recorded from a real provider call during a live eval run. Replayed when DP_LLM_MODE=recorded so the app runs with no API key.",
+  "caseKey" : "DEMO-D-3002",
+  "source" : "live",
+  "provider" : "Groq (OpenAI-compatible API)",
+  "model" : "openai/gpt-oss-120b",
+  "promptVersion" : "v3",
+  "recordedAt" : "2026-11-05T04:54:45.754169965Z",
+  "turns" : [ {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_b569f1c1-77b3-40f2-a9ed-c49126106e71",
+      "name" : "get_case_file",
+      "input" : { }
+    } ],
+    "inputTokens" : 2502,
+    "outputTokens" : 42,
+    "latencyMs" : 856
+  }, {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_f2ef1f44-dcf0-4960-afa1-a0948de0842d",
+      "name" : "submit_draft",
+      "input" : {
+        "citations" : [ {
+          "id" : "dispute:DEMO-D-3002",
+          "kind" : "dispute",
+          "label" : "Dispute details"
+        }, {
+          "id" : "order:ORD-3002",
+          "kind" : "order",
+          "label" : "Order with full refund"
+        }, {
+          "id" : "shipment:SHP-3002",
+          "kind" : "shipment",
+          "label" : "Shipment reported lost"
+        } ],
+        "confidence" : 0.97,
+        "evidence" : [ ],
+        "missing_info" : null,
+        "notes" : "Order ORD-3002 was fully refunded on 2026-10-29 for CAD 92.00 (refund ID REF-6002) after Northline Courier reported the parcel lost (tracking NLC4417003210). The buyer’s claim of non‑receipt is therefore satisfied.",
+        "offer" : null,
+        "rationale" : "The seller has already issued a full refund for the disputed amount and the shipment was confirmed lost. No further evidence is needed; accept the claim.",
+        "recommendation" : "ACCEPT"
+      }
+    } ],
+    "inputTokens" : 3341,
+    "outputTokens" : 1088,
+    "latencyMs" : 3211
+  } ]
+}

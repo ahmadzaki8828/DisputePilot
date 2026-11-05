@@ -4,46 +4,42 @@
   "source" : "live",
   "provider" : "Groq (OpenAI-compatible API)",
   "model" : "openai/gpt-oss-120b",
-  "promptVersion" : "v2",
-  "recordedAt" : "2026-11-03T05:55:50.025211397Z",
+  "promptVersion" : "v3",
+  "recordedAt" : "2026-11-05T04:54:45.754169965Z",
   "turns" : [ {
     "text" : null,
     "toolCalls" : [ {
-      "id" : "fc_fd580a5c-3a8e-4d9d-82c5-c585c022b24f",
+      "id" : "fc_4318b40e-9106-4e93-8721-312f21dbc339",
       "name" : "get_case_file",
       "input" : { }
     } ],
-    "inputTokens" : 2269,
+    "inputTokens" : 2488,
     "outputTokens" : 42,
-    "latencyMs" : 1008
+    "latencyMs" : 20214
   }, {
     "text" : null,
     "toolCalls" : [ {
-      "id" : "fc_c1faa696-91b9-426d-a526-89f0b44f994b",
+      "id" : "fc_d479caa7-8b03-439b-85c9-6074376fff5f",
       "name" : "submit_draft",
       "input" : {
         "citations" : [ {
           "id" : "dispute:DEMO-D-1001",
           "kind" : "dispute",
-          "label" : "Dispute"
+          "label" : "Dispute details"
         }, {
           "id" : "order:ORD-1042",
           "kind" : "order",
-          "label" : "Order"
+          "label" : "Order record"
         }, {
           "id" : "shipment:SHP-77",
           "kind" : "shipment",
-          "label" : "Shipment"
+          "label" : "Shipment record"
         }, {
-          "id" : "msg:MSG-1",
-          "kind" : "msg",
-          "label" : "Buyer message about missing parcel"
-        }, {
-          "id" : "msg:DM-1",
-          "kind" : "msg",
-          "label" : "Dispute claim"
+          "id" : "policy:shipping",
+          "kind" : "policy",
+          "label" : "Shipping policy (signature required)"
         } ],
-        "confidence" : 0.93,
+        "confidence" : 0.9,
         "evidence" : [ {
           "evidence_info" : {
             "tracking_info" : [ {
@@ -53,17 +49,17 @@
             } ]
           },
           "evidence_type" : "PROOF_OF_FULFILLMENT",
-          "notes" : "Order ORD-1042 was shipped via Northline Courier (tracking NLC4417002931). The carrier records show delivery on 2026-10-21 at 16:40, signed by J. Ellis at the Toronto, ON address."
+          "notes" : "Order ORD-1042 was shipped via Northline Courier (tracking NLC4417002931) and delivered on 2026-10-21. Delivery was signed for by J. Ellis, matching the buyer’s name. Store shipping policy requires a signature for orders over CAD 150."
         } ],
         "missing_info" : null,
-        "notes" : "The merchant fulfilled the order. Shipment SHP-77 via Northline Courier (tracking NLC4417002931) was delivered on 2026-10-21, signed by the buyer (J. Ellis) at the provided shipping address in Toronto, ON. The buyer’s claim that the item was not received is contradicted by the carrier’s delivery confirmation and signature.",
-        "offer_amount" : null,
-        "rationale" : "Delivery with signature matching the buyer’s name provides strong proof of fulfillment, satisfying PayPal’s evidence requirement. The claim is therefore contestable; we recommend fighting the dispute.",
+        "notes" : "The item was shipped and delivered with a signature on 2026-10-21 (shipment:SHP-77). The signature matches the buyer’s name (J. Ellis). Store policy requires a signature for orders over CAD 150 (policy:shipping). The buyer’s claim that the order never arrived is contradicted by this fulfillment evidence.",
+        "offer" : null,
+        "rationale" : "Shipment records and signature verification directly refute the buyer’s non‑receipt claim. Provide proof of fulfillment to contest the dispute.",
         "recommendation" : "FIGHT"
       }
     } ],
-    "inputTokens" : 3065,
-    "outputTokens" : 797,
-    "latencyMs" : 2450
+    "inputTokens" : 3331,
+    "outputTokens" : 919,
+    "latencyMs" : 85801
   } ]
 }

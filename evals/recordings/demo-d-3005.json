@@ -1,0 +1,64 @@
+{
+  "_note" : "Recorded from a real provider call during a live eval run. Replayed when DP_LLM_MODE=recorded so the app runs with no API key.",
+  "caseKey" : "DEMO-D-3005",
+  "source" : "live",
+  "provider" : "Groq (OpenAI-compatible API)",
+  "model" : "openai/gpt-oss-120b",
+  "promptVersion" : "v3",
+  "recordedAt" : "2026-11-05T04:54:45.754169965Z",
+  "turns" : [ {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_194cbf15-51f7-4463-9ad3-d14cc9cbe86e",
+      "name" : "get_case_file",
+      "input" : { }
+    } ],
+    "inputTokens" : 2477,
+    "outputTokens" : 42,
+    "latencyMs" : 697
+  }, {
+    "text" : null,
+    "toolCalls" : [ {
+      "id" : "fc_80a6891b-f95c-47ea-be77-20bdbecdae9b",
+      "name" : "submit_draft",
+      "input" : {
+        "citations" : [ {
+          "id" : "dispute:DEMO-D-3005",
+          "kind" : "dispute",
+          "label" : "Dispute amount CAD210"
+        }, {
+          "id" : "order:ORD-3005",
+          "kind" : "order",
+          "label" : "Order total CAD189"
+        }, {
+          "id" : "msg:MSG-3008",
+          "kind" : "msg",
+          "label" : "Merchant acknowledges overcharge"
+        }, {
+          "id" : "msg:DM-1",
+          "kind" : "msg",
+          "label" : "Buyer claims overcharge"
+        } ],
+        "confidence" : 0.97,
+        "evidence" : [ {
+          "evidence_type" : "OTHER",
+          "notes" : "Order total was CAD 189.00 (order:ORD-3005). Transaction amount was CAD 210.00 (dispute:DEMO-D-3005), resulting in an overcharge of CAD 21.00. Merchant has acknowledged the error (msg:MSG-3008)."
+        } ],
+        "missing_info" : null,
+        "notes" : "The buyer was overcharged by CAD 21.00 due to a checkout error. We will refund the difference while the item remains with the buyer.",
+        "offer" : {
+          "amount" : {
+            "currency" : "CAD",
+            "value" : 21
+          },
+          "offer_type" : "REFUND"
+        },
+        "rationale" : "Offer a CAD 21 refund to correct the overcharge, matching the order total and buyer's claim. This resolves the dispute efficiently.",
+        "recommendation" : "OFFER"
+      }
+    } ],
+    "inputTokens" : 3343,
+    "outputTokens" : 600,
+    "latencyMs" : 20789
+  } ]
+}

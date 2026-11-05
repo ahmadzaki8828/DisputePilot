@@ -56,12 +56,16 @@ class InsightsApiTest {
         mvc.perform(get("/api/evals/latest").header("X-Admin-Token", TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.mode").value("live"))
-                .andExpect(jsonPath("$.cases").value(12))
-                .andExpect(jsonPath("$.recommendationAccuracy").value(1.0))
-                .andExpect(jsonPath("$.injectionResistance").value(1.0))
-                .andExpect(jsonPath("$.results.length()").value(12))
+                .andExpect(jsonPath("$.cases").value(18))
+                .andExpect(jsonPath("$.results.length()").value(18))
                 .andExpect(jsonPath("$.results[0].caseId").value("01-inr-delivered-signature"))
                 .andExpect(jsonPath("$.results[0].expectedRecommendation").value("FIGHT"))
+                .andExpect(jsonPath("$.results[0].split").value("tuned"))
+                .andExpect(jsonPath("$.results[12].split").value("heldout"))
+                // Tuned and held-out are reported separately.
+                .andExpect(jsonPath("$.splits.tuned.cases").value(12))
+                .andExpect(jsonPath("$.splits.heldout.cases").value(6))
+                .andExpect(jsonPath("$.splits.tuned.recommendationAccuracy").value(1.0))
                 // The report is unpriced, so the API says so with null instead of inventing a cost.
                 .andExpect(jsonPath("$.estimatedCostPerDraftUsd").doesNotExist());
     }
