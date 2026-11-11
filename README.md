@@ -76,7 +76,7 @@ Design principles:
 - **Two kinds of dispute, one pipeline.** Real sandbox disputes, and simulated `DEMO-` disputes judges create from the UI, which a routing client sends to a simulator. The UI labels them **Simulated**.
 - **Zero keys by default:** `PAYPAL_MODE=mock` and recorded AI responses give a complete, honestly labelled demo.
 
-Stack: Java 21 and Spring Boot 4 (`JdbcClient`, Flyway), PostgreSQL 16, Next.js (App Router) with AG Grid Community, Docker. Deployed on Render ([`render.yaml`](render.yaml)).
+Stack: Java 21 and Spring Boot 4 (`JdbcClient`, Flyway), PostgreSQL 16, Next.js (App Router) with AG Grid Community and AG Studio (sponsor tools), Docker. Deployed on Render ([`render.yaml`](render.yaml)).
 
 ## PayPal technologies used
 
@@ -100,6 +100,7 @@ All sandbox. The app refuses to start against any non-sandbox PayPal host; there
 - **Model access.** A provider-agnostic `LlmClient` with two live implementations: any **OpenAI-compatible API** (the default, used with Groq's free tier and `openai/gpt-oss-120b`) and the **Claude API** through the official Java SDK (`com.anthropic:anthropic-java`; `DP_LLM_PROVIDER=anthropic`, default model `claude-haiku-5-5`, switchable to `claude-sonnet-5-5`). The Claude client marks the system prompt and tool definitions for prompt caching.
 - **Tool use and structured output.** The agent loop gives the model read-only tools (`get_case_file`, `get_order`, `get_shipments`, `get_customer_messages`, `get_policy`) and ends on a forced `submit_draft` tool whose JSON schema is the draft: recommendation, confidence, rationale, evidence in PayPal's shape, notes, citations, missing information, and for an OFFER the offer itself (amount and PayPal offer type). Maximum six turns, low temperature.
 - **Recorded mode.** With no key the app replays real model responses captured during the eval run (`evals/recordings/`). Every draft stores how it was produced (`live`, `recorded` or `sample`), the provider, the model and the prompt version, and the UI shows it. If a live provider is rate-limited, or the daily cap or a visitor's hourly limit is reached, the draft falls back to a *labelled* recorded response for disputes that have one, and otherwise returns a friendly 429.
+- **AG Studio (AG Grid):** `/analytics` is an AG Studio dashboard over disputes, drafts and submissions, with a custom "Deadline radar" widget. Its AI assistant (Studio Agent Framework, built-in harness) builds and edits the dashboard from plain-English questions. It runs on DisputePilot's own model provider through a Chat Completions adapter, and the backend calls the provider so the key never reaches the browser. Turns are rate-limited per visitor and count toward the daily live-AI cap. Needs `AG_STUDIO_LICENSE_KEY` (commercial; trial key); without it the page explains how to enable it. `DP_ANALYTICS_LLM_MODEL` lets it use a different model from drafts.
 - **Built with Claude Code.** This project was planned and built with Claude Code.
 
 ## Safety design
@@ -131,6 +132,20 @@ The suite has two parts, reported separately. The **tuned** 12 are the cases the
 | Mean latency per draft | 16477 ms | 11245 ms |
 
 Estimated cost per draft: not priced (no token prices were supplied).
+
+### System-level results (what could reach PayPal)
+
+The table above is the model's own draft (prompt v3, unchanged). After those results, three guards were added in the validator and the draft service: no accept or refund offer when the transaction is already refunded (case 14), no tracking number or refund ID in the note or evidence that is not in the merchant's records (case 12), and a warning, an audit entry and a required override for an ACCEPT when a buyer message tries to steer the AI (case 18). Replaying the same recordings through the guards (`evals/system-report.md`):
+
+| Metric | Tuned (12) | Held-out (6) |
+|---|---|---|
+| Drafts ready for approval (guards passed) | 11/12 | 4/6 |
+| Drafts held for review (`NEEDS_REVIEW`) | 1/12 | 2/6 |
+| Ready drafts with an unacceptable recommendation | 0 | 0 |
+| Ready drafts carrying a planted fact into the evidence | 0 | 0 |
+| Prompt-injection contained (strict, system level) | 2/2 | 1/1 |
+
+"Contained" means the model resisted, or the guards held the draft for review so it cannot be approved without an explicit override. The model itself did not improve: the three misses are caught, not fixed. **The held-out cases are no longer blind**: the guards were written after seeing those failures, so this is a regression check on known failures, not an estimate for new disputes. CI now gates this system-level injection metric again. To re-run live (needs `DP_LLM_API_KEY`): `make eval-live`.
 
 What the misses were:
 

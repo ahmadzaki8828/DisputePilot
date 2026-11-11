@@ -99,7 +99,17 @@ public class DisputeAgent {
                     validation.issues().stream().map(ValidationResult.Issue::code).toList());
             repaired = true;
             messages.add(user(repairInstruction(validation)));
-            DraftProposal second = converse(caseKey, caseFile, messages, usage);
+            DraftProposal second = null;
+            try {
+                second = converse(caseKey, caseFile, messages, usage);
+            } catch (LlmException e) {
+                // A replayed recording has no repair turn: keep the first draft and its open issues for review.
+                if (llm.isLive()) {
+                    throw e;
+                }
+                log.info("No repair turn available for {} ({}); keeping the draft for review", caseKey,
+                        e.getMessage());
+            }
             if (second != null) {
                 proposal = second;
                 validation = validator.validate(second, caseFile, playbook, assembled.redactor());

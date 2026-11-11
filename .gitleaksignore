@@ -1,3 +1,6 @@
 # Reviewed false positive: the throwaway local-compose admin token in a CI curl header (removed in the next commit;
 # the workflow now generates a random token per run).
 448c265237ea1107de4dc5c3652031bb29e77593:.github/workflows/ci.yml:curl-auth-header:72
+
+# Reviewed false positive: a made-up Idempotency-Key value in a test (DoubleRefundSubmissionTest), not a credential.
+cb3fde71698a21b932415b7bb60230b91674e33b:backend/src/test/java/com/disputepilot/submission/DoubleRefundSubmissionTest.java:generic-api-key:56

@@ -120,6 +120,8 @@ public class SubmissionService {
                 new ApiException(HttpStatus.NOT_FOUND, "Dispute not found", "The draft's dispute no longer exists."));
         String paypalId = stored.summary().paypalDisputeId();
 
+        refuseDoubleRefund(action, draft, stored);
+
         // PayPal is the source of truth: re-fetch right now and require the action in its links[].
         PayPalDispute fresh = sync.sync(paypalId, "PRE_SUBMIT").dispute();
         if (!fresh.allowedActions().contains(action.name())) {
@@ -189,6 +191,27 @@ public class SubmissionService {
             log.warn("Submitted {} but the follow-up sync failed: {}", paypalId, e.getMessage());
         }
         return new Result(submissions.find(submissionId).orElseThrow(), false);
+    }
+
+    /**
+     * Never pays the buyer twice: when the merchant's records show the disputed transaction already refunded,
+     * accepting the claim or offering a refund is refused, even for a draft a human approved over the warning.
+     */
+    private void refuseDoubleRefund(SubmissionAction action, Draft draft, DisputeRepository.StoredDispute stored) {
+        boolean refunds = action == SubmissionAction.ACCEPT_CLAIM
+                || (action == SubmissionAction.MAKE_OFFER && draft.offer().refundsMoney());
+        if (!refunds || stored.disputedTransactionId() == null) {
+            return;
+        }
+        boolean alreadyRefunded = merchant.findOrderByPaypalTransactionId(stored.disputedTransactionId())
+                .map(o -> o.refunds() != null && !o.refunds().isEmpty()).orElse(false);
+        if (alreadyRefunded) {
+            audit.user(AuditLogWriter.SUBMISSION_FAILED, draft.disputeId(), Map.of("draftId", draft.id(),
+                    "error", "REFUND_ALREADY_ISSUED", "action", action.name()));
+            throw new ApiException(HttpStatus.CONFLICT, "Refund already issued",
+                    "The merchant's records show this transaction was already refunded, so " + action
+                            + " would refund the buyer twice. Answer with PROOF_OF_REFUND evidence instead.");
+        }
     }
 
     /** FIGHT answers with evidence, ACCEPT accepts the claim, OFFER makes an offer. NEEDS_INFO has no call. */

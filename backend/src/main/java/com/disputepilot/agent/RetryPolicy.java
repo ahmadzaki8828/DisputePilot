@@ -18,6 +18,10 @@ public final class RetryPolicy {
     private final long baseDelayMs;
     private final Random random = new Random();
     private final Sleeper sleeper;
+    private final Duration maxWait;
+
+    /** The longest a draft will wait for one retry; a provider asking for more is treated as "busy, come back later". */
+    public static final Duration MAX_RETRY_WAIT = Duration.ofSeconds(30);
 
     /** Pulled out so tests do not actually wait. */
     public interface Sleeper {
@@ -29,6 +33,12 @@ public final class RetryPolicy {
     }
 
     public RetryPolicy(int maxAttempts, long baseDelayMs, Sleeper sleeper) {
+        this(maxAttempts, baseDelayMs, sleeper, null);
+    }
+
+    /** @param maxWait if a Retry-After hint exceeds this, give up at once and rethrow instead of sleeping (null: no cap) */
+    public RetryPolicy(int maxAttempts, long baseDelayMs, Sleeper sleeper, Duration maxWait) {
+        this.maxWait = maxWait;
         this.maxAttempts = Math.max(1, maxAttempts);
         this.baseDelayMs = Math.max(0, baseDelayMs);
         this.sleeper = sleeper;
@@ -43,6 +53,12 @@ public final class RetryPolicy {
             } catch (LlmException e) {
                 last = e;
                 if (!e.retryable() || attempt == maxAttempts) {
+                    throw e;
+                }
+                if (maxWait != null && e instanceof RateLimitedException r && r.retryAfter() != null
+                        && r.retryAfter().compareTo(maxWait) > 0) {
+                    log.warn("{} asks for a {} s wait (cap {} s) - not retrying", e.provider(),
+                            r.retryAfter().toSeconds(), maxWait.toSeconds());
                     throw e;
                 }
                 long wait = e instanceof RateLimitedException r && r.retryAfter() != null
@@ -64,7 +80,8 @@ public final class RetryPolicy {
     long backoffMs(int attempt) {
         long exponential = baseDelayMs * (1L << (attempt - 1));
         long jitter = baseDelayMs == 0 ? 0 : random.nextLong(baseDelayMs);
-        return exponential + jitter;
+        long total = exponential + jitter;
+        return maxWait == null ? total : Math.min(total, maxWait.toMillis());
     }
 
     /** 429 with the provider's Retry-After hint, when it sent one. */

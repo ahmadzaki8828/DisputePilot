@@ -2,7 +2,7 @@
 DP_ADMIN_TOKEN ?= dev-admin-token
 API_URL ?= http://localhost:8080
 
-.PHONY: dev app test seed demo db
+.PHONY: dev app test seed demo db eval-live
 
 db:
 	docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d db
@@ -38,3 +38,7 @@ demo:
 	  curl -fsS -X POST -H "X-Admin-Token: $(DP_ADMIN_TOKEN)" -H "Content-Type: application/json" \
 	    -d "{\"template\":\"$$t\"}" $(API_URL)/api/demo/disputes > /dev/null && echo "simulated $$t"; \
 	done
+
+# Re-runs the eval suite against the live model (needs DP_LLM_API_KEY; rewrites evals/report.* and evals/recordings/).
+eval-live:
+	cd backend && DP_EVAL_MODE=live ./mvnw -B -Peval test

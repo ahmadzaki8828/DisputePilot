@@ -39,6 +39,7 @@ public class AuditLogWriter {
     public static final String DEMO_DISPUTE_CREATED = "DEMO_DISPUTE_CREATED";
     public static final String DEMO_RESET = "DEMO_RESET";
     public static final String TRANSACTION_LINKED = "TRANSACTION_LINKED";
+    public static final String MANIPULATION_FLAGGED = "MANIPULATION_FLAGGED";
     public static final String LLM_FALLBACK = "LLM_FALLBACK";
 
     private final JdbcClient jdbc;

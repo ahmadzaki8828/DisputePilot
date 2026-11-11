@@ -192,11 +192,17 @@ export function DisputeView({ dispute, initialDraft, audit }: { dispute: Dispute
               {draft.missingInfo && draft.missingInfo.length > 0 && (
                 <div className="text-sm"><h3 className="font-medium">Missing information</h3><ul className="list-disc pl-5">{draft.missingInfo.map((m) => <li key={m}>{m}</li>)}</ul></div>
               )}
+              {draft.validation.issues.filter((i) => i.code === "MANIPULATION_WARNING").map((i, n) => (
+                <div key={n} role="alert" className="rounded border border-amber-400 bg-amber-50 p-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-100">
+                  <p className="font-medium">⚠ Possible manipulation</p>
+                  <p>{i.message}</p>
+                </div>
+              ))}
               <div className={`rounded p-2 text-sm ${draft.validation.passed ? "bg-emerald-50 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-100" : "bg-red-50 text-red-900 dark:bg-red-950 dark:text-red-100"}`}>
                 {draft.validation.passed ? "✓ Validator: every claim is grounded in your records." : (
                   <>
                     <p className="font-medium">Validator found problems:</p>
-                    <ul className="list-disc pl-5">{draft.validation.issues.map((i, n) => <li key={n}><span className="font-mono text-xs">{i.code}</span> {i.message}</li>)}</ul>
+                    <ul className="list-disc pl-5">{draft.validation.issues.filter((i) => i.code !== "MANIPULATION_WARNING").map((i, n) => <li key={n}><span className="font-mono text-xs">{i.code}</span> {i.message}</li>)}</ul>
                     <label className="mt-2 flex items-center gap-2"><input type="checkbox" checked={override} onChange={(e) => setOverride(e.target.checked)} /> I reviewed these issues and want to approve anyway</label>
                   </>
                 )}

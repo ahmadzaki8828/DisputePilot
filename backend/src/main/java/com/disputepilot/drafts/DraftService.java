@@ -4,6 +4,7 @@ import com.disputepilot.agent.DisputeAgent;
 import com.disputepilot.agent.DraftProposal;
 import com.disputepilot.agent.DraftValidator;
 import com.disputepilot.agent.LlmException;
+import com.disputepilot.agent.RetryPolicy;
 import com.disputepilot.agent.EvidenceAssembler;
 import com.disputepilot.agent.Playbook;
 import com.disputepilot.api.DisputeRepository;
@@ -17,7 +18,14 @@ import com.disputepilot.domain.Offer;
 import com.disputepilot.domain.Recommendation;
 import com.disputepilot.domain.ValidationResult;
 import com.disputepilot.paypal.PayPalDispute;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.math.BigDecimal;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,6 +52,21 @@ public class DraftService {
     private final DraftValidator validator;
     private final AuditLogWriter audit;
     private final RecordedFallback fallback;
+
+    /** Issue code on the placeholder saved when the provider is busy and nothing recorded can stand in. */
+    public static final String AI_BUSY = "AI_BUSY";
+    private static final Duration DEFAULT_BUSY_WAIT = Duration.ofMinutes(10);
+    private static final DateTimeFormatter BUSY_TIME = DateTimeFormatter.ofPattern("HH:mm 'UTC'");
+
+    /**
+     * Live drafts run one at a time, so several new disputes do not hit the provider's tokens-per-minute limit
+     * together. Everyone else (manual Regenerate, webhook auto-drafts) waits in this queue.
+     */
+    private final ExecutorService liveQueue = Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r, "live-draft-queue");
+        t.setDaemon(true);
+        return t;
+    });
 
     public DraftService(DisputeRepository disputes, DraftRepository drafts, EvidenceAssembler assembler,
                         DisputeAgent agent, DraftValidator validator, AuditLogWriter audit,
@@ -81,7 +104,12 @@ public class DraftService {
                 Map.of("paypalDisputeId", dispute.paypalDisputeId()));
 
         EvidenceAssembler.Assembled assembled = assembler.assemble(dispute);
-        DisputeAgent.AgentOutcome outcome = runAgent(disputeId, dispute, assembled, allowLive);
+        DisputeAgent.AgentOutcome outcome;
+        try {
+            outcome = runAgent(disputeId, dispute, assembled, allowLive);
+        } catch (BusyException busy) {
+            return saveBusyDraft(disputeId, dispute, busy);
+        }
 
         if (outcome.draft() == null) {
             audit.agent(AuditLogWriter.DRAFT_FAILED, disputeId,
@@ -128,6 +156,11 @@ public class DraftService {
                 "provider", String.valueOf(saved.provider()),
                 "model", String.valueOf(saved.model()),
                 "turns", outcome.turns()));
+        outcome.validation().issues().stream()
+                .filter(i -> DraftValidator.MANIPULATION_WARNING.equals(i.code())).findFirst()
+                .ifPresent(i -> audit.agent(AuditLogWriter.MANIPULATION_FLAGGED, disputeId, Map.of(
+                        "draftId", saved.id(), "recommendation", saved.recommendation().name(),
+                        "detail", i.message())));
         log.info("Draft v{} for {}: {} (validation {}, {} turn(s), {} in / {} out tokens)",
                 saved.version(), dispute.paypalDisputeId(), saved.recommendation(),
                 outcome.validation().passed() ? "passed" : "failed", outcome.turns(),
@@ -147,28 +180,72 @@ public class DraftService {
             return agent.draft(caseKey, assembled);
         }
         String reason;
+        Duration busyWait = DEFAULT_BUSY_WAIT;
         if (!allowLive) {
             reason = "the public demo's per-visitor limit on live drafts was reached";
         } else {
             try {
-                return agent.draft(caseKey, assembled);
+                return runQueued(() -> agent.draft(caseKey, assembled));
             } catch (LlmException e) {
                 if (e.httpStatus() != 429) {
                     throw new ApiException(HttpStatus.BAD_GATEWAY, "The AI provider failed",
                             "The model provider could not draft a response: " + e.getMessage());
                 }
                 reason = "the model provider is rate-limited or the daily live-AI budget is spent";
+                busyWait = e instanceof RetryPolicy.RateLimitedException r && r.retryAfter() != null
+                        ? r.retryAfter() : DEFAULT_BUSY_WAIT;
             }
         }
         if (!fallback.covers(caseKey)) {
-            throw new ApiException(HttpStatus.TOO_MANY_REQUESTS, "The AI is busy right now",
-                    "Live drafting is paused because " + reason + ", and this dispute has no recorded response "
-                            + "to fall back to. Please try again in a few minutes.");
+            throw new BusyException(reason, Instant.now().plus(busyWait));
         }
         audit.system(AuditLogWriter.LLM_FALLBACK, disputeId, Map.of("reason", reason,
                 "fallback", "recorded response", "caseKey", caseKey));
         log.info("Draft for {} falls back to a recorded response: {}", dispute.paypalDisputeId(), reason);
         return fallback.agent().draft(caseKey, assembled);
+    }
+
+    /** Runs a live agent call on the single-threaded queue and hands back its result or its original exception. */
+    private <T> T runQueued(java.util.concurrent.Callable<T> call) {
+        try {
+            return liveQueue.submit(call).get();
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof RuntimeException re) {
+                throw re;
+            }
+            throw new IllegalStateException(e.getCause());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new LlmException("queue", 0, "interrupted while waiting for the live-draft queue");
+        }
+    }
+
+    /** No live answer and no recording: nothing to show but an honest "busy" state the merchant can retry. */
+    private static final class BusyException extends RuntimeException {
+        final String reason;
+        final Instant retryAt;
+
+        BusyException(String reason, Instant retryAt) {
+            super(reason);
+            this.reason = reason;
+            this.retryAt = retryAt;
+        }
+    }
+
+    private Draft saveBusyDraft(UUID disputeId, PayPalDispute dispute, BusyException busy) {
+        String message = "AI is busy, try again around " + BUSY_TIME.format(busy.retryAt.atOffset(ZoneOffset.UTC))
+                + ". Live drafting is paused because " + busy.reason + ". Use Regenerate to try again.";
+        drafts.supersedeAll(disputeId);
+        Draft saved = drafts.insert(new Draft(UUID.randomUUID(), disputeId, drafts.nextVersion(disputeId),
+                DraftStatus.NEEDS_REVIEW, Recommendation.NEEDS_INFO, BigDecimal.ZERO, message, List.of(), "",
+                List.of(), List.of(), null,
+                new ValidationResult(false, List.of(new ValidationResult.Issue(AI_BUSY, message, null))),
+                com.disputepilot.domain.LlmMode.LIVE, null, null, null, null, null, 0, false, false,
+                Instant.now()));
+        audit.system(AuditLogWriter.LLM_FALLBACK, disputeId, Map.of("reason", busy.reason,
+                "fallback", "AI busy placeholder", "retryAt", busy.retryAt.toString()));
+        log.info("Draft for {} saved as 'AI is busy': {}", dispute.paypalDisputeId(), busy.reason);
+        return saved;
     }
 
     public Optional<Draft> latest(UUID disputeId) {
@@ -219,6 +296,10 @@ public class DraftService {
         if (existing.status() == DraftStatus.SUBMITTED || existing.status() == DraftStatus.SUPERSEDED) {
             throw new ApiException(HttpStatus.CONFLICT, "Draft cannot be approved",
                     "Draft " + draftId + " is " + existing.status() + ".");
+        }
+        if (existing.validation().issues().stream().anyMatch(i -> AI_BUSY.equals(i.code()))) {
+            throw new ApiException(HttpStatus.CONFLICT, "Draft cannot be approved",
+                    "This is an \"AI is busy\" placeholder, not a draft. Use Regenerate once the AI is available.");
         }
         if (!existing.validation().passed() && !overrideValidation) {
             throw new ApiException(HttpStatus.CONFLICT, "Draft did not pass validation",
