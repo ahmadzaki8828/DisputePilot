@@ -2,7 +2,7 @@
 
 **An AI copilot that helps small PayPal merchants answer disputes before the deadline, with evidence they can trust, and a human approving every submission.**
 
-- Hosted demo: _link added after the Render deploy_
+- Hosted demo: [_link added after the Render deploy_](https://disputepilot-web.onrender.com/)
 - Demo video: _link added after recording_
 - Built for the **PayPal AI Hackathon 2026** · [MIT licence](LICENSE) · the merchant ("Maple & Thread Co.") and the carrier ("Northline Courier") are fictional
 
